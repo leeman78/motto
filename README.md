@@ -206,6 +206,20 @@ The Dealers list shows a **Temp password** tag next to anyone who has not
 replaced theirs yet. An old account still carrying that tag usually means they
 never actually signed in.
 
+### Two different sign-in emails
+
+They fail for different reasons, so work out which one you are testing first.
+
+| Where | What sends it | Shows in Resend? |
+|---|---|---|
+| Admin → dealer → **Send sign-in link** | `/api/admin` calls Supabase for the link, then mails it through Resend itself | Yes, always |
+| Site → Dealer sign in → **Email me a sign-in link** | Supabase, through whatever SMTP the project has | Only if custom SMTP is configured and pointed at Resend |
+
+Supabase's `generateLink` mints a URL and does **not** send anything. The admin
+button therefore does its own sending. If that button returns 200 in the auth
+logs but nothing appears in Resend, the deployed build predates that fix —
+redeploy.
+
 ### When a sign-in or reset link does not arrive
 
 Supabase reports success even when the address has no account, so "sent" on

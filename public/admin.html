@@ -419,9 +419,11 @@ async function dealerDetail(id){
   $('#magic').onclick = async () => {
     const msg = $('#dMsg'); msg.textContent = 'Sending…';
     try{
-      await call('send_magic_link', { email: dealer.email, business_name: dealer.business_name });
-      msg.textContent = `Sign-in link sent to ${dealer.email}. Tell them to check junk if it is not there in a couple of minutes.`;
-    }catch(e){ msg.textContent = e.message; }
+      const r = await call('send_magic_link', { email: dealer.email, business_name: dealer.business_name });
+      msg.textContent = r.sent_to
+        ? `Sign-in link handed to Resend for ${r.sent_to}. It should show in your Resend dashboard within seconds. Tell them to check junk if it is not in the inbox shortly.`
+        : 'The link was generated but no email was sent — RESEND_API_KEY is not set in Vercel.';
+    }catch(e){ msg.textContent = 'Not sent: ' + e.message; }
   };
 
   document.querySelectorAll('.priceinput').forEach(inp => {
