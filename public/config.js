@@ -6,8 +6,8 @@
 // Supabase → Project Settings → API.
 // The ANON key belongs here. It only grants what your RLS policies allow.
 // The service_role key must NEVER appear in this file.
-export const SUPABASE_URL      = 'https://YOUR-PROJECT.supabase.co';
-export const SUPABASE_ANON_KEY = 'YOUR-ANON-KEY';
+export const SUPABASE_URL      = 'https://ryeqfugcvqwqtbjbwnin.supabase.co/rest/v1';
+export const SUPABASE_ANON_KEY = 'sb_publishable_5ubPlK5Cp8gj0AALJt2AAQ_4l6WU5kO';
 
 // -------------------------------------------------------------------
 // PRICING_MODE
