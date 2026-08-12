@@ -151,6 +151,46 @@ export default async function handler(req, res) {
       }
 
       // ---------------------------------------------------------------
+      // List prices. These are the numbers every dealer discount is derived
+      // from, so they are edited in one place and nowhere else.
+      case 'list_products': {
+        const { data, error } = await db
+          .from('variants')
+          .select('sku, label, case_pack, master_carton, list_cents, msrp_cents, upc, is_active, sort_order, products(name, sort_order)')
+          .order('sku');
+        if (error) throw error;
+        data.sort((a, b) =>
+          (a.products?.sort_order ?? 0) - (b.products?.sort_order ?? 0) || a.sort_order - b.sort_order);
+        return res.status(200).json({ items: data });
+      }
+
+      case 'set_list_price': {
+        const { sku } = p;
+        const patch = {};
+        for (const k of ['list_cents','msrp_cents','case_pack','master_carton']) {
+          if (k in p) {
+            const n = parseInt(p[k], 10);
+            if (!Number.isInteger(n) || n < 0) {
+              return res.status(400).json({ error: `${k} must be a whole number.` });
+            }
+            patch[k] = n;
+          }
+        }
+        if ('upc' in p) patch.upc = (p.upc || '').trim() || null;
+        if (!sku || !Object.keys(patch).length) {
+          return res.status(400).json({ error: 'sku and at least one field are required.' });
+        }
+        const { error } = await db.from('variants').update(patch).eq('sku', sku);
+        if (error) throw error;
+
+        // Tell the caller how many dealers are pinned to a manual price on this
+        // SKU, since those will NOT move with the list change.
+        const { count } = await db.from('dealer_prices')
+          .select('id', { count: 'exact', head: true }).eq('sku', sku);
+        return res.status(200).json({ ok: true, pinned: count || 0 });
+      }
+
+      // ---------------------------------------------------------------
       case 'list_inventory': {
         const { data, error } = await db
           .from('variants')

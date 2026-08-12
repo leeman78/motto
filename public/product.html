@@ -43,13 +43,13 @@
 </section>
 
 <footer><div class="fin">
-  <span>Motto USA · Wholesale Mobile Accessories · Carrollton, Texas · Since 2016</span>
+  <span>Motto USA · Wholesale · Carrollton, Texas · Since 2016 · <a href="mailto:info@mottob2b.com">info@mottob2b.com</a> · <a href="tel:2146818417">214-681-8417</a></span>
   <span><a href="https://mottousa.com">Retail store: mottousa.com →</a></span>
 </div></footer>
 
 <script type="module">
-import { loadCatalog, usd, isFlat, openingShot, bySlug, stockOf, STOCK, DEALER_MODE } from './catalog.js';
-import { SALES_PHONE } from './config.js';
+import { loadCatalog, usd, isFlat, openingShot, bySlug, stockOf, STOCK } from './catalog.js';
+import { SALES_PHONE, SALES_EMAIL } from './config.js';
 
 const $ = s => document.querySelector(s);
 const slug = new URLSearchParams(location.search).get('p');
@@ -125,7 +125,7 @@ if(!p){
               <i style="background:${(STOCK[v.stock]||STOCK.in_stock).dot}"></i>${(STOCK[v.stock]||STOCK.in_stock).label}${v.restock?' · '+v.restock:''}
             </span>
           </span>
-          <span class="v mono">${DEALER_MODE && v.case_cents!=null ? usd(v.case_cents)+' / case' : v.pack+' per case'}</span>
+          <span class="v mono">${v.case_cents!=null ? usd(v.case_cents)+' / case' : v.pack+' per case'}</span>
         </div>`).join('')}
       </div>
 
@@ -133,7 +133,7 @@ if(!p){
         <h4>Wholesale pricing</h4>
         <p class="sub">Quoted per account against the volume you move. Tell us your door count and we will send numbers the same day, usually within a few hours.</p>
         <a class="btn dark" href="/#contact">Request pricing on this product</a>
-        <p class="sub" style="margin:12px 0 0;text-align:center">Or call <a href="tel:${SALES_PHONE.replace(/\D/g,'')}"><b>${SALES_PHONE}</b></a>, Mon–Fri 9–5 CT</p>
+        <p class="sub" style="margin:12px 0 0;text-align:center">Or call <a href="tel:${SALES_PHONE.replace(/\D/g,'')}"><b>${SALES_PHONE}</b></a> · <a href="mailto:${SALES_EMAIL}"><b>${SALES_EMAIL}</b></a></p>
       </div>
     </div>
   </div>`;

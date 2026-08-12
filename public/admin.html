@@ -55,9 +55,11 @@ tr.click:hover td{background:#f7f8fa}
   <b>Motto Wholesale · Admin</b>
   <div class="tabs">
     <button data-tab="dealers" aria-pressed="true">Dealers</button>
+    <button data-tab="prices" aria-pressed="false">List prices</button>
     <button data-tab="inventory" aria-pressed="false">Inventory</button>
     <button data-tab="orders" aria-pressed="false">Orders</button>
   </div>
+  <button class="btn" id="signOut" style="background:#26282d;color:#c9ccd2;padding:8px 14px;font-size:12px">Sign out</button>
 </div></div>
 
 <div class="pane" id="pane"></div>
@@ -107,6 +109,12 @@ $('#gateGo').onclick = async () => {
 };
 $('#tok').addEventListener('keydown', e => { if(e.key==='Enter') $('#gateGo').click(); });
 
+$('#signOut').onclick = () => {
+  if(!confirm('Sign out of the admin console?')) return;
+  sessionStorage.removeItem('motto_admin');
+  location.reload();
+};
+
 document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => {
   tab = b.dataset.tab; view = null;
   document.querySelectorAll('.tabs button').forEach(x => x.setAttribute('aria-pressed', x===b));
@@ -115,8 +123,74 @@ document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => {
 
 async function boot(){
   if(tab === 'dealers')   return view ? dealerDetail(view) : dealerList();
+  if(tab === 'prices')    return priceList();
   if(tab === 'inventory') return inventoryList();
   return orderList();
+}
+
+/* ---------------- list prices ---------------- */
+async function priceList(){
+  $('#pane').innerHTML = '<div class="panel"><p class="sub">Loading…</p></div>';
+  const { items } = await call('list_products');
+  const total = items.reduce((s,i) => s + (i.list_cents||0), 0);
+
+  $('#pane').innerHTML = `
+  <div class="summary">
+    <div><div class="k">SKUs</div><div class="v">${items.length}</div></div>
+    <div><div class="k">Priced</div><div class="v">${items.filter(i=>i.list_cents>0).length}</div></div>
+    <div><div class="k">Missing UPC</div><div class="v">${items.filter(i=>!i.upc).length}</div></div>
+    <div><div class="k">Avg case</div><div class="v">${usd(Math.round(total/(items.length||1)))}</div></div>
+  </div>
+
+  <div class="panel">
+    <h2>List prices</h2>
+    <p class="sub">Every dealer's pricing is derived from these. Change a list price and every dealer without a manual override on that SKU moves with it on their next page load. Dealers who were pinned to a specific number stay where they are — the count is shown when you save.</p>
+    <table>
+      <thead><tr>
+        <th>Product</th><th>SKU</th><th>UPC</th>
+        <th class="r">Case pack</th><th class="r">Master</th>
+        <th class="r">List / case</th><th class="r">MSRP / pc</th><th class="r">Margin at MSRP</th>
+      </tr></thead>
+      <tbody>${items.map(i=>{
+        const perPiece = i.case_pack ? Math.round(i.list_cents / i.case_pack) : 0;
+        const margin = i.msrp_cents ? Math.round((1 - perPiece / i.msrp_cents) * 100) : null;
+        return `<tr>
+          <td><b>${i.products?.name || ''}</b><br><span style="color:#9a9da4;font-size:11.5px">${i.label}</span></td>
+          <td class="mono" style="color:#9a9da4;font-size:11.5px">${i.sku}</td>
+          <td><input class="priceinput" style="width:120px;text-align:left" data-upc="${i.sku}" value="${i.upc||''}" placeholder="—"></td>
+          <td class="r"><input class="priceinput" style="width:62px" data-pack="${i.sku}" value="${i.case_pack||''}"></td>
+          <td class="r"><input class="priceinput" style="width:62px" data-master="${i.sku}" value="${i.master_carton||''}"></td>
+          <td class="r"><input class="priceinput" data-list="${i.sku}" value="${((i.list_cents||0)/100).toFixed(2)}"></td>
+          <td class="r"><input class="priceinput" style="width:82px" data-msrp="${i.sku}" value="${((i.msrp_cents||0)/100).toFixed(2)}"></td>
+          <td class="r mono" style="color:${margin!=null && margin>=45 ? '#166534' : '#9a9da4'}">${margin!=null ? margin+'%' : '—'}</td>
+        </tr>`;}).join('')}
+      </tbody>
+    </table>
+    <p class="sub" style="margin:18px 0 0" id="priceMsg">Changes save when you leave a field. "Margin at MSRP" is what the retailer keeps if they sell at your suggested price — it is the number a buyer asks about first.</p>
+  </div>`;
+
+  const push = async (sku, patch) => {
+    const msg = $('#priceMsg');
+    try{
+      const r = await call('set_list_price', { sku, ...patch });
+      msg.textContent = r.pinned
+        ? `Saved ${sku}. Note: ${r.pinned} dealer${r.pinned>1?'s have':' has'} a manual price on this SKU and will not move with it.`
+        : `Saved ${sku}.`;
+      priceList();
+    }catch(e){ msg.textContent = e.message; }
+  };
+  const cents = v => Math.round(parseFloat(String(v).replace(/[^0-9.]/g,'')) * 100) || 0;
+
+  document.querySelectorAll('[data-list]').forEach(el =>
+    el.onchange = () => push(el.dataset.list, { list_cents: cents(el.value) }));
+  document.querySelectorAll('[data-msrp]').forEach(el =>
+    el.onchange = () => push(el.dataset.msrp, { msrp_cents: cents(el.value) }));
+  document.querySelectorAll('[data-pack]').forEach(el =>
+    el.onchange = () => push(el.dataset.pack, { case_pack: parseInt(el.value)||1 }));
+  document.querySelectorAll('[data-master]').forEach(el =>
+    el.onchange = () => push(el.dataset.master, { master_carton: parseInt(el.value)||0 }));
+  document.querySelectorAll('[data-upc]').forEach(el =>
+    el.onchange = () => push(el.dataset.upc, { upc: el.value.trim() }));
 }
 
 /* ---------------- inventory ---------------- */

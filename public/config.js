@@ -4,24 +4,27 @@
 // -------------------------------------------------------------------
 
 // Supabase → Project Settings → API.
-// The ANON key belongs here. It only grants what your RLS policies allow.
-// The service_role key must NEVER appear in this file.
+// Use the PUBLISHABLE key (sb_publishable_...) or the legacy anon key.
+// It only grants what your RLS policies allow.
+// The secret / service_role key must NEVER appear in this file.
 export const SUPABASE_URL      = 'https://ryeqfugcvqwqtbjbwnin.supabase.co';
 export const SUPABASE_ANON_KEY = 'sb_publishable_5ubPlK5Cp8gj0AALJt2AAQ_4l6WU5kO';
 
 // -------------------------------------------------------------------
-// PRICING_MODE
+// ORDER_MODE — what a signed-in dealer can do.
 //
-//   'contact'  Catalog only. Every product says to call for pricing.
-//              Dealer sign-in and the order cart are hidden entirely.
-//              Use this until real list prices are loaded in Supabase.
+//   'quote'  Dealers sign in and see their own pricing. No cart, no
+//            checkout. They call or email to place the order.
 //
-//   'dealer'   Approved dealers sign in, see their own case pricing and
-//              order online through Stripe.
+//   'online' Everything above, plus a case cart and Stripe checkout.
 //
-// Flip this one word when your prices are real. Nothing else changes.
+// Dealer sign-in works in both. The public catalog never shows a price
+// either way, so this only decides whether orders are placed on the site
+// or over the phone. Start on 'quote' and switch when your list prices
+// are real and Stripe is set up.
 // -------------------------------------------------------------------
-export const PRICING_MODE = 'contact';
+export const ORDER_MODE = 'quote';
 
 // Shown wherever a buyer is told to get in touch.
 export const SALES_PHONE = '214-681-8417';
+export const SALES_EMAIL = 'info@mottob2b.com';

@@ -16,7 +16,7 @@
 <script type="application/ld+json">
 {"@context":"https://schema.org","@graph":[
 {"@type":"Organization","@id":"https://wholesale.mottousa.com/#org","name":"Motto USA",
- "url":"https://wholesale.mottousa.com/","telephone":"+1-214-681-8417","foundingDate":"2016",
+ "url":"https://wholesale.mottousa.com/","telephone":"+1-214-681-8417","email":"info@mottob2b.com","foundingDate":"2016",
  "areaServed":"US","description":"Wholesale supplier of mobile phone accessories to convenience retail across the South Central US.","slogan":"We are Motto.",
  "address":{"@type":"PostalAddress","streetAddress":"1445 Mac Arthur Dr Ste 116","addressLocality":"Carrollton",
  "addressRegion":"TX","postalCode":"75007","addressCountry":"US"},
@@ -87,7 +87,7 @@
   </div>
 
   <div class="gate rise" id="gate">
-    <div class="txt" id="gateTxt"><b>Pricing is quoted per account.</b> Tell us how many doors you cover and we will send a price list the same day.</div>
+    <div class="txt" id="gateTxt"><b>Pricing is quoted per account.</b> Your numbers depend on the volume you move, so a rep sets them with you. Already a partner? Sign in to see your pricing.</div>
     <button class="btn dark" id="gateBtn">Dealer sign in</button>
   </div>
 
@@ -203,6 +203,7 @@
       <p>Tell us how many doors you cover and what moves in them. A rep will come back with pricing, minimums and a suggested opening order, usually the same day.</p>
       <div class="details">
         <div class="detail"><small>Phone</small><b><a href="tel:2146818417">214-681-8417</a></b></div>
+        <div class="detail"><small>Email</small><b><a href="mailto:info@mottob2b.com">info@mottob2b.com</a></b></div>
         <div class="detail"><small>Warehouse</small><b>1445 Mac Arthur Dr Ste 116, Carrollton, TX 75007</b></div>
         <div class="detail"><small>Hours</small><b>9:00 AM — 5:00 PM · Monday–Friday, CT</b></div>
         <div class="detail"><small>Directions</small><b><a target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=1445+Mac+Arthur+Dr+Ste+116%2C+Carrollton%2C+TX+75007">Open in Maps →</a></b></div>
@@ -222,7 +223,7 @@
       </div>
       <div class="f"><label for="c6">What are you looking for</label><textarea id="c6" rows="3" placeholder="Cables and wall chargers for two locations"></textarea></div>
       <button class="btn dark" id="leadBtn">Send inquiry</button>
-      <p class="formnote" id="leadNote">Goes straight to the Motto sales team. We reply within one business day.</p>
+      <p class="formnote" id="leadNote">Goes straight to info@mottob2b.com. We reply within one business day.</p>
     </div>
   </div>
 </section>
@@ -230,7 +231,7 @@
 </main>
 
 <footer><div class="fin">
-  <span>Motto USA · Wholesale Mobile Accessories · Carrollton, Texas · Since 2016</span>
+  <span>Motto USA · Wholesale · Carrollton, Texas · Since 2016 · <a href="mailto:info@mottob2b.com">info@mottob2b.com</a> · <a href="tel:2146818417">214-681-8417</a></span>
   <span><a href="https://mottousa.com">Retail store: mottousa.com →</a></span>
 </div></footer>
 
@@ -268,8 +269,8 @@
 </aside>
 
 <script type="module">
-import { loadCatalog, supabase, usd, isFlat, openingShot, stockOf, DEALER_MODE } from './catalog.js';
-import { SALES_PHONE } from './config.js';
+import { loadCatalog, supabase, usd, isFlat, openingShot, stockOf, CAN_ORDER } from './catalog.js';
+import { SALES_PHONE, SALES_EMAIL } from './config.js';
 
 const $ = s => document.querySelector(s);
 let CAT=[], PRODUCTS=[], SKU={}, RULES={}, DEALER=null;
@@ -296,26 +297,27 @@ async function boot(){
 }
 
 function paintAuth(){
-  if(!DEALER_MODE){
-    document.body.classList.remove('dealer');
-    $('#authBtn').hidden = true; $('#cartBtn').hidden = true;
-    $('#gate').classList.add('quoteonly');
-    $('#gateTxt').innerHTML = '<b>Pricing is quoted per account.</b> Your numbers depend on the volume you move, so a rep sets them with you. No public price list.';
-    $('#gateBtn').textContent = `Call ${SALES_PHONE}`;
-    $('#gateBtn').onclick = () => { location.href = 'tel:' + SALES_PHONE.replace(/\D/g,''); };
-    $('#catalogSub').textContent = 'Available in a variety of colors and lengths. Contact our sales team for wholesale pricing, availability, and ordering information.';
-    return;
-  }
   const on = !!DEALER;
   document.body.classList.toggle('dealer', on);
+
   $('#authBtn').textContent = on ? 'Sign out' : 'Dealer sign in';
-  $('#cartBtn').hidden = !on;
+  $('#cartBtn').hidden = !(on && CAN_ORDER);
   $('#gate').classList.toggle('on', on);
+  $('#gate').classList.toggle('quoteonly', !on);
   $('#gateBtn').textContent = on ? 'Sign out' : 'Dealer sign in';
-  $('#catalogSub').textContent = 'Available in a variety of colors and lengths. Pricing below is your account pricing, and quantities move in full cases.';
-  $('#gateTxt').innerHTML = on
-    ? `<b>Signed in — ${DEALER.business_name}.</b> Pricing below is your account pricing. Quantities are in full cases. Terms: ${DEALER.terms.toUpperCase()}.`
-    : '<b>Pricing is private.</b> Approved dealers see their own case pricing and can order directly. Everyone else, contact sales for a quote.';
+
+  if(on){
+    $('#catalogSub').textContent =
+      'Available in a variety of colors and lengths. Pricing below is your account pricing, and quantities move in full cases.';
+    $('#gateTxt').innerHTML = CAN_ORDER
+      ? `<b>Signed in — ${DEALER.business_name}.</b> Pricing below is your account pricing. Quantities are in full cases. Terms: ${DEALER.terms.toUpperCase()}.`
+      : `<b>Signed in — ${DEALER.business_name}.</b> Pricing below is your account pricing. To place an order, call ${SALES_PHONE} or email ${SALES_EMAIL}.`;
+  } else {
+    $('#catalogSub').textContent =
+      'Available in a variety of colors and lengths. Contact our sales team for wholesale pricing, availability, and ordering information.';
+    $('#gateTxt').innerHTML =
+      '<b>Pricing is quoted per account.</b> Your numbers depend on the volume you move, so a rep sets them with you. Already a partner? Sign in to see your pricing.';
+  }
 }
 
 function paintFilters(){
@@ -466,7 +468,7 @@ function totals(){
   return { sub, ship, fee, cases, units, total: base+fee };
 }
 function updateCart(){
-  if(!DEALER_MODE) return;
+  if(!CAN_ORDER) return;
   const t = totals();
   $('#cartCount').textContent = t.cases;
   $('#sSub').textContent = usd(t.sub);
@@ -512,7 +514,8 @@ async function toggleAuth(){
   if(DEALER){ const sb = await supabase(); if(sb) await sb.auth.signOut(); cart={}; DEALER=null; await boot(); }
   else openLogin();
 }
-if(DEALER_MODE){ $('#authBtn').onclick = toggleAuth; $('#gateBtn').onclick = toggleAuth; }
+$('#authBtn').onclick = toggleAuth;
+$('#gateBtn').onclick = toggleAuth;
 
 $('#loginGo').onclick = async () => {
   const btn = $('#loginGo'), err = $('#loginErr'), sb = await supabase();
@@ -568,7 +571,7 @@ $('#leadBtn').onclick = async () => {
     if(!r.ok) error = true;
   }catch(_){ error = true; }
   btn.disabled = false; btn.textContent = 'Send inquiry';
-  if(error){ note.textContent = `That did not send. Call ${SALES_PHONE} and we will take it by phone.`; return; }
+  if(error){ note.textContent = `That did not send. Call ${SALES_PHONE} or email ${SALES_EMAIL}.`; return; }
   btn.textContent = 'Sent'; btn.disabled = true;
   note.textContent = 'Received. A rep will reach out within one business day.';
   ['#c1','#c2','#c3','#c4','#c6'].forEach(s => $(s).value='');

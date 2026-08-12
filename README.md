@@ -64,17 +64,19 @@ The anon key belongs in the browser. It only grants what your RLS policies allow
 which is why `variants` is locked down and prices are served through `/api/catalog`
 instead of read directly.
 
-The same file holds `PRICING_MODE`, and it decides what kind of site this is:
+The same file holds `ORDER_MODE`, which decides how orders get placed:
 
-- `'contact'` — catalog only. Every product says to call for a quote, and dealer
-  sign-in and the cart are hidden. Nothing about pricing is exposed.
-- `'dealer'` — approved dealers sign in, see their own case pricing and order
-  through Stripe.
+- `'quote'` — dealers sign in and see their own pricing, then call or email to
+  order. No cart, no Stripe.
+- `'online'` — everything above, plus a case cart and Stripe checkout.
 
-Ship on `'contact'`. Load your real list prices, open a test dealer account,
-check the numbers on their price sheet, then flip the one word to `'dealer'`.
-No other file changes. Launching on `'dealer'` with placeholder prices is how
-you end up honouring a quote you never meant to give.
+**Dealer sign-in works in both, and the public catalog never shows a price in
+either.** So `ORDER_MODE` only controls whether an order is placed on the site
+or over the phone. Ship on `'quote'`, load real list prices, then switch when
+Stripe is set up.
+
+Also in the file: `SALES_PHONE` and `SALES_EMAIL`. Change them here and they
+update everywhere on the page.
 
 ### 3. Environment variables
 
@@ -162,6 +164,37 @@ PREVIEW while it is running that way. As soon as `/api/catalog` answers, the
 database takes over and the bar disappears.
 
 ---
+
+## Prices
+
+List prices live in the admin **List prices** tab. That is the only place they
+should ever be edited. Every dealer's pricing is derived from them, so raising
+a list price moves every dealer who does not have a manual override on that SKU.
+
+The save confirmation tells you how many dealers are pinned to a manual price on
+that SKU and therefore will *not* move. Those are the ones to call.
+
+The Margin at MSRP column is what the retailer keeps selling at your suggested
+price. It is the first number a convenience-store buyer asks about, so it is
+worth keeping honest.
+
+## Email
+
+The contact form writes the lead to Supabase and then emails
+`info@mottob2b.com`. The write happens first on purpose: if the mail provider
+is down the lead is still saved, and the buyer is never told their message was
+lost when it wasn't.
+
+Set `RESEND_API_KEY` in Vercel to turn the email on. Without it the form still
+works, the leads just sit in the database. The sending domain has to be
+verified in Resend first, or mail from `info@mottob2b.com` will be rejected.
+
+**Supabase auth emails are separate.** Password resets and the "email me a
+sign-in link" option are sent by Supabase, and out of the box they come from
+`noreply@mail.app.supabase.io` with a hard limit of a few per hour. For real
+dealers, set custom SMTP under Supabase → Project Settings → Authentication →
+SMTP Settings and point it at the same Resend account. Then those come from
+`info@mottob2b.com` too, and the rate limit goes away.
 
 ## Availability
 

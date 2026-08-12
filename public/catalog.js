@@ -4,13 +4,14 @@
 // the built-in copy below, so the site renders before Supabase is connected and
 // the two pages can never disagree about what is in the catalog.
 
-import { SUPABASE_URL, SUPABASE_ANON_KEY, PRICING_MODE } from './config.js';
+import { SUPABASE_URL, SUPABASE_ANON_KEY, ORDER_MODE } from './config.js';
 
-export const DEALER_MODE = PRICING_MODE === 'dealer';
+// Ordering online is optional. Signing in never is — a dealer who has an
+// account should always be able to see the pricing that was set for them.
+export const CAN_ORDER = ORDER_MODE === 'online';
 
 let sbPromise = null;
 export function supabase(){
-  if(!DEALER_MODE) return Promise.resolve(null);
   if(/YOUR-PROJECT|YOUR-ANON-KEY/.test(SUPABASE_URL + SUPABASE_ANON_KEY)) return Promise.resolve(null);
   if(!sbPromise){
     sbPromise = import('https://esm.sh/@supabase/supabase-js@2')
@@ -146,25 +147,13 @@ export const FALLBACK = {
 ]};
 /** Returns { categories, products, rules, dealer, live } */
 export async function loadCatalog(){
-  if(DEALER_MODE){
-    try{
-      const sb = await supabase();
-      const session = sb ? (await sb.auth.getSession()).data.session : null;
-      const headers = session ? { Authorization:`Bearer ${session.access_token}` } : {};
-      const r = await fetch('/api/catalog', { headers });
-      if(r.ok) return { ...(await r.json()), live:true };
-    }catch(_){ /* not deployed yet */ }
-  }else{
-    try{
-      const r = await fetch('/api/catalog');
-      if(r.ok){
-        const d = await r.json();
-        // contact mode: never let a price reach the browser
-        d.products.forEach(p => p.variants.forEach(v => { delete v.case_cents; }));
-        return { ...d, dealer:null, live:true };
-      }
-    }catch(_){ }
-  }
+  try{
+    const sb = await supabase();
+    const session = sb ? (await sb.auth.getSession()).data.session : null;
+    const headers = session ? { Authorization:`Bearer ${session.access_token}` } : {};
+    const r = await fetch('/api/catalog', { headers });
+    if(r.ok) return { ...(await r.json()), live:true };
+  }catch(_){ /* not deployed yet */ }
   return { ...FALLBACK, live:false };
 }
 
