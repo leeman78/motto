@@ -1,0 +1,16 @@
+{
+  "name": "motto-wholesale",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Motto USA wholesale catalog and dealer ordering portal",
+  "scripts": {
+    "dev": "vercel dev",
+    "deploy": "vercel --prod",
+    "stripe:listen": "stripe listen --forward-to localhost:3000/api/stripe-webhook"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.0",
+    "stripe": "^16.8.0"
+  }
+}

@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Motto Wholesale — Admin</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+body{background:#fafafb}
+.abar{background:#0c0d0f;color:#fff;padding:0}
+.abar .wrap{display:flex;align-items:center;justify-content:space-between;height:60px}
+.abar b{font-size:15px;letter-spacing:-.02em}
+.abar .tabs{display:flex;gap:4px}
+.abar .tabs button{background:none;border:0;color:#8e9198;font-family:inherit;font-size:13px;font-weight:650;padding:8px 14px;border-radius:9px;cursor:pointer}
+.abar .tabs button[aria-pressed="true"]{background:#1e2024;color:#fff}
+.pane{max-width:1280px;margin:34px auto 90px;padding:0 30px}
+.panel{background:#fff;border:1px solid var(--line);border-radius:22px;padding:26px;margin-bottom:18px}
+.panel h2{font-size:22px;letter-spacing:-.035em;margin:0 0 4px}
+.panel .sub{font-size:13px;color:#8a8d94;margin:0 0 22px;line-height:1.55;max-width:62ch}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:760px){.cols{grid-template-columns:1fr}}
+table{width:100%;border-collapse:collapse}
+th{font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:#9a9da4;font-weight:700;text-align:left;padding:0 10px 9px;border-bottom:1px solid var(--line)}
+th.r,td.r{text-align:right}
+td{padding:12px 10px;border-bottom:1px solid #f0f0f2;font-size:13.5px;vertical-align:middle}
+tr.click{cursor:pointer}
+tr.click:hover td{background:#f7f8fa}
+.pill{display:inline-block;font-size:10px;font-weight:700;padding:3px 8px;border-radius:999px;letter-spacing:.03em}
+.pill.ok{background:#e8f6ec;color:#166534}
+.pill.warn{background:#fff4e0;color:#8a5a00}
+.pill.info{background:#eaf1ff;color:#1a4bb8}
+.pill.grey{background:#f0f0f2;color:#71747b}
+.inline{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.priceinput{width:104px;font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:13px;text-align:right;border:1px solid #e2e2e6;border-radius:9px;padding:8px 10px;outline:none}
+.priceinput:focus{border-color:#111}
+.priceinput.over{border-color:var(--blue);background:#f5f8ff;font-weight:700}
+.tiny{border:0;background:none;color:#b3b6bd;font-size:11px;font-weight:700;cursor:pointer;padding:4px}
+.tiny:hover{color:var(--red)}
+.back{border:0;background:none;font-size:13px;font-weight:650;color:#6b6e75;cursor:pointer;padding:0;margin-bottom:14px}
+.credbox{background:#0c0d0f;color:#fff;border-radius:18px;padding:22px;margin-top:16px}
+.credbox .k{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#8e9198;font-weight:700}
+.credbox .v{font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:19px;font-weight:700;margin:5px 0 16px;user-select:all}
+.credbox p{font-size:11.5px;color:#9da0a6;line-height:1.6;margin:0}
+.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:16px;overflow:hidden;margin-bottom:22px}
+@media(max-width:700px){.summary{grid-template-columns:1fr 1fr}}
+.summary div{background:#fff;padding:16px 18px}
+.summary .k{font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:#9a9da4;font-weight:700}
+.summary .v{font-size:22px;font-weight:750;letter-spacing:-.03em;margin-top:5px}
+</style>
+</head>
+<body>
+
+<div class="abar"><div class="wrap">
+  <b>Motto Wholesale · Admin</b>
+  <div class="tabs">
+    <button data-tab="dealers" aria-pressed="true">Dealers</button>
+    <button data-tab="orders" aria-pressed="false">Orders</button>
+  </div>
+</div></div>
+
+<div class="pane" id="pane"></div>
+
+<!-- gate -->
+<div class="scrim open" id="gateScrim"></div>
+<div class="modal open" id="gateModal" role="dialog" aria-label="Admin sign in">
+  <h3>Admin access</h3>
+  <p class="msub">Paste the ADMIN_TOKEN from your Vercel environment variables. It is kept in this tab only and cleared when you close it.</p>
+  <div class="f"><label for="tok">Admin token</label><input id="tok" type="password" placeholder="••••••••••••"></div>
+  <p class="err" id="gateErr" hidden></p>
+  <button class="btn dark" id="gateGo" style="width:100%;padding:14px">Unlock</button>
+</div>
+
+<script type="module">
+const $ = s => document.querySelector(s);
+const usd = c => '$' + (c/100).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+const cents = s => Math.round(parseFloat(String(s).replace(/[^0-9.]/g,'')) * 100);
+
+let TOKEN = sessionStorage.getItem('motto_admin') || '';
+let tab = 'dealers', dealers = [], view = null;
+
+async function call(action, body = {}){
+  const r = await fetch('/api/admin', {
+    method:'POST',
+    headers:{ 'Content-Type':'application/json', 'x-admin-token': TOKEN },
+    body: JSON.stringify({ action, ...body })
+  });
+  const d = await r.json();
+  if(!r.ok) throw new Error(d.error || 'Request failed.');
+  return d;
+}
+
+/* ---------------- gate ---------------- */
+$('#gateGo').onclick = async () => {
+  TOKEN = $('#tok').value.trim();
+  try{
+    await call('list_dealers');
+    sessionStorage.setItem('motto_admin', TOKEN);
+    $('#gateScrim').classList.remove('open');
+    $('#gateModal').classList.remove('open');
+    boot();
+  }catch(e){
+    $('#gateErr').textContent = 'That token was not accepted.';
+    $('#gateErr').hidden = false;
+  }
+};
+$('#tok').addEventListener('keydown', e => { if(e.key==='Enter') $('#gateGo').click(); });
+
+document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => {
+  tab = b.dataset.tab; view = null;
+  document.querySelectorAll('.tabs button').forEach(x => x.setAttribute('aria-pressed', x===b));
+  boot();
+});
+
+async function boot(){
+  if(tab === 'dealers') return view ? dealerDetail(view) : dealerList();
+  return orderList();
+}
+
+/* ---------------- dealers ---------------- */
+async function dealerList(){
+  $('#pane').innerHTML = '<div class="panel"><p class="sub">Loading…</p></div>';
+  const { dealers: d } = await call('list_dealers');
+  dealers = d;
+
+  $('#pane').innerHTML = `
+  <div class="summary">
+    <div><div class="k">Dealers</div><div class="v">${d.length}</div></div>
+    <div><div class="k">Approved</div><div class="v">${d.filter(x=>x.approved_at).length}</div></div>
+    <div><div class="k">Custom price sheets</div><div class="v">${d.filter(x=>x.override_count>0).length}</div></div>
+    <div><div class="k">On terms</div><div class="v">${d.filter(x=>x.terms!=='prepay').length}</div></div>
+  </div>
+
+  <div class="panel">
+    <h2>Open a dealer account</h2>
+    <p class="sub">Do this once a deal closes. Enter their discount off list and the account is live. If you negotiated something unusual on specific SKUs, open the account first and override those lines on the next screen.</p>
+    <div class="cols">
+      <div class="f"><label for="n1">Business name</label><input id="n1" placeholder="Corner Market"></div>
+      <div class="f"><label for="n2">Contact name</label><input id="n2" placeholder="Full name"></div>
+      <div class="f"><label for="n3">Email (this is their login)</label><input id="n3" type="email" placeholder="owner@business.com"></div>
+      <div class="f"><label for="n4">Phone</label><input id="n4" placeholder="(214) 555-0100"></div>
+      <div class="f"><label for="n5">Discount off list</label><input id="n5" type="number" step="0.5" min="0" max="90" value="30"></div>
+      <div class="f"><label for="n6">Payment terms</label>
+        <select id="n6"><option value="prepay">Prepay (card or ACH at checkout)</option><option value="net15">Net 15 (invoice)</option><option value="net30">Net 30 (invoice)</option></select>
+      </div>
+    </div>
+    <div class="f"><label for="n7">Internal notes</label><input id="n7" placeholder="Met at Dallas show. Wants cables only to start."></div>
+    <p class="err" id="newErr" hidden></p>
+    <button class="btn dark" id="newGo" style="padding:13px 22px">Create account</button>
+    <div id="creds"></div>
+  </div>
+
+  <div class="panel">
+    <h2>Dealer accounts</h2>
+    <p class="sub">Click a row to open that dealer's price sheet.</p>
+    <table>
+      <thead><tr><th>Business</th><th>Login email</th><th class="r">Discount</th><th class="r">Overrides</th><th>Terms</th><th>Status</th></tr></thead>
+      <tbody>${d.map(x=>`
+        <tr class="click" data-id="${x.id}">
+          <td><b>${x.business_name}</b>${x.contact_name?`<br><span style="color:#9a9da4;font-size:11.5px">${x.contact_name}</span>`:''}</td>
+          <td style="color:#71747b">${x.email||'—'}</td>
+          <td class="r mono">${Number(x.discount_pct).toFixed(1)}%</td>
+          <td class="r">${x.override_count ? `<span class="pill info">${x.override_count} custom</span>` : '<span class="pill grey">none</span>'}</td>
+          <td>${x.terms==='prepay'?'<span class="pill grey">Prepay</span>':`<span class="pill warn">${x.terms.toUpperCase()}</span>`}</td>
+          <td>${x.approved_at?'<span class="pill ok">Active</span>':'<span class="pill warn">Pending</span>'}</td>
+        </tr>`).join('') || '<tr><td colspan="6" style="color:#9a9da4;padding:40px 10px;text-align:center">No dealers yet.</td></tr>'}
+      </tbody>
+    </table>
+  </div>`;
+
+  $('#newGo').onclick = createDealer;
+  document.querySelectorAll('tr.click').forEach(tr => tr.onclick = () => { view = tr.dataset.id; dealerDetail(view); });
+}
+
+async function createDealer(){
+  const btn = $('#newGo'), err = $('#newErr');
+  err.hidden = true; btn.disabled = true; btn.textContent = 'Creating…';
+  try{
+    const r = await call('create_dealer', {
+      business_name: $('#n1').value.trim(), contact_name: $('#n2').value.trim(),
+      email: $('#n3').value.trim(), phone: $('#n4').value.trim(),
+      discount_pct: parseFloat($('#n5').value) || 0,
+      terms: $('#n6').value, notes: $('#n7').value.trim()
+    });
+    $('#creds').innerHTML = `
+      <div class="credbox">
+        <div class="k">Login email</div><div class="v">${r.email}</div>
+        <div class="k">Temporary password</div><div class="v">${r.password}</div>
+        <p>Read this to the dealer now. It is not stored anywhere you can look it up again — if they lose it, use Reset password on their detail screen. They can also use the "email me a sign-in link" option and skip passwords entirely.</p>
+      </div>`;
+    ['#n1','#n2','#n3','#n4','#n7'].forEach(s => $(s).value = '');
+    const { dealers: d } = await call('list_dealers'); dealers = d;
+  }catch(e){ err.textContent = e.message; err.hidden = false; }
+  btn.disabled = false; btn.textContent = 'Create account';
+}
+
+/* ---------------- price sheet ---------------- */
+async function dealerDetail(id){
+  $('#pane').innerHTML = '<div class="panel"><p class="sub">Loading price sheet…</p></div>';
+  const { dealer, rows } = await call('price_sheet', { dealer_id: id });
+
+  $('#pane').innerHTML = `
+  <button class="back" id="back">← All dealers</button>
+
+  <div class="panel">
+    <h2>${dealer.business_name}</h2>
+    <p class="sub">${dealer.email || ''} ${dealer.phone ? '· ' + dealer.phone : ''}${dealer.notes ? '<br>' + dealer.notes : ''}</p>
+    <div class="cols">
+      <div class="f"><label for="d1">Discount off list</label><input id="d1" type="number" step="0.5" min="0" max="90" value="${dealer.discount_pct}"></div>
+      <div class="f"><label for="d2">Payment terms</label>
+        <select id="d2">
+          <option value="prepay"${dealer.terms==='prepay'?' selected':''}>Prepay</option>
+          <option value="net15"${dealer.terms==='net15'?' selected':''}>Net 15</option>
+          <option value="net30"${dealer.terms==='net30'?' selected':''}>Net 30</option>
+        </select>
+      </div>
+      <div class="f"><label for="d3">Minimum order (dollars)</label><input id="d3" type="number" step="10" value="${(dealer.moq_cents/100).toFixed(0)}"></div>
+      <div class="f"><label for="d4">Account status</label>
+        <select id="d4"><option value="active"${dealer.approved_at?' selected':''}>Active</option><option value="suspended"${!dealer.approved_at?' selected':''}>Suspended</option></select>
+      </div>
+    </div>
+    <div class="inline">
+      <button class="btn dark" id="saveD">Save account</button>
+      <button class="btn soft" id="resetP">Reset password</button>
+      <button class="btn soft" id="magic">Send sign-in link</button>
+      <span id="dMsg" style="font-size:12.5px;color:#8a8d94"></span>
+    </div>
+    <div id="dCreds"></div>
+  </div>
+
+  <div class="panel">
+    <h2>Price sheet</h2>
+    <p class="sub">Every line starts at list minus ${Number(dealer.discount_pct).toFixed(1)}%. Type a different number in any row to lock that SKU to a manual price — the blue rows are the ones you have overridden. Clear an override and the line goes back to following the discount, so a list price change carries through automatically.</p>
+    <table>
+      <thead><tr>
+        <th>Product</th><th>SKU</th><th class="r">Case</th>
+        <th class="r">List</th><th class="r">This dealer pays</th><th class="r">Per piece</th><th></th>
+      </tr></thead>
+      <tbody>${rows.map(r=>`
+        <tr>
+          <td><b>${r.product_name}</b><br><span style="color:#9a9da4;font-size:11.5px">${r.label}</span></td>
+          <td class="mono" style="color:#9a9da4;font-size:11.5px">${r.sku}</td>
+          <td class="r mono" style="color:#9a9da4">${r.case_pack}</td>
+          <td class="r mono" style="color:#9a9da4">${usd(r.list_cents)}</td>
+          <td class="r"><input class="priceinput${r.is_override?' over':''}" data-sku="${r.sku}" value="${(r.case_cents/100).toFixed(2)}"></td>
+          <td class="r mono" style="color:#9a9da4">${usd(Math.round(r.case_cents/r.case_pack))}</td>
+          <td class="r">${r.is_override?`<button class="tiny" data-clear="${r.sku}">CLEAR</button>`:''}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>
+    <p class="sub" style="margin:18px 0 0">Changes save the moment you leave a field.</p>
+  </div>`;
+
+  $('#back').onclick = () => { view = null; dealerList(); };
+
+  $('#saveD').onclick = async () => {
+    const msg = $('#dMsg'); msg.textContent = 'Saving…';
+    try{
+      await call('update_dealer', {
+        dealer_id: id,
+        discount_pct: parseFloat($('#d1').value) || 0,
+        terms: $('#d2').value,
+        moq_cents: Math.round((parseFloat($('#d3').value)||500) * 100),
+        approved_at: $('#d4').value === 'active' ? new Date().toISOString() : null
+      });
+      msg.textContent = 'Saved.';
+      dealerDetail(id);
+    }catch(e){ msg.textContent = e.message; }
+  };
+
+  $('#resetP').onclick = async () => {
+    if(!confirm('Generate a new password for this dealer? Their current one stops working immediately.')) return;
+    const r = await call('reset_password', { dealer_id: id });
+    $('#dCreds').innerHTML = `<div class="credbox"><div class="k">New password</div><div class="v">${r.password}</div><p>Read it to them now. This is the only time it is shown.</p></div>`;
+  };
+
+  $('#magic').onclick = async () => {
+    const msg = $('#dMsg'); msg.textContent = 'Sending…';
+    try{ await call('send_magic_link', { email: dealer.email }); msg.textContent = 'Sign-in link sent to ' + dealer.email; }
+    catch(e){ msg.textContent = e.message; }
+  };
+
+  document.querySelectorAll('.priceinput').forEach(inp => {
+    inp.onchange = async () => {
+      const v = cents(inp.value);
+      if(!Number.isInteger(v) || v < 0){ inp.value = '0.00'; return; }
+      inp.disabled = true;
+      try{ await call('set_price', { dealer_id: id, sku: inp.dataset.sku, case_cents: v }); dealerDetail(id); }
+      catch(e){ alert(e.message); inp.disabled = false; }
+    };
+  });
+
+  document.querySelectorAll('[data-clear]').forEach(b => {
+    b.onclick = async () => {
+      await call('clear_price', { dealer_id: id, sku: b.dataset.clear });
+      dealerDetail(id);
+    };
+  });
+}
+
+/* ---------------- orders ---------------- */
+async function orderList(){
+  $('#pane').innerHTML = '<div class="panel"><p class="sub">Loading…</p></div>';
+  const { orders } = await call('list_orders');
+  const paid = orders.filter(o => o.status === 'paid');
+  const rev  = paid.reduce((s,o) => s + (o.total_cents || 0), 0);
+
+  const pill = s => ({
+    paid:'ok', shipped:'ok', processing:'warn', pending:'grey',
+    abandoned:'grey', payment_failed:'warn', refunded:'warn'
+  })[s] || 'grey';
+
+  $('#pane').innerHTML = `
+  <div class="summary">
+    <div><div class="k">Orders</div><div class="v">${orders.length}</div></div>
+    <div><div class="k">Paid</div><div class="v">${paid.length}</div></div>
+    <div><div class="k">Awaiting payment</div><div class="v">${orders.filter(o=>o.status==='processing'||o.status==='pending').length}</div></div>
+    <div><div class="k">Paid revenue</div><div class="v">${usd(rev)}</div></div>
+  </div>
+  <div class="panel">
+    <h2>Recent orders</h2>
+    <p class="sub">Bank debit settles a few business days after checkout, so an ACH order sits at Processing until the webhook clears it. Do not ship on Processing.</p>
+    <table>
+      <thead><tr><th>#</th><th>Dealer</th><th>Placed</th><th class="r">Total</th><th>Pay</th><th>Status</th><th>Tracking</th></tr></thead>
+      <tbody>${orders.map(o=>`
+        <tr>
+          <td class="mono">${o.order_no}</td>
+          <td><b>${o.dealer_accounts?.business_name || o.customer_name || '—'}</b><br><span style="color:#9a9da4;font-size:11.5px">${(o.order_items||[]).length} lines</span></td>
+          <td style="color:#71747b;font-size:12.5px">${new Date(o.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric'})}</td>
+          <td class="r mono">${usd(o.total_cents || o.subtotal_cents + o.freight_cents)}</td>
+          <td style="font-size:11.5px;color:#71747b">${o.payment_method==='card'?'Card':'ACH'}</td>
+          <td><span class="pill ${pill(o.status)}">${o.status}</span></td>
+          <td><input class="priceinput" style="width:130px;text-align:left" data-order="${o.id}" value="${o.tracking||''}" placeholder="Add tracking"></td>
+        </tr>`).join('') || '<tr><td colspan="7" style="color:#9a9da4;padding:40px 10px;text-align:center">No orders yet.</td></tr>'}
+      </tbody>
+    </table>
+  </div>`;
+
+  document.querySelectorAll('[data-order]').forEach(inp => {
+    inp.onchange = async () => {
+      await call('update_order', {
+        order_id: inp.dataset.order,
+        tracking: inp.value.trim(),
+        status: inp.value.trim() ? 'shipped' : undefined
+      });
+      orderList();
+    };
+  });
+}
+
+if(TOKEN){
+  $('#tok').value = TOKEN;
+  $('#gateGo').click();
+}
+</script>
+</body>
+</html>

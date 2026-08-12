@@ -1,0 +1,568 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Motto Wholesale | Mobile Accessories for Retail</title>
+<meta name="description" content="Motto USA wholesale leather-wrapped charging cables, earbuds, fast chargers and adapters for retailers, dealers and distribution partners. Carrollton, TX.">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="top" id="topbar">MOTTO USA · WHOLESALE · RETAIL PARTNERS</div>
+
+<nav><div class="wrap nav">
+  <a class="brand" href="#"><img src="assets/logo.webp" alt="Motto" onerror="this.replaceWith(Object.assign(document.createElement('b'),{textContent:'MOTTO'}))"><span>Wholesale</span></a>
+  <div class="links"><a href="#catalog">Products</a><a href="#why">Why Motto</a><a href="#contact">Contact</a></div>
+  <div class="navright">
+    <button class="btn soft" id="authBtn">Dealer sign in</button>
+    <button class="btn dark cartbtn" id="cartBtn" hidden>Cart <b id="cartCount">0</b></button>
+  </div>
+</div></nav>
+
+<main class="wrap">
+
+<section class="hero">
+  <div>
+    <div class="eyebrow">Motto USA · Wholesale</div>
+    <h1>Mobile essentials.<br>Built for retail.</h1>
+    <p class="lead">Leather-wrapped charging cables, earbuds and fast chargers with distinctive shelf presence and an assortment buyers can read in one pass.</p>
+    <div class="cta">
+      <button class="btn blue" onclick="go('#catalog')">Explore Catalog</button>
+      <a class="btn soft" id="heroCall" href="#contact">Talk to Sales →</a>
+    </div>
+  </div>
+  <div class="heroimg"><img src="assets/usbc_hero.webp" alt="Motto leather-wrapped USB-C cable" onerror="this.remove()"></div>
+</section>
+
+<section class="strip">
+  <div><b>Up to 65W</b><span>USB-C PD cable charging</span></div>
+  <div><b>Leather-wrapped</b><span>Signature cable construction</span></div>
+  <div><b>15 product families</b><span>Cables, power, audio, adapters</span></div>
+  <div><b>Carrollton, TX</b><span>Ships domestic from Dallas metro</span></div>
+</section>
+
+<section id="catalog">
+  <div class="head">
+    <h2>Wholesale catalog</h2>
+    <p id="catalogSub">One card per product family. Colors and lengths stay together as variants.</p>
+  </div>
+
+  <div class="gate" id="gate">
+    <div class="txt" id="gateTxt"><b>Pricing is private.</b> Your pricing is set when your account is opened, so it is specific to your agreement. Contact sales to get started.</div>
+    <button class="btn dark" id="gateBtn">Dealer sign in</button>
+  </div>
+
+  <div class="filters" id="filters"></div>
+  <div class="grid" id="grid"><div class="loading">Loading catalog…</div></div>
+</section>
+
+<section class="sales" id="why">
+  <div>
+    <div class="eyebrow" style="color:#8baaff">Built for B2B</div>
+    <h2>Less shopping.<br>More selling.</h2>
+    <p id="whyLead">A sales catalog, not another consumer store. Buyers see the assortment and specifications first. Approved dealers get their own pricing, case-pack ordering and ACH payment at a fraction of card fees.</p>
+    <button class="btn blue" onclick="go('#contact')">Request Wholesale Information</button>
+  </div>
+  <div class="points">
+    <div class="point"><b>Pricing set per account</b><span>Your terms are agreed with a rep and loaded to your login. No public price list.</span></div>
+    <div class="point"><b>Case-pack ordering</b><span>Quantities move in full cases, so warehouse picks match what was sold.</span></div>
+    <div class="point" id="whyPay"><b>ACH at 0.8%, capped at $5</b><span>Bank debit keeps processing off your margin on reorders. Cards accepted too.</span></div>
+    <div class="point"><b>Net 30 on approval</b><span>Established accounts switch from prepay to invoice terms.</span></div>
+  </div>
+</section>
+
+<section class="contact" id="contact">
+  <div>
+    <div class="eyebrow">Motto USA</div>
+    <h2>Talk to our team.</h2>
+    <p>Interested in carrying Motto products? Contact our Carrollton team for wholesale product information, availability and partnership opportunities.</p>
+    <div class="details">
+      <div class="detail"><small>Address</small><b>1445 Mac Arthur Dr Ste 116, Carrollton, TX 75007</b></div>
+      <div class="detail"><small>Open Hours</small><b>09:00 AM — 05:00 PM · Monday–Friday</b></div>
+      <div class="detail"><small>Phone</small><b><a href="tel:2146818417">214-681-8417</a></b></div>
+      <div class="detail"><small>Directions</small><b><a target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=1445+Mac+Arthur+Dr+Ste+116%2C+Carrollton%2C+TX+75007">Get directions →</a></b></div>
+    </div>
+  </div>
+  <div class="form">
+    <div class="f"><label for="c1">Business name</label><input id="c1" placeholder="Corner Market"></div>
+    <div class="f"><label for="c2">Contact name</label><input id="c2" placeholder="Full name"></div>
+    <div class="f"><label for="c3">Email</label><input id="c3" type="email" placeholder="you@business.com"></div>
+    <div class="f"><label for="c4">Phone</label><input id="c4" type="tel" placeholder="(214) 555-0100"></div>
+    <div class="f"><label for="c5">Business type</label>
+      <select id="c5"><option>Single store</option><option>Multi-store retailer</option><option>Distributor / route</option><option>Online seller</option><option>Corporate / promotional</option></select>
+    </div>
+    <div class="f"><label for="c6">What are you looking for</label><textarea id="c6" rows="3" placeholder="Cables and wall chargers for two locations"></textarea></div>
+    <button class="btn dark" id="leadBtn">Send inquiry</button>
+    <p class="formnote" id="leadNote">Submitting sends this to the Motto sales team. We reply within one business day.</p>
+  </div>
+</section>
+
+</main>
+
+<footer><div class="fin">
+  <span>Motto USA · Wholesale Mobile Accessories · Carrollton, Texas</span>
+  <span><a href="https://mottousa.com">Retail store: mottousa.com →</a></span>
+</div></footer>
+
+<!-- sign-in -->
+<div class="scrim" id="loginScrim"></div>
+<div class="modal" id="loginModal" role="dialog" aria-label="Dealer sign in">
+  <h3>Dealer sign in</h3>
+  <p class="msub">Use the email and password your Motto rep set up for your account.</p>
+  <div class="f"><label for="le">Email</label><input id="le" type="email" autocomplete="username" placeholder="you@business.com"></div>
+  <div class="f"><label for="lp">Password</label><input id="lp" type="password" autocomplete="current-password" placeholder="••••••••"></div>
+  <p class="err" id="loginErr" hidden></p>
+  <button class="btn dark" id="loginGo" style="width:100%;padding:14px">Sign in</button>
+  <button class="btn soft" id="magicGo" style="width:100%;padding:12px;margin-top:8px">Email me a sign-in link instead</button>
+  <p class="msub" style="margin:14px 0 0;text-align:center">No account? Call <a href="tel:2146818417">214-681-8417</a>.</p>
+  <button class="mclose" id="loginClose" aria-label="Close">×</button>
+</div>
+
+<!-- cart -->
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" aria-label="Order cart">
+  <div class="dhead"><h3>Your order</h3><button id="closeCart" aria-label="Close">×</button></div>
+  <div class="ditems" id="ditems"></div>
+  <div class="dfoot">
+    <div class="sum"><span>Subtotal</span><b class="mono" id="sSub">$0.00</b></div>
+    <div class="sum"><span>Freight</span><b class="mono" id="sShip">$0.00</b></div>
+    <div class="sum"><span>Processing</span><b class="mono" id="sFee">$0.00</b></div>
+    <div class="sum tot"><span>Total</span><b class="mono" id="sTot">$0.00</b></div>
+    <div class="pay">
+      <button data-pay="us_bank_account" aria-pressed="true">Bank debit<small>0.8%, max $5</small></button>
+      <button data-pay="card" aria-pressed="false">Card<small>2.9% + 30¢</small></button>
+    </div>
+    <button class="btn blue" id="checkout" disabled>Checkout</button>
+    <p class="dnote" id="dnote">Quantities are in full cases.</p>
+  </div>
+</aside>
+
+<script type="module">
+import { SUPABASE_URL, SUPABASE_ANON_KEY, PRICING_MODE, SALES_PHONE } from './config.js';
+
+const DEALER_MODE = PRICING_MODE === 'dealer';
+
+// Loaded dynamically. Stays null if config.js still holds placeholders or if
+// the CDN is unreachable, and every call site checks first — so a bad network
+// costs you sign-in, not the whole catalog.
+let sb = null;
+const configured = !/YOUR-PROJECT|YOUR-ANON-KEY/.test(SUPABASE_URL + SUPABASE_ANON_KEY);
+if(configured){
+  try{
+    const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
+    sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  }catch(e){ console.warn('Supabase unavailable:', e.message); }
+}
+
+const $  = s => document.querySelector(s);
+const usd = c => '$' + (c/100).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+window.go = s => $(s).scrollIntoView({behavior:'smooth'});
+
+let CAT = [], PRODUCTS = [], SKU = {}, RULES = {}, DEALER = null;
+let active = 'all', cart = {}, payMethod = 'us_bank_account';
+
+/* ----------------------------------------------------------------------
+   Offline fallback. Used only when /api/catalog cannot be reached, which
+   happens when you open this file straight off disk before deploying.
+   Once Supabase and the function are live this is never touched, so the
+   database stays the single source of truth.
+---------------------------------------------------------------------- */
+const FALLBACK = {
+  categories:[{slug:'cables',name:'Leather cables'},{slug:'power',name:'Chargers & power'},
+              {slug:'audio',name:'Earbuds & audio'},{slug:'adapters',name:'Adapters'}],
+  rules:{ moq_cents:50000, free_freight_cents:150000, freight_cents:1800 },
+  dealer:null,
+  products:[
+  {slug:'usbc-usbc',cat:'cables',type:'Leather-Wrapped Charging Cable',
+   name:'USB-C to USB-C Fast Charging Cable',
+   desc:'Leather-wrapped Type-C to Type-C cable rated to 65W. Tangle-free, flexible, and built for daily handling. Works with Samsung, Pixel, iPad, MacBook and any other USB-C device.',
+   meta:['3 ft / 6 ft / 10 ft','Up to 65W','USB-C PD','Data sync'],
+   colors:[{name:'Black',hex:'#1a1a1a',image:'usbc_black.webp'},{name:'Brown',hex:'#6b4128',image:'usbc_brown.webp'},
+           {name:'Wine',hex:'#7d2230',image:'usbc_wine.webp'},{name:'Orange',hex:'#e2611f',image:'usbc_orange.webp'},
+           {name:'Gold',hex:'#c98b32',image:null}],
+   shots:['usbc_hero.webp'],
+   variants:[{sku:'MT-CC65-03',label:'3 ft',pack:12},{sku:'MT-CC65-06',label:'6 ft',pack:12},{sku:'MT-CC65-10',label:'10 ft',pack:12}]},
+
+  {slug:'usbc-lightning',cat:'cables',type:'Leather-Wrapped Lightning Cable',
+   name:'USB-C to Lightning Fast Charging Cable',
+   desc:'Leather-wrapped Type-C to Lightning cable for Apple devices, supporting up to 65W fast charging plus stable data transfer.',
+   meta:['6 ft','Up to 65W','Lightning','Data sync'],
+   colors:[{name:'Black',hex:'#1a1a1a',image:null},{name:'Wine',hex:'#7d2230',image:'lightning_wine.webp'},
+           {name:'Gold',hex:'#c98b32',image:'lightning_gold.webp'},{name:'Orange',hex:'#e2611f',image:'lightning_orange.webp'},
+           {name:'Brown',hex:'#6b4128',image:'lightning_brown.webp'}],
+   shots:['lightning_hero.webp'],
+   variants:[{sku:'MT-CL-06',label:'6 ft',pack:12}]},
+
+  {slug:'usba-lightning',cat:'cables',type:'Leather-Wrapped Lightning Cable',
+   name:'USB-A to Lightning Charging Cable',
+   desc:'Legacy USB-A connection for customers still running older wall bricks and car adapters.',
+   meta:['3 ft / 6 ft','USB-A','Lightning'],
+   colors:[{name:'Black',hex:'#1a1a1a',image:null},{name:'Wine',hex:'#7d2230',image:null},{name:'Brown',hex:'#6b4128',image:null}],
+   shots:[],
+   variants:[{sku:'MT-AL-03',label:'3 ft',pack:12},{sku:'MT-AL-06',label:'6 ft',pack:12}]},
+
+  {slug:'wall-20w',cat:'power',type:'Fast Charger',name:'20W PD Wall Charger',
+   desc:'Compact dual-port wall charger with USB-C PD and USB-A. Supports Lightning, Micro USB and USB-C cables, so one brick covers the whole rack.',
+   meta:['20W PD','USB-C','USB-A','Dual Port'],
+   colors:[{name:'White',hex:'#f4f4f6',image:'wall_white.webp'},{name:'Black',hex:'#1a1a1a',image:'wall_black.webp'}],
+   shots:['wall_white.webp','wall_lifestyle.webp'],
+   variants:[{sku:'MT-W20',label:'Single',pack:10}]},
+
+  {slug:'car-45w',cat:'power',type:'Fast Charger',name:'45W PD Car Charger',
+   desc:'USB-C Power Delivery paired with an 18W Quick Charge port in an alloy housing.',
+   meta:['45W PD','QC 18W','Dual Port'],
+   colors:[{name:'Black',hex:'#1a1a1a',image:null}],shots:[],
+   variants:[{sku:'MT-C45',label:'Single',pack:10}]},
+
+  {slug:'powerbank-soccer',cat:'power',type:'Portable Power',name:'Soccer Ball Portable Power Bank',
+   desc:'Novelty portable power bank with USB-C in and out. Seasonal and event-driven demand.',
+   meta:['Portable','USB-C In/Out'],
+   colors:[{name:'White',hex:'#f4f4f6',image:null}],shots:[],
+   variants:[{sku:'MT-PB-SOC',label:'Single',pack:6}]},
+
+  {slug:'buds-plus',cat:'audio',type:'True Wireless Earbuds',name:'Motto BUDS+',
+   desc:'True wireless earbuds with active noise cancellation and a Qi-chargeable case.',
+   meta:['ANC','Qi Charging','True Wireless'],
+   colors:[{name:'Black',hex:'#1a1a1a',image:null},{name:'White',hex:'#f4f4f6',image:null}],shots:[],
+   variants:[{sku:'MT-BUDS-P',label:'Single',pack:6}]},
+
+  {slug:'airbuds-a5',cat:'audio',type:'True Wireless Earbuds',name:'Wireless Airbuds A5',
+   desc:'Entry true wireless earbuds for retailers who want a second price point above wired.',
+   meta:['True Wireless','Charging Case'],
+   colors:[{name:'White',hex:'#f4f4f6',image:null}],shots:[],
+   variants:[{sku:'MT-A5',label:'Single',pack:6}]},
+
+  {slug:'headset-anc',cat:'audio',type:'Wireless Headset',name:'Wireless Headset ANC/ENC',
+   desc:'Over-ear wireless headset with active and environmental noise cancellation.',
+   meta:['ANC','ENC','Over-Ear'],
+   colors:[{name:'Black',hex:'#1a1a1a',image:null},{name:'White',hex:'#f4f4f6',image:null}],shots:[],
+   variants:[{sku:'MT-HS-ANC',label:'Single',pack:6}]},
+
+  {slug:'wired-35mm',cat:'audio',type:'Wired Earphones',name:'Premium 3.5mm AUX Wired Earphones',
+   desc:'Standard 3.5mm wired earphones with in-line mic. Reliable impulse purchase at the counter.',
+   meta:['3.5mm','In-line Mic'],
+   colors:[{name:'Black',hex:'#1a1a1a',image:null},{name:'White',hex:'#f4f4f6',image:null}],shots:[],
+   variants:[{sku:'MT-EAR-35',label:'Single',pack:12}]},
+
+  {slug:'wired-usbc',cat:'audio',type:'Wired Earphones',name:'Premium USB-C Wired Earphones',
+   desc:'USB-C wired earphones for Android and iPhone 15 and up. Growing share every quarter.',
+   meta:['USB-C','In-line Mic'],
+   colors:[{name:'Black',hex:'#1a1a1a',image:null},{name:'White',hex:'#f4f4f6',image:null}],shots:[],
+   variants:[{sku:'MT-EAR-UC',label:'Single',pack:12}]},
+
+  {slug:'wired-lightning',cat:'audio',type:'Wired Earphones',name:'Premium Lightning Wired Earphones',
+   desc:'Lightning wired earphones for the installed iPhone base. Still the volume leader on wired.',
+   meta:['Lightning','In-line Mic'],
+   colors:[{name:'Black',hex:'#1a1a1a',image:null},{name:'White',hex:'#f4f4f6',image:null}],shots:[],
+   variants:[{sku:'MT-EAR-LT',label:'Single',pack:12}]},
+
+  {slug:'adapter-usbc-35',cat:'adapters',type:'Audio Adapter Cable',name:'USB-C to 3.5mm Audio Adapter Cable',
+   desc:'Type-C to 3.5mm AUX cable for headphones and car aux inputs. TPE jacket resists compression and twisting, so it survives being stuffed in a console.',
+   meta:['USB-C','3.5mm AUX','TPE jacket'],
+   colors:[{name:'White',hex:'#f4f4f6',image:'adapter_usbc_35_product.webp'}],
+   shots:['adapter_usbc_35.webp','adapter_usbc_35_detail.webp'],
+   variants:[{sku:'MT-AD-UC35',label:'Single',pack:20}]},
+
+  {slug:'adapter-lightning-35',cat:'adapters',type:'Audio Adapter',name:'Lightning to 3.5mm Adapter',
+   desc:'Headphone jack adapter for iPhone. Pairs naturally with the wired earphone assortment.',
+   meta:['Lightning','3.5mm'],
+   colors:[{name:'White',hex:'#f4f4f6',image:null}],shots:[],
+   variants:[{sku:'MT-AD-LT35',label:'Single',pack:20}]},
+
+  {slug:'adapter-lightning-usbc',cat:'adapters',type:'Connector Adapter',name:'Lightning to USB-C Adapter',
+   desc:'Lets an existing Lightning cable charge a USB-C device. Explains itself on the peg card.',
+   meta:['Lightning','USB-C','Charge + Data'],
+   colors:[{name:'White',hex:'#f4f4f6',image:null}],shots:[],
+   variants:[{sku:'MT-AD-LTUC',label:'Single',pack:20}]}
+]};
+
+/* ---------------- load ---------------- */
+async function loadCatalog(){
+  let d = null;
+  try{
+    const session = sb ? (await sb.auth.getSession()).data.session : null;
+    const headers = session ? { Authorization:`Bearer ${session.access_token}` } : {};
+    const r = await fetch('/api/catalog', { headers });
+    if(r.ok) d = await r.json();
+  }catch(_){ /* not deployed yet */ }
+
+  if(!d){
+    d = FALLBACK;
+    document.getElementById('topbar').className = 'top test';
+    document.getElementById('topbar').textContent =
+      'PREVIEW — showing built-in catalog data. Connect Supabase to go live.';
+  }
+  CAT = d.categories; PRODUCTS = d.products; RULES = d.rules; DEALER = d.dealer;
+  SKU = {};
+  PRODUCTS.forEach(p => p.variants.forEach(v => SKU[v.sku] = {...v, product:p.name}));
+  paintAuth(); paintFilters(); render(); updateCart();
+}
+
+function paintAuth(){
+  if(!DEALER_MODE){
+    // Catalog-only launch: no sign-in, no cart, no prices anywhere.
+    document.body.classList.remove('dealer');
+    $('#authBtn').hidden = true;
+    $('#cartBtn').hidden = true;
+    $('#gate').classList.add('quoteonly');
+    $('#gateTxt').innerHTML =
+      `<b>Wholesale pricing is quoted per account.</b> Tell us how many doors you cover and we will send a price list the same day.`;
+    $('#gateBtn').textContent = `Call ${SALES_PHONE}`;
+    $('#gateBtn').onclick = () => { location.href = 'tel:' + SALES_PHONE.replace(/\D/g,''); };
+    $('#catalogSub').textContent =
+      'One card per product family. Colors and lengths stay together as variants. Call for case pricing, minimums and lead times.';
+    $('#whyLead').textContent =
+      'A sales catalog, not another consumer store. Buyers see the assortment and specifications first, then a rep quotes pricing against the volume they actually move.';
+    $('#whyPay').innerHTML =
+      '<b>Ships from Carrollton, TX</b><span>Dallas metro warehouse. Orders picked and out the door in one to two business days.</span>';
+    return;
+  }
+  const on = !!DEALER;
+  document.body.classList.toggle('dealer', on);
+  $('#authBtn').textContent = on ? 'Sign out' : 'Dealer sign in';
+  $('#cartBtn').hidden = !on;
+  $('#gate').classList.toggle('on', on);
+  $('#gateBtn').textContent = on ? 'Sign out' : 'Dealer sign in';
+  $('#catalogSub').textContent =
+    'One card per product family. Colors and lengths stay together as variants. Sign in with your dealer account to see your pricing and order online.';
+  $('#gateTxt').innerHTML = on
+    ? `<b>Signed in — ${DEALER.business_name}.</b> Pricing below is your account pricing. Quantities are in full cases. Terms: ${DEALER.terms.toUpperCase()}.`
+    : '<b>Pricing is private.</b> Your pricing is set when your account is opened, so it is specific to your agreement. Contact sales to get started.';
+}
+
+function paintFilters(){
+  $('#filters').innerHTML = [{slug:'all',name:'All products'}, ...CAT].map(c=>{
+    const n = c.slug==='all' ? PRODUCTS.length : PRODUCTS.filter(p=>p.cat===c.slug).length;
+    return `<button class="chip" aria-pressed="${c.slug==='all'}" data-id="${c.slug}">${c.name}<small>${n}</small></button>`;
+  }).join('');
+}
+$('#filters').onclick = e => {
+  const b = e.target.closest('.chip'); if(!b) return;
+  active = b.dataset.id;
+  [...$('#filters').children].forEach(x=>x.setAttribute('aria-pressed', x===b));
+  render();
+};
+
+/* ---------------- render ---------------- */
+function render(){
+  const list = PRODUCTS.filter(p => active==='all' || p.cat===active);
+  $('#grid').innerHTML = list.map(p=>{
+    const id = 'pic_'+p.slug;
+    // Card opens on the brand or lifestyle shot when there is one, otherwise
+    // on the first colorway that actually has a photo.
+    const opening = p.shots[0] || (p.colors.find(c=>c.image)||{}).image || '';
+    const shot = c => c.image ? `assets/${c.image}` : '';
+    return `<article class="card">
+      <div class="mainpic" id="${id}" data-label="${p.name}">
+        <img src="${opening?'assets/'+opening:''}" alt="${p.name}" onerror="miss('${id}',this)">
+      </div>
+      <div class="body">
+        <div class="type">${p.type||''}</div>
+        <h3>${p.name}</h3>
+        <p class="desc">${p.desc||''}</p>
+        <div class="meta">${p.meta.map(m=>`<span>${m}</span>`).join('')}</div>
+
+        <div class="swatchbar">
+          <div class="swlabel" id="lbl_${p.slug}">${p.colors.length>1?'Available colors':'Finish'}</div>
+          <div class="swrow">
+            ${p.colors.map(c=>c.image
+              ? `<button class="sw" style="--c:${c.hex}" title="${c.name}" aria-label="${c.name}"
+                   onclick="pickColor('${id}','${p.slug}','${shot(c)}','${c.name}',this)"></button>`
+              : `<button class="sw off" style="--c:${c.hex}" title="${c.name} — photo coming" aria-label="${c.name}, photo coming" disabled></button>`
+            ).join('')}
+            ${p.shots.length ? `<span class="swdiv"></span>` + p.shots.map((s,j)=>
+              `<button class="view${j===0?' active':''}" aria-label="View ${j+1}"
+                 onclick="pickView('${id}','${p.slug}','assets/${s}',this)"><img src="assets/${s}" alt="" onerror="this.style.opacity=0"></button>`).join('') : ''}
+          </div>
+        </div>
+
+        <div class="foot">
+          <div class="footlocked" onclick="go('#contact')"><span>WHOLESALE PRODUCT</span><em>Get a quote →</em></div>
+          <div class="pricing">${p.variants.map(v=>{
+            // No price on file means the SKU was never quoted for this account.
+            // Show it, but do not let them order at a price nobody agreed to.
+            if(v.case_cents == null) return `
+            <div class="vrow unpriced">
+              <div class="vname">${v.label}<small class="mono">${v.sku} · ${v.pack}/case</small></div>
+              <div class="askprice">Not on your price sheet</div>
+            </div>`;
+            return `
+            <div class="vrow">
+              <div class="vname">${v.label}<small class="mono">${v.sku} · ${v.pack}/case</small></div>
+              <div class="vprice mono">${usd(v.case_cents)}<small>${usd(Math.round(v.case_cents/v.pack))} ea</small></div>
+              <div class="step">
+                <button onclick="bump('${v.sku}',-1)" aria-label="Less">−</button>
+                <input class="mono" id="q_${v.sku}" value="${cart[v.sku]||0}" inputmode="numeric" onchange="setQty('${v.sku}',this.value)">
+                <button onclick="bump('${v.sku}',1)" aria-label="More">+</button>
+              </div>
+            </div>`;}).join('')}</div>
+        </div>
+      </div>
+    </article>`;
+  }).join('') || '<div class="loading">Nothing in this category yet.</div>';
+}
+window.miss = (id,img) => { img.style.opacity=0; $('#'+id).classList.add('noimg'); };
+
+function showShot(id, src, btn){
+  const box = $('#'+id), img = box.querySelector('img');
+  box.classList.remove('noimg');
+  img.style.opacity = 1;
+  img.onerror = () => miss(id, img);
+  img.src = src;
+  btn.parentElement.querySelectorAll('.sw, .view').forEach(x => x.classList.remove('active'));
+  btn.classList.add('active');
+}
+window.pickColor = (id, slug, src, name, btn) => {
+  showShot(id, src, btn);
+  $('#lbl_'+slug).textContent = name;
+};
+window.pickView = (id, slug, src, btn) => {
+  const p = PRODUCTS.find(x => x.slug === slug);
+  showShot(id, src, btn);
+  $('#lbl_'+slug).textContent = p && p.colors.length > 1 ? 'Available colors' : 'Finish';
+};
+
+/* ---------------- cart ---------------- */
+window.bump = (sku,d) => setQty(sku,(cart[sku]||0)+d);
+window.setQty = (sku,n) => {
+  n = Math.max(0, Math.min(999, parseInt(n)||0));
+  if(n===0) delete cart[sku]; else cart[sku]=n;
+  const el = $('#q_'+sku); if(el) el.value = n;
+  updateCart();
+};
+function totals(){
+  let sub=0, cases=0, units=0;
+  for(const sku in cart){ const v=SKU[sku]; if(!v?.case_cents) continue;
+    sub += v.case_cents*cart[sku]; cases += cart[sku]; units += v.pack*cart[sku]; }
+  const ship = sub===0 ? 0 : (sub >= RULES.free_freight_cents ? 0 : RULES.freight_cents);
+  const base = sub+ship;
+  const fee = base===0 ? 0 : (payMethod==='card' ? Math.round(base*0.029)+30 : Math.min(500, Math.round(base*0.008)));
+  return { sub, ship, fee, cases, units, total: base+fee };
+}
+function updateCart(){
+  const t = totals();
+  $('#cartCount').textContent = t.cases;
+  $('#sSub').textContent = usd(t.sub);
+  $('#sShip').textContent = t.sub && !t.ship ? 'Free' : usd(t.ship);
+  $('#sFee').textContent = usd(t.fee);
+  $('#sTot').textContent = usd(t.total);
+
+  const keys = Object.keys(cart);
+  $('#ditems').innerHTML = keys.length ? keys.map(sku=>{ const v=SKU[sku]; return `
+    <div class="ditem">
+      <div class="n">${v.product}<small class="mono">${v.label} · ${sku} · ${cart[sku]} case${cart[sku]>1?'s':''} · ${v.pack*cart[sku]} pcs</small></div>
+      <div class="p mono">${usd((v.case_cents||0)*cart[sku])}</div>
+      <button class="x" onclick="setQty('${sku}',0)" aria-label="Remove">×</button>
+    </div>`}).join('') : '<div class="empty">No cases added yet.<br>Quantities are in full cases.</div>';
+
+  const btn = $('#checkout'), note = $('#dnote');
+  const moq = RULES.moq_cents || 50000;
+  if(t.sub===0){ btn.disabled=true; btn.textContent='Checkout';
+    note.textContent = `Minimum order ${usd(moq)}. Freight free over ${usd(RULES.free_freight_cents||150000)}.`; }
+  else if(t.sub < moq){ btn.disabled=true; btn.textContent='Minimum order not met';
+    note.textContent = `Add ${usd(moq-t.sub)} more to reach your ${usd(moq)} minimum.`; }
+  else { btn.disabled=false; btn.textContent = `Checkout · ${usd(t.total)}`;
+    note.textContent = t.ship
+      ? `${t.units} pieces. Add ${usd(RULES.free_freight_cents-t.sub)} more for free freight.`
+      : `${t.units} pieces. Freight included.`; }
+}
+document.querySelectorAll('.pay button').forEach(b => b.onclick = () => {
+  payMethod = b.dataset.pay;
+  document.querySelectorAll('.pay button').forEach(x=>x.setAttribute('aria-pressed', x===b));
+  updateCart();
+});
+
+const openCart = () => { $('#scrim').classList.add('open'); $('#drawer').classList.add('open'); };
+const shutCart = () => { $('#scrim').classList.remove('open'); $('#drawer').classList.remove('open'); };
+$('#cartBtn').onclick = openCart;
+$('#closeCart').onclick = shutCart;
+$('#scrim').onclick = shutCart;
+
+/* ---------------- auth ---------------- */
+const openLogin = () => { $('#loginScrim').classList.add('open'); $('#loginModal').classList.add('open'); $('#le').focus(); };
+const shutLogin = () => { $('#loginScrim').classList.remove('open'); $('#loginModal').classList.remove('open'); $('#loginErr').hidden = true; };
+$('#loginClose').onclick = shutLogin;
+$('#loginScrim').onclick = shutLogin;
+document.addEventListener('keydown', e => { if(e.key==='Escape'){ shutCart(); shutLogin(); } });
+
+async function toggleAuth(){
+  if(DEALER){ if(sb) await sb.auth.signOut(); cart={}; DEALER=null; await loadCatalog(); }
+  else openLogin();
+}
+if(DEALER_MODE){
+  $('#authBtn').onclick = toggleAuth;
+  $('#gateBtn').onclick = toggleAuth;
+}
+
+$('#loginGo').onclick = async () => {
+  const btn = $('#loginGo'), err = $('#loginErr');
+  if(!sb){ err.textContent = 'This copy is not connected to Supabase yet.'; err.hidden = false; return; }
+  btn.disabled = true; btn.textContent = 'Signing in…'; err.hidden = true;
+  const { error } = await sb.auth.signInWithPassword({
+    email: $('#le').value.trim(), password: $('#lp').value
+  });
+  btn.disabled = false; btn.textContent = 'Sign in';
+  if(error){ err.textContent = 'That email and password did not match. Call 214-681-8417 for a reset.'; err.hidden = false; return; }
+  shutLogin(); await loadCatalog();
+};
+$('#lp').addEventListener('keydown', e => { if(e.key==='Enter') $('#loginGo').click(); });
+
+$('#magicGo').onclick = async () => {
+  const email = $('#le').value.trim(), err = $('#loginErr');
+  if(!email){ err.textContent = 'Enter your email first.'; err.hidden = false; return; }
+  if(!sb){ err.textContent = 'This copy is not connected to Supabase yet.'; err.hidden = false; return; }
+  const { error } = await sb.auth.signInWithOtp({ email, options:{ shouldCreateUser:false } });
+  err.textContent = error
+    ? 'We could not send a link to that address. Call 214-681-8417.'
+    : 'Check your email. The link signs you in for 24 hours.';
+  err.hidden = false;
+};
+
+/* ---------------- checkout ---------------- */
+$('#checkout').onclick = async () => {
+  const btn = $('#checkout');
+  btn.disabled = true; btn.textContent = 'Opening Stripe…';
+  const session = sb ? (await sb.auth.getSession()).data.session : null;
+  try{
+    const r = await fetch('/api/checkout', {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json', Authorization:`Bearer ${session.access_token}` },
+      body: JSON.stringify({ items: Object.keys(cart).map(sku=>({sku, cases:cart[sku]})), payment_method: payMethod })
+    });
+    const d = await r.json();
+    if(!r.ok) throw new Error(d.error || 'Checkout failed.');
+    if(d.invoice){ alert(d.message); cart={}; render(); updateCart(); shutCart(); return; }
+    location.href = d.url;
+  }catch(err){
+    alert(err.message);
+    updateCart();
+  }
+};
+
+/* ---------------- lead form ---------------- */
+$('#leadBtn').onclick = async () => {
+  const btn = $('#leadBtn'), note = $('#leadNote');
+  const payload = {
+    business_name: $('#c1').value.trim(), contact_name: $('#c2').value.trim(),
+    email: $('#c3').value.trim(), phone: $('#c4').value.trim(),
+    business_type: $('#c5').value, message: $('#c6').value.trim()
+  };
+  if(!payload.business_name || !payload.email){
+    note.textContent = 'Business name and email are required.'; return;
+  }
+  if(!sb){ note.textContent = 'Not connected yet. Call 214-681-8417 and we will take it by phone.'; return; }
+  btn.disabled = true; btn.textContent = 'Sending…';
+  const { error } = await sb.from('leads').insert(payload);
+  btn.disabled = false; btn.textContent = 'Send inquiry';
+  if(error){ note.textContent = 'That did not send. Call 214-681-8417 and we will take it by phone.'; return; }
+  btn.textContent = 'Sent'; btn.disabled = true;
+  note.textContent = 'Received. A rep will reach out within one business day.';
+  ['#c1','#c2','#c3','#c4','#c6'].forEach(s => $(s).value='');
+};
+
+if(sb) sb.auth.onAuthStateChange((evt) => { if(evt==='SIGNED_IN') loadCatalog(); });
+loadCatalog();
+</script>
+</body>
+</html>
