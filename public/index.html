@@ -198,9 +198,9 @@
 <section class="sec wrap" id="contact" style="padding-block-start:10px">
   <div class="contactgrid rise">
     <div>
-      <div class="eyebrow">Motto USA</div>
-      <h2>Talk to our team.</h2>
-      <p>Tell us how many doors you cover and what moves in them. A rep will come back with pricing, minimums and a suggested opening order, usually the same day.</p>
+      <div class="eyebrow" id="contactEye">Motto USA</div>
+      <h2 id="contactH">Talk to our team.</h2>
+      <p id="contactP">Tell us how many doors you cover and what moves in them. A rep will come back with pricing, minimums and a suggested opening order, usually the same day.</p>
       <div class="details">
         <div class="detail"><small>Phone</small><b><a href="tel:2146818417">214-681-8417</a></b></div>
         <div class="detail"><small>Email</small><b><a href="mailto:info@mottob2b.com">info@mottob2b.com</a></b></div>
@@ -259,22 +259,29 @@
     <div class="sum"><span>Freight</span><b class="mono" id="sShip">$0.00</b></div>
     <div class="sum"><span>Processing</span><b class="mono" id="sFee">$0.00</b></div>
     <div class="sum tot"><span>Total</span><b class="mono" id="sTot">$0.00</b></div>
-    <div class="pay">
+    <div class="pay" id="payRow" hidden>
       <button data-pay="us_bank_account" aria-pressed="true">Bank debit<small>0.8%, max $5</small></button>
       <button data-pay="card" aria-pressed="false">Card<small>2.9% + 30¢</small></button>
     </div>
-    <button class="btn blue" id="checkout" disabled>Checkout</button>
+    <button class="btn blue" id="checkout" disabled>Submit order</button>
     <p class="dnote" id="dnote">Quantities are in full cases.</p>
   </div>
 </aside>
 
 <script type="module">
-import { loadCatalog, supabase, usd, isFlat, openingShot, stockOf, CAN_ORDER } from './catalog.js';
+import { loadCatalog, supabase, usd, isFlat, openingShot, stockOf, CAN_ORDER,
+         orderMatrix, matrixTotals, lineKey, splitKey, fullSku } from './catalog.js';
 import { SALES_PHONE, SALES_EMAIL } from './config.js';
 
 const $ = s => document.querySelector(s);
 let CAT=[], PRODUCTS=[], SKU={}, RULES={}, DEALER=null;
-let active='all', cart={}, payMethod='us_bank_account';
+let active='all', payMethod='us_bank_account';
+// Lines staged on a product page arrive here; the cart also survives a reload,
+// which matters when someone is building a 20-line order across the catalog.
+let cart = (() => {
+  try{ return JSON.parse(sessionStorage.getItem('motto_cart') || '{}'); }catch(_){ return {}; }
+})();
+const saveCart = () => { try{ sessionStorage.setItem('motto_cart', JSON.stringify(cart)); }catch(_){} };
 let view = localStorage.getItem('motto_view') === 'list' ? 'list' : 'visual';
 
 /* ---------------- scroll reveal ---------------- */
@@ -301,10 +308,29 @@ function paintAuth(){
   document.body.classList.toggle('dealer', on);
 
   $('#authBtn').textContent = on ? 'Sign out' : 'Dealer sign in';
-  $('#cartBtn').hidden = !(on && CAN_ORDER);
+  $('#cartBtn').hidden = !on;
   $('#gate').classList.toggle('on', on);
   $('#gate').classList.toggle('quoteonly', !on);
   $('#gateBtn').textContent = on ? 'Sign out' : 'Dealer sign in';
+
+  // A signed-in dealer already has pricing. Asking them for their door count
+  // so a rep can quote them reads like the site does not know who they are.
+  $('#navQuote').textContent = on ? 'Contact sales' : 'Get a quote';
+  $('#contactEye').textContent = on ? DEALER.business_name : 'Motto USA';
+  $('#contactH').textContent  = on ? 'Need something?' : 'Talk to our team.';
+  $('#contactP').textContent  = on
+    ? 'Reordering, a product that is not on your price sheet, a private label run, a delivery question — send it here or call and we will sort it out.'
+    : 'Tell us how many doors you cover and what moves in them. A rep will come back with pricing, minimums and a suggested opening order, usually the same day.';
+  $('#leadBtn').textContent = on ? 'Send message' : 'Send inquiry';
+  // Prefill what the account already tells us. Retyping details the site has
+  // on file is the fastest way to make a portal feel like a form, not a tool.
+  if(on){
+    if(!$('#c1').value) $('#c1').value = DEALER.business_name || '';
+    if(!$('#c2').value) $('#c2').value = DEALER.contact_name || '';
+    if(!$('#c3').value) $('#c3').value = DEALER.email || '';
+    if(!$('#c4').value) $('#c4').value = DEALER.phone || '';
+  }
+  $('#c5').closest('.f').hidden = on;   // business type is a qualifying question
 
   if(on){
     $('#catalogSub').textContent =
@@ -408,28 +434,54 @@ function renderCards(list){
 
         <div class="foot">
           <a class="footlocked" href="product.html?p=${p.slug}"><span>VIEW PRODUCT</span><em>Details &amp; specs →</em></a>
-          <div class="pricing">${p.variants.map(v=>{
-            if(v.case_cents == null) return `
-            <div class="vrow unpriced">
-              <div class="vname">${v.label}<small class="mono">${v.sku} · ${v.pack}/case</small></div>
-              <div class="askprice">Not on your price sheet</div>
-            </div>`;
-            return `
-            <div class="vrow">
-              <div class="vname">${v.label}<small class="mono">${v.sku} · ${v.pack}/case</small></div>
-              <div class="vprice mono">${usd(v.case_cents)}<small>${usd(Math.round(v.case_cents/v.pack))} ea</small></div>
-              <div class="step">
-                <button onclick="bump('${v.sku}',-1)" aria-label="Less">−</button>
-                <input class="mono" id="q_${v.sku}" value="${cart[v.sku]||0}" inputmode="numeric" onchange="setQty('${v.sku}',this.value)">
-                <button onclick="bump('${v.sku}',1)" aria-label="More">+</button>
-              </div>
-            </div>`;}).join('')}</div>
+          <div class="pricing">${orderMatrix(p, cart)}</div>
         </div>
       </div>
     </article>`;
   }).join('') || '<div class="loading">Nothing in this category yet.</div>';
   requestAnimationFrame(() => grid.classList.add('in'));
+  wireMatrices(grid);
 }
+
+/* Typing in a matrix only stages a line. Nothing reaches the cart until
+   "Add to order" is pressed, so a mistyped digit is not an order. */
+function wireMatrices(root){
+  root.querySelectorAll('.matrix').forEach(m => {
+    const slug = m.querySelector('[data-add]').dataset.add;
+    const p = PRODUCTS.find(x => x.slug === slug);
+    const btn = m.querySelector('[data-add]');
+    const tot = m.querySelector('[data-total]');
+    const refresh = () => {
+      const t = matrixTotals(m, p);
+      btn.disabled = !t.cases;
+      tot.textContent = t.cases
+        ? `${t.cases} case${t.cases>1?'s':''} · ${t.pieces} pcs · ${usd(t.cents)}`
+        : 'No cases selected';
+    };
+    m.querySelectorAll('[data-key]').forEach(el => {
+      el.oninput = () => { el.value = el.value.replace(/\D/g,'').slice(0,4); refresh(); };
+    });
+    btn.onclick = () => {
+      m.querySelectorAll('[data-key]').forEach(el => {
+        const n = parseInt(el.value,10) || 0;
+        if(n) cart[el.dataset.key] = (cart[el.dataset.key] || 0) + n;
+        el.value = '';
+      });
+      refresh(); updateCart(); openCart();
+    };
+    refresh();
+  });
+}
+
+function colorHex(sku, name){
+  for(const p of PRODUCTS){
+    if(p.variants.some(v => v.sku === sku)){
+      return (p.colors.find(c => c.name === name) || {}).hex || '#ccc';
+    }
+  }
+  return '#ccc';
+}
+window.colorHex = colorHex;
 
 window.miss = (id,img) => { img.style.opacity=0; $('#'+id).classList.add('noimg'); };
 function showShot(id, src, btn){
@@ -451,45 +503,51 @@ window.pickView = (id, slug, src, btn) => {
 };
 
 /* ---------------- cart ---------------- */
-window.bump = (sku,d) => setQty(sku,(cart[sku]||0)+d);
-window.setQty = (sku,n) => {
-  n = Math.max(0, Math.min(999, parseInt(n)||0));
-  if(n===0) delete cart[sku]; else cart[sku]=n;
-  const el = $('#q_'+sku); if(el) el.value = n;
+window.setLine = (key,n) => {
+  n = Math.max(0, Math.min(9999, parseInt(n)||0));
+  if(n===0) delete cart[key]; else cart[key]=n;
   updateCart();
 };
 function totals(){
   let sub=0, cases=0, units=0;
-  for(const sku in cart){ const v=SKU[sku]; if(!v?.case_cents) continue;
-    sub += v.case_cents*cart[sku]; cases += cart[sku]; units += v.pack*cart[sku]; }
+  for(const key in cart){
+    const { sku } = splitKey(key); const v = SKU[sku];
+    if(!v?.case_cents) continue;
+    sub += v.case_cents*cart[key]; cases += cart[key]; units += v.pack*cart[key]; }
   const ship = sub===0 ? 0 : (sub >= RULES.free_freight_cents ? 0 : RULES.freight_cents);
   const base = sub+ship;
   const fee = base===0 ? 0 : (payMethod==='card' ? Math.round(base*0.029)+30 : Math.min(500, Math.round(base*0.008)));
   return { sub, ship, fee, cases, units, total: base+fee };
 }
 function updateCart(){
-  if(!CAN_ORDER) return;
+  saveCart();
+  if(!DEALER) return;
   const t = totals();
   $('#cartCount').textContent = t.cases;
   $('#sSub').textContent = usd(t.sub);
   $('#sShip').textContent = t.sub && !t.ship ? 'Free' : usd(t.ship);
   $('#sFee').textContent = usd(t.fee);
-  $('#sTot').textContent = usd(t.total);
+  $('#sFee').closest('.sum').hidden = !CAN_ORDER;
+  $('#sTot').textContent = usd(CAN_ORDER ? t.total : t.sub + t.ship);
 
   const keys = Object.keys(cart);
-  $('#ditems').innerHTML = keys.length ? keys.map(sku=>{ const v=SKU[sku]; return `
+  $('#ditems').innerHTML = keys.length ? keys.map(key=>{
+    const { sku, color } = splitKey(key); const v = SKU[sku]; if(!v) return '';
+    return `
     <div class="ditem">
-      <div class="n">${v.product}<small class="mono">${v.label} · ${sku} · ${cart[sku]} case${cart[sku]>1?'s':''} · ${v.pack*cart[sku]} pcs</small></div>
-      <div class="p mono">${usd((v.case_cents||0)*cart[sku])}</div>
-      <button class="x" onclick="setQty('${sku}',0)" aria-label="Remove">×</button>
+      <div class="n">${v.product}${color?` <span class="cdot" style="background:${colorHex(sku,color)}"></span>${color}`:''}
+        <small class="mono">${v.label} · ${fullSku(sku,color)} · ${cart[key]} case${cart[key]>1?'s':''} · ${v.pack*cart[key]} pcs</small></div>
+      <div class="p mono">${usd((v.case_cents||0)*cart[key])}</div>
+      <button class="x" onclick="setLine('${key}',0)" aria-label="Remove">×</button>
     </div>`}).join('') : '<div class="empty">No cases added yet.<br>Quantities are in full cases.</div>';
 
   const btn = $('#checkout'), note = $('#dnote'), moq = RULES.moq_cents || 50000;
-  if(t.sub===0){ btn.disabled=true; btn.textContent='Checkout';
+  const verb = CAN_ORDER ? 'Checkout' : 'Submit order';
+  if(t.sub===0){ btn.disabled=true; btn.textContent=verb;
     note.textContent = `Minimum order ${usd(moq)}. Freight free over ${usd(RULES.free_freight_cents||150000)}.`; }
   else if(t.sub < moq){ btn.disabled=true; btn.textContent='Minimum order not met';
     note.textContent = `Add ${usd(moq-t.sub)} more to reach your ${usd(moq)} minimum.`; }
-  else { btn.disabled=false; btn.textContent = `Checkout · ${usd(t.total)}`;
+  else { btn.disabled=false; btn.textContent = `${verb} · ${usd(CAN_ORDER ? t.total : t.sub + t.ship)}`;
     note.textContent = t.ship
       ? `${t.units} pieces. Add ${usd(RULES.free_freight_cents-t.sub)} more for free freight.`
       : `${t.units} pieces. Freight included.`; }
@@ -500,6 +558,7 @@ document.querySelectorAll('.pay button').forEach(b => b.onclick = () => {
   updateCart();
 });
 
+$('#payRow').hidden = !CAN_ORDER;
 const openCart = () => { $('#scrim').classList.add('open'); $('#drawer').classList.add('open'); };
 const shutCart = () => { $('#scrim').classList.remove('open'); $('#drawer').classList.remove('open'); };
 $('#cartBtn').onclick = openCart; $('#closeCart').onclick = shutCart; $('#scrim').onclick = shutCart;
@@ -511,7 +570,7 @@ $('#loginClose').onclick = shutLogin; $('#loginScrim').onclick = shutLogin;
 document.addEventListener('keydown', e => { if(e.key==='Escape'){ shutCart(); shutLogin(); } });
 
 async function toggleAuth(){
-  if(DEALER){ const sb = await supabase(); if(sb) await sb.auth.signOut(); cart={}; DEALER=null; await boot(); }
+  if(DEALER){ const sb = await supabase(); if(sb) await sb.auth.signOut(); cart={}; saveCart(); DEALER=null; await boot(); }
   else openLogin();
 }
 $('#authBtn').onclick = toggleAuth;
@@ -540,19 +599,35 @@ $('#magicGo').onclick = async () => {
 
 $('#checkout').onclick = async () => {
   const btn = $('#checkout'), sb = await supabase();
-  btn.disabled = true; btn.textContent = 'Opening Stripe…';
+  const label = btn.textContent;
+  btn.disabled = true; btn.textContent = CAN_ORDER ? 'Opening Stripe…' : 'Sending…';
   const session = sb ? (await sb.auth.getSession()).data.session : null;
+  const items = Object.keys(cart).map(key => {
+    const { sku, color } = splitKey(key);
+    return { sku, color, cases: cart[key] };
+  });
+
   try{
-    const r = await fetch('/api/checkout', {
+    const r = await fetch(CAN_ORDER ? '/api/checkout' : '/api/quote', {
       method:'POST',
       headers:{ 'Content-Type':'application/json', ...(session?{Authorization:`Bearer ${session.access_token}`}:{}) },
-      body: JSON.stringify({ items: Object.keys(cart).map(sku=>({sku, cases:cart[sku]})), payment_method: payMethod })
+      body: JSON.stringify({ items, payment_method: payMethod })
     });
     const d = await r.json();
-    if(!r.ok) throw new Error(d.error || 'Checkout failed.');
-    if(d.invoice){ alert(d.message); cart={}; render(); updateCart(); shutCart(); return; }
-    location.href = d.url;
-  }catch(err){ alert(err.message); updateCart(); }
+    if(!r.ok) throw new Error(d.error || 'That did not go through.');
+    if(d.url){ location.href = d.url; return; }
+
+    // Quote mode: the order is with the sales team, not paid for.
+    cart = {}; saveCart();
+    $('#ditems').innerHTML = `<div class="empty" style="padding:60px 20px">
+        <b style="display:block;color:var(--ink);font-size:15px;margin-bottom:10px">Order sent.</b>
+        ${d.message || 'A rep will confirm stock and totals, usually within a few hours.'}</div>`;
+    updateCart(); render(); watch();
+  }catch(err){
+    alert(err.message);
+    btn.disabled = false; btn.textContent = label;
+    updateCart();
+  }
 };
 
 /* ---------------- lead form ---------------- */
@@ -564,45 +639,54 @@ $('#leadBtn').onclick = async () => {
     business_type: $('#c5').value, message: $('#c6').value.trim()
   };
   if(!payload.business_name || !payload.email){ note.textContent = 'Business name and email are required.'; return; }
+
   btn.disabled = true; btn.textContent = 'Sending…';
-  let error = null;
+  note.textContent = 'Sending…';
+
+  // A cold serverless function plus an email hop can take a few seconds. Cap it
+  // so the button can never sit spinning forever with nothing to tell the user.
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 15000);
+  let failed = null;
+
   try{
-    const r = await fetch('/api/lead', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
-    if(!r.ok) error = true;
-  }catch(_){ error = true; }
-  btn.disabled = false; btn.textContent = 'Send inquiry';
-  if(error){ note.textContent = `That did not send. Call ${SALES_PHONE} or email ${SALES_EMAIL}.`; return; }
-  btn.textContent = 'Sent'; btn.disabled = true;
-  note.textContent = 'Received. A rep will reach out within one business day.';
-  ['#c1','#c2','#c3','#c4','#c6'].forEach(s => $(s).value='');
+    const r = await fetch('/api/lead', {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json' },
+      body: JSON.stringify(payload),
+      signal: ctrl.signal
+    });
+    if(!r.ok){
+      const d = await r.json().catch(() => ({}));
+      failed = d.error || `Server returned ${r.status}.`;
+    }
+  }catch(err){
+    failed = err.name === 'AbortError'
+      ? 'That took too long to send.'
+      : 'Could not reach the server.';
+  }finally{
+    clearTimeout(timer);
+    btn.disabled = false;
+    btn.textContent = 'Send inquiry';
+  }
+
+  if(failed){
+    note.innerHTML = `${failed} Call <a href="tel:${SALES_PHONE.replace(/\D/g,'')}"><b>${SALES_PHONE}</b></a> or email <a href="mailto:${SALES_EMAIL}"><b>${SALES_EMAIL}</b></a> and we will take it directly.`;
+    return;
+  }
+
+  // Swap the whole form for a confirmation. A greyed-out button and a line of
+  // small print underneath is too easy to miss, and a buyer who is not sure it
+  // sent will either submit again or give up.
+  document.querySelector('.form').innerHTML = `
+    <div class="sent">
+      <div class="tick" aria-hidden="true">✓</div>
+      <h3>Got it. Thanks, ${payload.contact_name ? payload.contact_name.split(' ')[0] : 'talk soon'}.</h3>
+      <p>Your inquiry is with our sales team. A rep will follow up within one business day with pricing, minimums and a suggested opening order.</p>
+      <p class="small">A confirmation is on its way to <b>${payload.email}</b>. If nothing arrives in a few minutes, check spam or just call us.</p>
+      <a class="btn dark" href="tel:${SALES_PHONE.replace(/\D/g,'')}">Call ${SALES_PHONE}</a>
+    </div>`;
 };
-
-/* ---------------- counter reel ---------------- */
-(() => {
-  const v = $('#reel'), btn = $('#reelBtn');
-  if(!v) return;
-  const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const icon = playing => btn.innerHTML = playing
-    ? '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="5" width="3.4" height="14" rx="1.2"/><rect x="13.6" y="5" width="3.4" height="14" rx="1.2"/></svg>'
-    : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.2v13.6L19 12z"/></svg>';
-
-  btn.onclick = () => {
-    if(v.paused){ v.play(); } else { v.pause(); }
-    icon(!v.paused);
-    btn.setAttribute('aria-label', v.paused ? 'Play video' : 'Pause video');
-  };
-
-  if(calm){ icon(false); btn.setAttribute('aria-label','Play video'); return; }
-
-  // Nothing plays while it is off screen. A looping video in a background tab
-  // is a battery and data cost the visitor never agreed to.
-  let manual = false;
-  btn.addEventListener('click', () => { manual = true; });
-  new IntersectionObserver(es => es.forEach(e => {
-    if(manual) return;
-    if(e.isIntersecting) v.play().catch(()=>{}); else v.pause();
-  }), { threshold:.25 }).observe(v);
-})();
 
 boot();
 </script>

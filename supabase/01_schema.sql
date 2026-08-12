@@ -145,7 +145,10 @@ create table orders (
   order_no              bigint generated always as identity,
   dealer_id             uuid references dealer_accounts(id),
   status                text not null default 'pending',
-  -- pending | processing | paid | payment_failed | abandoned | refunded | shipped
+  -- requested | pending | processing | paid | payment_failed
+  -- | abandoned | refunded | shipped
+  -- 'requested' means submitted through the site with online payment off:
+  -- a real order awaiting a rep to confirm stock and invoice it.
   payment_method        text,
   subtotal_cents        int not null,
   freight_cents         int not null default 0,
@@ -169,6 +172,8 @@ create table order_items (
   id         bigserial primary key,
   order_id   uuid references orders(id) on delete cascade,
   sku        text not null,
+  -- Colourway is part of what gets picked. Null for single-finish products.
+  color      text,
   cases      int not null check (cases > 0),
   case_cents int not null,      -- price snapshot at order time
   pieces     int not null

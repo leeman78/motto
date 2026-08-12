@@ -82,6 +82,9 @@ export default async function handler(req, res) {
       products: catalog,
       dealer: dealer ? {
         business_name: dealer.business_name,
+        contact_name: dealer.contact_name,
+        email: dealer.email,
+        phone: dealer.phone,
         terms: dealer.terms,
         moq_cents: dealer.moq_cents ?? MOQ_CENTS
       } : null,

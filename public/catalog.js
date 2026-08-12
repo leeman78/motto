@@ -37,6 +37,20 @@ export const STOCK = {
 };
 export const stockOf = x => STOCK[x?.stock] || STOCK.in_stock;
 
+/* ------------------------------------------------------------------
+   Order lines are colour + length, not length alone. A warehouse picks
+   "wine 3 ft", not "3 ft", so the cart has to carry both or the pick
+   list is guesswork.
+------------------------------------------------------------------ */
+const CODES = { black:'BLK', brown:'BRN', wine:'WIN', red:'RED', orange:'ORG',
+                gold:'GLD', white:'WHT', navy:'NVY', pink:'PNK' };
+export const colorCode = name =>
+  CODES[String(name || '').toLowerCase()] || String(name || 'STD').slice(0,3).toUpperCase();
+
+export const lineKey  = (sku, color) => `${sku}::${color || ''}`;
+export const splitKey = key => { const [sku, color] = key.split('::'); return { sku, color }; };
+export const fullSku  = (sku, color) => color ? `${sku}-${colorCode(color)}` : sku;
+
 export const FALLBACK = {
   categories:[{slug:'cables',name:'Leather cables'},{slug:'power',name:'Chargers & power'},
               {slug:'audio',name:'Earbuds & audio'},{slug:'adapters',name:'Adapters'}],
@@ -162,3 +176,56 @@ export const bySlug = (products, slug) => products.find(p => p.slug === slug);
 /** Opening image for a product: brand shot if there is one, else first colourway. */
 export const openingShot = p =>
   p.shots?.[0] || (p.colors || []).find(c => c.image)?.image || '';
+
+
+/* ------------------------------------------------------------------
+   Order matrix. Lengths down the side, colourways across the top, one
+   cell per orderable line. Lets a buyer place "wine 3 ft x100, brown
+   6 ft x10" in a single pass instead of picking a colour, adding, and
+   starting over.
+------------------------------------------------------------------ */
+export function orderMatrix(p, cart, opts = {}) {
+  const priced = p.variants.filter(v => v.case_cents != null);
+  if (!priced.length) {
+    return `<div class="nomatrix">No pricing on file for this product yet. Call for a quote.</div>`;
+  }
+  const cols = (p.colors || []).filter(c => c.name);
+  const multi = cols.length > 1;
+  const cell = (v, colorName) => {
+    const key = lineKey(v.sku, multi ? colorName : '');
+    return `<input class="qty mono" type="text" inputmode="numeric" value="${cart[key] || ''}"
+              placeholder="0" data-key="${key}" aria-label="${p.name} ${v.label} ${colorName || ''} cases">`;
+  };
+
+  return `
+  <div class="matrix${multi ? '' : ' single'}" style="--cols:${multi ? cols.length : 1}">
+    <div class="mhead">
+      <span class="mcorner">Cases</span>
+      ${multi ? cols.map(c => `<span class="mcol"><i style="background:${c.hex}" title="${c.name}"></i><em>${c.name}</em></span>`).join('')
+              : '<span class="mcol"><em>Qty</em></span>'}
+    </div>
+    ${priced.map(v => `
+      <div class="mrow">
+        <span class="mlab">${v.label}<small class="mono">${usd(v.case_cents)} · ${v.pack}/cs</small></span>
+        ${multi ? cols.map(c => cell(v, c.name)).join('') : cell(v, '')}
+      </div>`).join('')}
+    <div class="mfoot">
+      <span class="mtot" data-total="${p.slug}">No cases selected</span>
+      <button class="btn dark madd" data-add="${p.slug}" disabled>${opts.addLabel || 'Add to order'}</button>
+    </div>
+  </div>`;
+}
+
+/** Cases and dollars currently typed into one product's matrix. */
+export function matrixTotals(root, p) {
+  let cases = 0, cents = 0, pieces = 0;
+  root.querySelectorAll(`[data-key]`).forEach(el => {
+    const n = parseInt(el.value, 10) || 0;
+    if (!n) return;
+    const { sku } = splitKey(el.dataset.key);
+    const v = p.variants.find(x => x.sku === sku);
+    if (!v || v.case_cents == null) return;
+    cases += n; cents += v.case_cents * n; pieces += v.pack * n;
+  });
+  return { cases, cents, pieces };
+}

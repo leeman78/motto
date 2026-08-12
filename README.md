@@ -196,6 +196,31 @@ dealers, set custom SMTP under Supabase → Project Settings → Authentication 
 SMTP Settings and point it at the same Resend account. Then those come from
 `info@mottob2b.com` too, and the rate limit goes away.
 
+## Ordering
+
+Colour is part of the order line, not just a photo switch. A warehouse picks
+"wine 3 ft", not "3 ft", so the cart carries both and the SKU on the pick list
+comes out as `MT-CC65-03-WIN`.
+
+Signed-in dealers get an order matrix on every card and product page: lengths
+down the side, colourways across the top, one cell each. That is how a buyer
+actually thinks — "10 cases of 6 ft, mixed" — and it beats picking a colour,
+adding, and starting over for each one.
+
+Typing in the matrix only stages a line. Nothing reaches the cart until **Add
+to order** is pressed, so a mistyped digit is never an order.
+
+What happens on submit depends on `ORDER_MODE`:
+
+- `'quote'` → `/api/quote`. The order is recorded with status `requested` and
+  emailed to sales and to the dealer. Nothing is charged. SKUs that are not
+  `in_stock` are flagged at the top of the sales email so a rep checks before
+  confirming.
+- `'online'` → `/api/checkout`. Stripe.
+
+Both re-resolve every price server side. A submitted order is a commitment, so
+it is never priced from whatever the browser had cached.
+
 ## Availability
 
 Every SKU carries a status: In stock, Low stock, Pre-order or Out of stock. It

@@ -53,8 +53,8 @@ export default async function handler(req, res) {
     const line_items = [];
     const rows = [];
 
-    for (const { sku, cases } of items) {
-      const qty = Math.max(1, Math.min(999, parseInt(cases, 10) || 0));
+    for (const { sku, color, cases } of items) {
+      const qty = Math.max(1, Math.min(9999, parseInt(cases, 10) || 0));
       const v = bySku[sku];
       const unit = priced[sku];
       subtotal += unit * qty;
@@ -65,13 +65,13 @@ export default async function handler(req, res) {
           currency: 'usd',
           unit_amount: unit,
           product_data: {
-            name: `${v.products.name} — ${v.label}`,
+            name: `${v.products.name} — ${v.label}${color ? ' — ' + color : ''}`,
             description: `${sku} · case of ${v.case_pack}`,
-            metadata: { sku }
+            metadata: { sku, ...(color ? { color } : {}) }
           }
         }
       });
-      rows.push({ sku, cases: qty, case_cents: unit, pieces: v.case_pack * qty });
+      rows.push({ sku, color: color || null, cases: qty, case_cents: unit, pieces: v.case_pack * qty });
     }
 
     const moq = dealer.moq_cents ?? MOQ_CENTS;
