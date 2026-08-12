@@ -206,6 +206,31 @@ The Dealers list shows a **Temp password** tag next to anyone who has not
 replaced theirs yet. An old account still carrying that tag usually means they
 never actually signed in.
 
+### When a sign-in or reset link does not arrive
+
+Supabase reports success even when the address has no account, so "sent" on
+screen does not mean "delivered". Work through these in order:
+
+1. **Does the address exactly match the account?** `signInWithOtp` is called
+   with `shouldCreateUser: false`, so an address that is not on a dealer
+   account silently sends nothing. Check the spelling in
+   Authentication → Users.
+2. **Is Site URL set?** Authentication → URL Configuration. If it still says
+   `http://localhost:3000`, links in those emails point at a machine that is
+   not there. Set it to the deployed domain and add it to Redirect URLs.
+3. **Is custom SMTP actually saved?** Authentication → Emails → SMTP Settings.
+   Without it Supabase sends from its own address with a hard limit of a few
+   per hour, and once you cross that limit later attempts just fail quietly.
+4. **Check Resend → Emails.** If the message is not listed there, Supabase
+   never handed it over, which points back at 2 or 3. If it is listed as
+   Bounced, the address is the problem.
+5. **Auth logs.** Supabase → Logs → Auth shows the send attempt and the reason
+   it failed.
+
+The contact form is unrelated — it goes through Resend directly from
+`/api/lead`, not through Supabase. So the form working tells you nothing about
+whether auth email is configured.
+
 ## Fees
 
 `FEE_MODE` in `public/config.js` is `absorb`: Motto pays the processing cost,

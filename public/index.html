@@ -598,7 +598,8 @@ $('#cartBtn').onclick = openCart; $('#closeCart').onclick = shutCart; $('#scrim'
 
 /* ---------------- auth ---------------- */
 const openLogin = () => { $('#loginScrim').classList.add('open'); $('#loginModal').classList.add('open'); $('#le').focus(); };
-const shutLogin = () => { $('#loginScrim').classList.remove('open'); $('#loginModal').classList.remove('open'); $('#loginErr').hidden = true; };
+const shutLogin = () => { $('#loginScrim').classList.remove('open'); $('#loginModal').classList.remove('open');
+  $('#loginErr').hidden = true; $('#loginErr').className = 'err'; };
 $('#loginClose').onclick = shutLogin; $('#loginScrim').onclick = shutLogin;
 document.addEventListener('keydown', e => { if(e.key==='Escape'){ shutCart(); shutLogin(); } });
 
@@ -613,6 +614,7 @@ $('#loginGo').onclick = async () => {
   const btn = $('#loginGo'), err = $('#loginErr'), sb = await supabase();
   if(!sb){ err.textContent = 'This copy is not connected to Supabase yet.'; err.hidden = false; return; }
   btn.disabled = true; btn.textContent = 'Signing in…'; err.hidden = true;
+  $('#loginErr').className = 'err';
   const { error } = await sb.auth.signInWithPassword({ email: $('#le').value.trim(), password: $('#lp').value });
   btn.disabled = false; btn.textContent = 'Sign in';
   if(error){ err.textContent = 'That email and password did not match. Call 214-681-8417 for a reset.'; err.hidden = false; return; }
@@ -621,14 +623,39 @@ $('#loginGo').onclick = async () => {
 $('#lp').addEventListener('keydown', e => { if(e.key==='Enter') $('#loginGo').click(); });
 
 $('#magicGo').onclick = async () => {
-  const email = $('#le').value.trim(), err = $('#loginErr'), sb = await supabase();
-  if(!email){ err.textContent = 'Enter your email first.'; err.hidden = false; return; }
-  if(!sb){ err.textContent = 'This copy is not connected to Supabase yet.'; err.hidden = false; return; }
-  const { error } = await sb.auth.signInWithOtp({ email, options:{ shouldCreateUser:false } });
-  err.textContent = error
-    ? 'We could not send a link to that address. Call 214-681-8417.'
-    : 'Link sent. It signs you in for 24 hours. Check your junk or spam folder if it is not in your inbox in a couple of minutes.';
+  const email = $('#le').value.trim(), err = $('#loginErr'), btn = $('#magicGo'), sb = await supabase();
+  if(!email){ err.textContent = 'Enter your email first, then tap this again.'; err.hidden = false; return; }
+  if(!sb){ err.textContent = 'Not connected. Call ' + SALES_PHONE + '.'; err.hidden = false; return; }
+
+  btn.disabled = true; btn.textContent = 'Sending…'; err.hidden = true;
+  const { error } = await sb.auth.signInWithOtp({
+    email,
+    options: {
+      shouldCreateUser: false,
+      // Without this the link points at whatever Site URL the project has,
+      // which defaults to localhost and lands the dealer nowhere.
+      emailRedirectTo: location.origin + '/'
+    }
+  });
+
+  if(error){
+    btn.disabled = false; btn.textContent = 'Email me a sign-in link instead';
+    err.textContent = /rate|limit|seconds/i.test(error.message)
+      ? 'Too many requests just now. Wait a minute and try again, or call ' + SALES_PHONE + '.'
+      : 'We could not send a link to that address. Call ' + SALES_PHONE + '.';
+    err.hidden = false;
+    return;
+  }
+
+  // Supabase reports success even when the address has no account, so the page
+  // cannot promise the email is on its way to this particular inbox.
+  btn.textContent = 'Link sent';
+  err.className = 'ok';
+  err.innerHTML = `If <b>${email}</b> is on a Motto account, a sign-in link is on its way.
+    It works for 24 hours. Check your junk or spam folder if it is not in your inbox in a couple of minutes.
+    No account yet? Call <a href="tel:${SALES_PHONE.replace(/\D/g,'')}">${SALES_PHONE}</a>.`;
   err.hidden = false;
+  setTimeout(() => { btn.disabled = false; btn.textContent = 'Email me a sign-in link instead'; }, 30000);
 };
 
 $('#checkout').onclick = async () => {
@@ -779,10 +806,11 @@ $('#forgotGo').onclick = async (e) => {
   const email = $('#le').value.trim(), err = $('#loginErr'), sb = await supabase();
   if(!email){ err.textContent = 'Enter your email first, then tap this again.'; err.hidden = false; return; }
   if(!sb){ err.textContent = 'Not connected. Call 214-681-8417.'; err.hidden = false; return; }
-  const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin + '/#reset' });
+  const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin + '/' });
+  err.className = error ? 'err' : 'ok';
   err.textContent = error
-    ? 'We could not send a reset to that address. Call 214-681-8417.'
-    : 'Reset link sent. Check your inbox, and your junk or spam folder if it is not there in a couple of minutes.';
+    ? 'We could not send a reset to that address. Call ' + SALES_PHONE + '.'
+    : `If ${email} is on a Motto account, a reset link is on its way. Check your junk or spam folder if it is not in your inbox in a couple of minutes.`;
   err.hidden = false;
 };
 
