@@ -48,7 +48,7 @@
 </div></footer>
 
 <script type="module">
-import { loadCatalog, usd, isFlat, openingShot, bySlug, DEALER_MODE } from './catalog.js';
+import { loadCatalog, usd, isFlat, openingShot, bySlug, stockOf, STOCK, DEALER_MODE } from './catalog.js';
 import { SALES_PHONE } from './config.js';
 
 const $ = s => document.querySelector(s);
@@ -97,6 +97,9 @@ if(!p){
     <div>
       <div class="eyebrow">${p.type||''}</div>
       <h1>${p.name}</h1>
+      <div class="lstock ${stockOf(p).tone}" style="margin:-6px 0 16px;font-size:13px">
+        <i style="background:${stockOf(p).dot}"></i>${stockOf(p).label}${p.stock==='low_stock'?' on one or more sizes':''}
+      </div>
       <p class="blurb">${p.desc||''}</p>
 
       <div class="meta" style="margin:0 0 26px">${p.meta.map(m=>`<span style="background:var(--soft)">${m}</span>`).join('')}</div>
@@ -115,7 +118,13 @@ if(!p){
       <div class="specs" style="border-top:1px solid var(--line)">
         ${p.variants.map(v=>`
         <div class="specrow">
-          <span class="k"><b style="color:var(--ink)">${v.label}</b> <span class="mono" style="font-size:11.5px;color:var(--ink-3)">${v.sku}${v.upc?' · UPC '+v.upc:''}</span></span>
+          <span class="k">
+            <b style="color:var(--ink)">${v.label}</b>
+            <span class="mono" style="font-size:11.5px;color:var(--ink-3)">${v.sku}${v.upc?' · UPC '+v.upc:''}</span>
+            <span class="lstock ${(STOCK[v.stock]||STOCK.in_stock).tone}" style="font-size:11px;margin-left:8px">
+              <i style="background:${(STOCK[v.stock]||STOCK.in_stock).dot}"></i>${(STOCK[v.stock]||STOCK.in_stock).label}${v.restock?' · '+v.restock:''}
+            </span>
+          </span>
           <span class="v mono">${DEALER_MODE && v.case_cents!=null ? usd(v.case_cents)+' / case' : v.pack+' per case'}</span>
         </div>`).join('')}
       </div>

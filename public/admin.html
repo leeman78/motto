@@ -55,6 +55,7 @@ tr.click:hover td{background:#f7f8fa}
   <b>Motto Wholesale · Admin</b>
   <div class="tabs">
     <button data-tab="dealers" aria-pressed="true">Dealers</button>
+    <button data-tab="inventory" aria-pressed="false">Inventory</button>
     <button data-tab="orders" aria-pressed="false">Orders</button>
   </div>
 </div></div>
@@ -113,8 +114,60 @@ document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => {
 });
 
 async function boot(){
-  if(tab === 'dealers') return view ? dealerDetail(view) : dealerList();
+  if(tab === 'dealers')   return view ? dealerDetail(view) : dealerList();
+  if(tab === 'inventory') return inventoryList();
   return orderList();
+}
+
+/* ---------------- inventory ---------------- */
+const STOCKS = [
+  ['in_stock','In stock','ok'], ['low_stock','Low stock','warn'],
+  ['pre_order','Pre-order','info'], ['out_of_stock','Out of stock','warn']
+];
+
+async function inventoryList(){
+  $('#pane').innerHTML = '<div class="panel"><p class="sub">Loading…</p></div>';
+  const { items } = await call('list_inventory');
+  const count = k => items.filter(i => i.stock_status === k).length;
+
+  $('#pane').innerHTML = `
+  <div class="summary">
+    <div><div class="k">Active SKUs</div><div class="v">${items.filter(i=>i.is_active).length}</div></div>
+    <div><div class="k">In stock</div><div class="v">${count('in_stock')}</div></div>
+    <div><div class="k">Low stock</div><div class="v">${count('low_stock')}</div></div>
+    <div><div class="k">Out or pre-order</div><div class="v">${count('out_of_stock')+count('pre_order')}</div></div>
+  </div>
+
+  <div class="panel">
+    <h2>Availability</h2>
+    <p class="sub">What buyers see on the catalog. This is set by hand on purpose. A wrong "in stock" costs you one phone call, but a broken live inventory feed takes down the whole page. Update it when a container lands or a SKU runs dry.</p>
+    <table>
+      <thead><tr><th>Product</th><th>SKU</th><th class="r">Case</th><th>Availability</th><th>Restock date</th></tr></thead>
+      <tbody>${items.map(i=>`
+        <tr>
+          <td><b>${i.products?.name || ''}</b><br><span style="color:#9a9da4;font-size:11.5px">${i.label}</span></td>
+          <td class="mono" style="color:#9a9da4;font-size:11.5px">${i.sku}</td>
+          <td class="r mono" style="color:#9a9da4">${i.case_pack}</td>
+          <td>
+            <select class="priceinput" style="width:145px;text-align:left" data-stock="${i.sku}">
+              ${STOCKS.map(([v,l]) => `<option value="${v}"${i.stock_status===v?' selected':''}>${l}</option>`).join('')}
+            </select>
+          </td>
+          <td><input type="date" class="priceinput" style="width:150px;text-align:left" data-restock="${i.sku}" value="${i.restock_date||''}"></td>
+        </tr>`).join('')}
+      </tbody>
+    </table>
+    <p class="sub" style="margin:18px 0 0">A product family shows the weakest status of its SKUs. One low-stock length makes the whole card read Low stock, which is what you want: it starts the conversation before the buyer places an order you cannot fill.</p>
+  </div>`;
+
+  const save = async sku => {
+    const st = document.querySelector(`[data-stock="${sku}"]`).value;
+    const rd = document.querySelector(`[data-restock="${sku}"]`).value;
+    try{ await call('set_stock', { sku, stock_status: st, restock_date: rd || null }); }
+    catch(e){ alert(e.message); }
+  };
+  document.querySelectorAll('[data-stock]').forEach(el => el.onchange = () => save(el.dataset.stock));
+  document.querySelectorAll('[data-restock]').forEach(el => el.onchange = () => save(el.dataset.restock));
 }
 
 /* ---------------- dealers ---------------- */

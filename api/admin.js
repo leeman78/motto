@@ -151,6 +151,31 @@ export default async function handler(req, res) {
       }
 
       // ---------------------------------------------------------------
+      case 'list_inventory': {
+        const { data, error } = await db
+          .from('variants')
+          .select('sku, label, case_pack, stock_status, restock_date, is_active, sort_order, products(name, slug, sort_order)')
+          .order('sku');
+        if (error) throw error;
+        data.sort((a, b) =>
+          (a.products?.sort_order ?? 0) - (b.products?.sort_order ?? 0) || a.sort_order - b.sort_order);
+        return res.status(200).json({ items: data });
+      }
+
+      case 'set_stock': {
+        const { sku, stock_status, restock_date = null } = p;
+        const ok = ['in_stock','low_stock','pre_order','out_of_stock'];
+        if (!sku || !ok.includes(stock_status)) {
+          return res.status(400).json({ error: 'sku and a valid stock_status are required.' });
+        }
+        const { error } = await db.from('variants')
+          .update({ stock_status, restock_date: restock_date || null })
+          .eq('sku', sku);
+        if (error) throw error;
+        return res.status(200).json({ ok: true });
+      }
+
+      // ---------------------------------------------------------------
       case 'list_orders': {
         const { data, error } = await db
           .from('orders')

@@ -80,10 +80,10 @@
 <section class="sec wrap" id="catalog">
   <div class="head rise">
     <div>
-      <div class="eyebrow">The line</div>
-      <h2>Wholesale catalog</h2>
+      <div class="eyebrow">Catalog</div>
+      <h2>The Motto line</h2>
     </div>
-    <p id="catalogSub">One card per product family. Colors and lengths stay together as variants.</p>
+    <p id="catalogSub">Available in a variety of colors and lengths. Contact our sales team for wholesale pricing, availability, and ordering information.</p>
   </div>
 
   <div class="gate rise" id="gate">
@@ -91,8 +91,21 @@
     <button class="btn dark" id="gateBtn">Dealer sign in</button>
   </div>
 
-  <div class="filters rise" id="filters"></div>
+  <div class="toolbar rise">
+    <div class="filters" id="filters"></div>
+    <div class="density" role="group" aria-label="Catalog layout">
+      <button data-mode="visual" aria-pressed="true">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
+        Cards
+      </button>
+      <button data-mode="list" aria-pressed="false">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><rect x="1" y="2" width="14" height="2.4" rx="1"/><rect x="1" y="6.8" width="14" height="2.4" rx="1"/><rect x="1" y="11.6" width="14" height="2.4" rx="1"/></svg>
+        List
+      </button>
+    </div>
+  </div>
   <div class="grid stag" id="grid"><div class="loading">Loading catalog…</div></div>
+  <div id="list" hidden></div>
 </section>
 
 <!-- ============================ PRIVATE LABEL ============================ -->
@@ -255,12 +268,13 @@
 </aside>
 
 <script type="module">
-import { loadCatalog, supabase, usd, isFlat, openingShot, DEALER_MODE } from './catalog.js';
+import { loadCatalog, supabase, usd, isFlat, openingShot, stockOf, DEALER_MODE } from './catalog.js';
 import { SALES_PHONE } from './config.js';
 
 const $ = s => document.querySelector(s);
 let CAT=[], PRODUCTS=[], SKU={}, RULES={}, DEALER=null;
 let active='all', cart={}, payMethod='us_bank_account';
+let view = localStorage.getItem('motto_view') === 'list' ? 'list' : 'visual';
 
 /* ---------------- scroll reveal ---------------- */
 const io = new IntersectionObserver(es => es.forEach(e => {
@@ -278,7 +292,7 @@ async function boot(){
     $('#topbar').className = 'top test';
     $('#topbar').textContent = 'PREVIEW — showing built-in catalog data. Connect Supabase to go live.';
   }
-  paintAuth(); paintFilters(); render(); updateCart(); watch();
+  paintAuth(); paintFilters(); paintDensity(); render(); updateCart(); watch();
 }
 
 function paintAuth(){
@@ -289,7 +303,7 @@ function paintAuth(){
     $('#gateTxt').innerHTML = '<b>Pricing is quoted per account.</b> Your numbers depend on the volume you move, so a rep sets them with you. No public price list.';
     $('#gateBtn').textContent = `Call ${SALES_PHONE}`;
     $('#gateBtn').onclick = () => { location.href = 'tel:' + SALES_PHONE.replace(/\D/g,''); };
-    $('#catalogSub').textContent = 'One card per product family. Colors and lengths stay together as variants. Call for case pricing, minimums and lead times.';
+    $('#catalogSub').textContent = 'Available in a variety of colors and lengths. Contact our sales team for wholesale pricing, availability, and ordering information.';
     return;
   }
   const on = !!DEALER;
@@ -298,7 +312,7 @@ function paintAuth(){
   $('#cartBtn').hidden = !on;
   $('#gate').classList.toggle('on', on);
   $('#gateBtn').textContent = on ? 'Sign out' : 'Dealer sign in';
-  $('#catalogSub').textContent = 'One card per product family. Colors and lengths stay together as variants. Sign in with your dealer account to see your pricing and order online.';
+  $('#catalogSub').textContent = 'Available in a variety of colors and lengths. Pricing below is your account pricing, and quantities move in full cases.';
   $('#gateTxt').innerHTML = on
     ? `<b>Signed in — ${DEALER.business_name}.</b> Pricing below is your account pricing. Quantities are in full cases. Terms: ${DEALER.terms.toUpperCase()}.`
     : '<b>Pricing is private.</b> Approved dealers see their own case pricing and can order directly. Everyone else, contact sales for a quote.';
@@ -317,18 +331,58 @@ $('#filters').onclick = e => {
   render(); watch();
 };
 
+/* ---------------- density ---------------- */
+document.querySelectorAll('.density button').forEach(b => b.onclick = () => {
+  view = b.dataset.mode;
+  try{ localStorage.setItem('motto_view', view); }catch(_){}
+  document.querySelectorAll('.density button').forEach(x => x.setAttribute('aria-pressed', x===b));
+  render(); watch();
+});
+function paintDensity(){
+  document.querySelectorAll('.density button')
+    .forEach(x => x.setAttribute('aria-pressed', x.dataset.mode === view));
+}
+
 /* ---------------- cards ---------------- */
 function render(){
-  const list = PRODUCTS.filter(p => active==='all' || p.cat===active);
+  const rows = PRODUCTS.filter(p => active==='all' || p.cat===active);
+  $('#grid').hidden = view !== 'visual';
+  $('#list').hidden = view !== 'list';
+  if(view === 'list') return renderList(rows);
+  return renderCards(rows);
+}
+
+function renderList(rows){
+  $('#list').innerHTML = `
+    <div class="lhead">
+      <span></span><span>Product family</span><span class="lspec">Specs</span>
+      <span>Availability</span><span class="lcase">Case</span><span></span>
+    </div>` + rows.map(p => {
+      const o = openingShot(p), st = stockOf(p);
+      const packs = [...new Set(p.variants.map(v => v.pack))].join(' / ');
+      return `<a class="lrow" href="product.html?p=${p.slug}">
+        <span class="lpic${isFlat(o)?' flat':''}">${o?`<img src="assets/${o}" alt="" loading="lazy" onerror="this.style.opacity=0">`:''}</span>
+        <span class="lname"><small class="mono">${p.variants[0]?.sku || ''}</small>${p.name}</span>
+        <span class="lspec">${p.meta.slice(0,3).map(m=>`<em>${m}</em>`).join('')}</span>
+        <span class="lstock ${st.tone}"><i style="background:${st.dot}"></i>${st.label}</span>
+        <span class="lcase mono">${packs}/case</span>
+        <span class="lgo">Details →</span>
+      </a>`;
+    }).join('') || '<div class="loading">Nothing in this category yet.</div>';
+}
+
+function renderCards(list){
   const grid = $('#grid');
   grid.classList.remove('in');
   grid.innerHTML = list.map(p=>{
     const id = 'pic_'+p.slug;
     const open = openingShot(p);
+    const st = stockOf(p);
     const shot = c => c.image ? `assets/${c.image}` : '';
     return `<article class="card">
       <a href="product.html?p=${p.slug}" class="mainpic${isFlat(open)?' flat':''}" id="${id}" data-label="${p.name}" aria-label="${p.name} details">
         <img src="${open?'assets/'+open:''}" alt="${p.name}" loading="lazy" onerror="miss('${id}',this)">
+        <span class="badge ${st.tone}"><i style="background:${st.dot}"></i>${st.label}</span>
       </a>
       <div class="body">
         <div class="type">${p.type||''}</div>

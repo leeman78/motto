@@ -51,7 +51,13 @@ create table variants (
   list_cents    int  not null,               -- LIST price per case, integer cents
   msrp_cents    int,                         -- suggested retail per piece
   is_active     boolean default true,
-  sort_order    int default 0
+  sort_order    int default 0,
+  -- Availability shown on the catalog. Set by hand in the admin Inventory tab
+  -- rather than wired to a live count: a wrong "in stock" costs you a phone
+  -- call, a broken inventory feed costs you the whole page.
+  stock_status  text not null default 'in_stock'
+                check (stock_status in ('in_stock','low_stock','pre_order','out_of_stock')),
+  restock_date  date
 );
 
 create index variants_product_idx on variants(product_id);
@@ -100,6 +106,19 @@ language sql stable as $$
        from variants v, dealer_accounts d
       where v.sku = p_sku and d.id = p_dealer)
   );
+$$;
+
+-- A product family is only as available as its weakest SKU.
+create or replace function product_stock(p_product uuid)
+returns text
+language sql stable as $$
+  select case
+    when bool_and(stock_status = 'out_of_stock') then 'out_of_stock'
+    when bool_or (stock_status = 'out_of_stock')
+      or bool_or (stock_status = 'low_stock')     then 'low_stock'
+    when bool_or (stock_status = 'pre_order')     then 'pre_order'
+    else 'in_stock' end
+  from variants where product_id = p_product and is_active;
 $$;
 
 -- Full price sheet for one dealer. This is what the admin screen edits

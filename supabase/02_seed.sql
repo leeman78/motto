@@ -121,27 +121,27 @@ on conflict (slug) do nothing;
 -- ---------------------------------------------------------------------
 -- Variants. UPC and weight filled in where known.
 -- ---------------------------------------------------------------------
-insert into variants (product_id, sku, upc, label, case_pack, master_carton, list_cents, msrp_cents, sort_order)
-select p.id, x.sku, nullif(x.upc,''), x.label, x.pack, x.master, x.list, x.msrp, x.ord
+insert into variants (product_id, sku, upc, label, case_pack, master_carton, list_cents, msrp_cents, sort_order, stock_status)
+select p.id, x.sku, nullif(x.upc,''), x.label, x.pack, x.master, x.list, x.msrp, x.ord, x.stock
 from (values
- ('usbc-usbc','MT-CC65-03','','3 ft',12,144, 6000, 999,1),
- ('usbc-usbc','MT-CC65-06','','6 ft',12,144, 7680, 999,2),
- ('usbc-usbc','MT-CC65-10','','10 ft',12,120, 8960, 999,3),
- ('usbc-lightning','MT-CL-06','850025312042','6 ft',12,144, 7920,1299,1),
- ('usba-lightning','MT-AL-03','','3 ft',12,144, 5760, 999,1),
- ('usba-lightning','MT-AL-06','','6 ft',12,144, 7360,1299,2),
- ('wall-20w','MT-W20','','Single',10,100, 6470,1299,1),
- ('car-45w','MT-C45','','Single',10,120, 4270, 999,1),
- ('powerbank-soccer','MT-PB-SOC','','Single',6,48,13200,3999,1),
- ('buds-plus','MT-BUDS-P','','Single',6,48,12720,3999,1),
- ('airbuds-a5','MT-A5','','Single',6,48,11360,3999,1),
- ('headset-anc','MT-HS-ANC','','Single',6,36,12800,3999,1),
- ('wired-35mm','MT-EAR-35','','Single',12,144, 4960, 999,1),
- ('wired-usbc','MT-EAR-UC','','Single',12,144, 7040,1299,1),
- ('wired-lightning','MT-EAR-LT','','Single',12,144, 7360,1299,1),
- ('adapter-usbc-35','MT-AD-UC35','','Single',20,200,10530,1299,1),
- ('adapter-lightning-35','MT-AD-LT35','','Single',20,200,10930,1299,1),
- ('adapter-lightning-usbc','MT-AD-LTUC','','Single',20,200,10670,1299,1)
-) as x(slug,sku,upc,label,pack,master,list,msrp,ord)
+ ('usbc-usbc','MT-CC65-03','','3 ft',12,144, 6000, 999,1,'in_stock'),
+ ('usbc-usbc','MT-CC65-06','','6 ft',12,144, 7680, 999,2,'in_stock'),
+ ('usbc-usbc','MT-CC65-10','','10 ft',12,120, 8960, 999,3,'in_stock'),
+ ('usbc-lightning','MT-CL-06','850025312042','6 ft',12,144, 7920,1299,1,'in_stock'),
+ ('usba-lightning','MT-AL-03','','3 ft',12,144, 5760, 999,1,'in_stock'),
+ ('usba-lightning','MT-AL-06','','6 ft',12,144, 7360,1299,2,'in_stock'),
+ ('wall-20w','MT-W20','','Single',10,100, 6470,1299,1,'in_stock'),
+ ('car-45w','MT-C45','','Single',10,120, 4270, 999,1,'in_stock'),
+ ('powerbank-soccer','MT-PB-SOC','','Single',6,48,13200,3999,1,'in_stock'),
+ ('buds-plus','MT-BUDS-P','','Single',6,48,12720,3999,1,'in_stock'),
+ ('airbuds-a5','MT-A5','','Single',6,48,11360,3999,1,'in_stock'),
+ ('headset-anc','MT-HS-ANC','','Single',6,36,12800,3999,1,'in_stock'),
+ ('wired-35mm','MT-EAR-35','','Single',12,144, 4960, 999,1,'in_stock'),
+ ('wired-usbc','MT-EAR-UC','','Single',12,144, 7040,1299,1,'in_stock'),
+ ('wired-lightning','MT-EAR-LT','','Single',12,144, 7360,1299,1,'in_stock'),
+ ('adapter-usbc-35','MT-AD-UC35','','Single',20,200,10530,1299,1,'in_stock'),
+ ('adapter-lightning-35','MT-AD-LT35','','Single',20,200,10930,1299,1,'in_stock'),
+ ('adapter-lightning-usbc','MT-AD-LTUC','','Single',20,200,10670,1299,1,'in_stock')
+) as x(slug,sku,upc,label,pack,master,list,msrp,ord,stock)
 join products p on p.slug = x.slug
 on conflict (sku) do nothing;

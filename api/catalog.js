@@ -10,6 +10,15 @@
 
 import { db, getDealer, MOQ_CENTS, FREE_FREIGHT_CENTS, FREIGHT_CENTS } from './_lib.js';
 
+const RANK = { out_of_stock: 0, low_stock: 1, pre_order: 2, in_stock: 3 };
+function rollUp(list) {
+  if (!list.length) return 'in_stock';
+  if (list.every(s => s === 'out_of_stock')) return 'out_of_stock';
+  if (list.some(s => s === 'out_of_stock' || s === 'low_stock')) return 'low_stock';
+  if (list.some(s => s === 'pre_order')) return 'pre_order';
+  return 'in_stock';
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
 
@@ -24,7 +33,7 @@ export default async function handler(req, res) {
       .select(`
         slug, type_label, name, description, spec_tags, colors, images, sort_order,
         categories ( slug ),
-        variants ( sku, label, case_pack, master_carton, is_active, sort_order )
+        variants ( sku, upc, label, case_pack, master_carton, is_active, sort_order, stock_status, restock_date )
       `)
       .eq('is_published', true)
       .order('sort_order');
@@ -50,13 +59,19 @@ export default async function handler(req, res) {
       meta: p.spec_tags || [],
       colors: p.colors || [],
       shots: p.images || [],
+      // a family is only as available as its weakest SKU
+      stock: rollUp((p.variants || []).filter(v => v.is_active).map(v => v.stock_status)),
       variants: (p.variants || [])
         .filter(v => v.is_active)
         .sort((a, b) => a.sort_order - b.sort_order)
         .map(v => ({
           sku: v.sku,
+          upc: v.upc,
           label: v.label,
           pack: v.case_pack,
+          master_carton: v.master_carton,
+          stock: v.stock_status,
+          restock: v.restock_date,
           // omitted entirely when nobody is signed in
           ...(dealer ? { case_cents: priceBySku[v.sku]?.case_cents ?? null } : {})
         }))

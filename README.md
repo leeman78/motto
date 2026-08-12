@@ -163,6 +163,18 @@ database takes over and the bar disappears.
 
 ---
 
+## Availability
+
+Every SKU carries a status: In stock, Low stock, Pre-order or Out of stock. It
+shows as a badge on the catalog card, a column in list view, and per SKU on the
+product page. A product family displays the weakest status among its SKUs, so
+one low-stock length makes the whole card read Low stock. That is intentional:
+it starts the conversation before a buyer places an order you cannot fill.
+
+Set it in the admin Inventory tab. This is manual rather than wired to a live
+count on purpose — a wrong "in stock" costs one phone call, a broken inventory
+feed takes down the catalog.
+
 ## Day to day
 
 ### Opening a dealer account
@@ -232,6 +244,7 @@ api/
   lead.js             wholesale inquiry form
 public/
   index.html          home: hero, catalog, private label, why, about, reel, contact
+                      catalog has a Cards / List density toggle, remembered per browser
   product.html        product detail, reads ?p=<slug>
   admin.html          internal console
   order-confirmed.html
