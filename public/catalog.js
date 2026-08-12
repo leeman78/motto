@@ -25,7 +25,7 @@ export function orderTotal(subtotal, freight, method) {
     const adjust = method === 'us_bank_account'
       ? -Math.round(base * (ACH_DISCOUNT_PCT / 100)) : 0;
     return { base, adjust, total: base + adjust,
-             label: adjust ? `Bank debit discount (${ACH_DISCOUNT_PCT}%)` : null };
+             label: adjust ? `ACH discount (${ACH_DISCOUNT_PCT}%)` : null };
   }
 
   if (FEE_MODE === 'surcharge') {

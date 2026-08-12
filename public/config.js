@@ -38,7 +38,7 @@ export const ORDER_MODE = 'online';
 // several states, capped at 3%, and never allowed on debit cards.
 //
 //   'absorb'       one price, any method   ← current
-//   'ach_discount' bank debit gets a discount
+//   'ach_discount' ACH gets a discount
 //   'surcharge'    card orders carry a fee
 // -------------------------------------------------------------------
 export const FEE_MODE = 'absorb';

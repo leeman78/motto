@@ -63,7 +63,7 @@ export function feeFor(base, method) {
   if (FEE_MODE === 'ach_discount') {
     const adjust = method === 'us_bank_account'
       ? -Math.round(base * (ACH_DISCOUNT_PCT / 100)) : 0;
-    return { adjust, label: adjust ? `Bank debit discount (${ACH_DISCOUNT_PCT}%)` : null };
+    return { adjust, label: adjust ? `ACH discount (${ACH_DISCOUNT_PCT}%)` : null };
   }
   if (FEE_MODE === 'surcharge') {
     const adjust = method === 'card'

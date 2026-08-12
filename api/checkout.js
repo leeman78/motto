@@ -143,7 +143,7 @@ export default async function handler(req, res) {
     }
 
     // ACH is 0.8% capped at $5. Card is 2.9% + 30c. On a $2,000 reorder that
-    // is $5 versus $58, so bank debit is offered first.
+    // is $5 versus $58, so ACH is offered first.
     const methods = payment_method === 'card' ? ['card'] : ['us_bank_account', 'card'];
 
     // A discount cannot be a negative line item, so it goes through a coupon.

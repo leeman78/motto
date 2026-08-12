@@ -257,7 +257,7 @@
 <div class="scrim" id="pwScrim"></div>
 <div class="modal" id="pwModal" role="dialog" aria-label="Set a password">
   <h3 id="pwTitle">Set your password</h3>
-  <p class="msub" id="pwSub">Your rep read the current one out over the phone, so it is not private. Pick something only you know.</p>
+  <p class="msub" id="pwSub">For security, please replace the temporary password with one only you know.</p>
   <div class="f"><label for="pw1">New password</label><input id="pw1" type="password" autocomplete="new-password" placeholder="At least 8 characters"></div>
   <div class="f"><label for="pw2">Repeat it</label><input id="pw2" type="password" autocomplete="new-password" placeholder="Same again"></div>
   <p class="err" id="pwErr" hidden></p>
@@ -277,7 +277,7 @@
     <div class="sum" hidden><span id="feeLabel">Processing</span><b class="mono" id="sFee">$0.00</b></div>
     <div class="sum tot"><span>Total</span><b class="mono" id="sTot">$0.00</b></div>
     <div class="pay" id="payRow" hidden>
-      <button data-pay="us_bank_account" aria-pressed="true">Bank debit<small id="payAch">Clears in a few days</small></button>
+      <button data-pay="us_bank_account" aria-pressed="true">ACH bank transfer<small id="payAch">Clears in a few days</small></button>
       <button data-pay="card" aria-pressed="false">Card<small id="payCard">Charged right away</small></button>
     </div>
     <button class="btn blue" id="checkout" disabled>Submit order</button>
@@ -343,7 +343,7 @@ function paintAuth(){
   $('#pwBtn').hidden = !on;
   if(on && DEALER.must_change_password){
     $('#pwTitle').textContent = 'Set your password';
-    $('#pwSub').textContent = 'Your rep read the current one out over the phone, so it is not private. Pick something only you know before you order.';
+    $('#pwSub').textContent = 'For security, please replace the temporary password with one only you know.';
     $('#pwClose').hidden = true;
     openPw();
   }
@@ -735,7 +735,7 @@ $('#pwClose').onclick = shutPw;
 $('#pwScrim').onclick = shutPw;
 $('#pwBtn').onclick = () => {
   $('#pwTitle').textContent = 'Change your password';
-  $('#pwSub').textContent = 'Pick something at least 8 characters long that you do not use anywhere else.';
+  $('#pwSub').textContent = 'Choose something at least 8 characters long that you do not use anywhere else.';
   $('#pwClose').hidden = false;
   openPw();
 };

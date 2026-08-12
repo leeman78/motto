@@ -314,7 +314,7 @@ async function createDealer(){
       <div class="credbox">
         <div class="k">Login email</div><div class="v">${r.email}</div>
         <div class="k">Temporary password</div><div class="v">${r.password}</div>
-        <p>Read this to the dealer now. It is not stored anywhere you can look it up again. They are asked to replace it the first time they sign in, so it only has to survive one phone call. If they lose it before then, use Reset password on their detail screen — or tell them to use "Forgot your password?" on the sign-in box and do it themselves.</p>
+        <p>Send or read this to the dealer now. It is not stored anywhere you can look it up again. They are asked to replace it the first time they sign in, so it only has to get them through one login. If they lose it before then, use Reset password on their detail screen — or tell them to use "Forgot your password?" on the sign-in box and do it themselves.</p>
       </div>`;
     ['#n1','#n2','#n3','#n4','#n7'].forEach(s => $(s).value = '');
     const { dealers: d } = await call('list_dealers'); dealers = d;
@@ -400,7 +400,7 @@ async function dealerDetail(id){
     if(!confirm('Generate a new password for this dealer? Their current one stops working immediately.')) return;
     const r = await call('reset_password', { dealer_id: id });
     $('#dCreds').innerHTML = `<div class="credbox"><div class="k">New password</div><div class="v">${r.password}</div>
-      <p>Read it to them now. This is the only time it is shown, and they will be asked to replace it the moment they sign in.</p></div>`;
+      <p>Send or read it to them now. This is the only time it is shown, and they will be asked to replace it the moment they sign in.</p></div>`;
   };
 
   $('#magic').onclick = async () => {
@@ -448,7 +448,7 @@ async function orderList(){
   </div>
   <div class="panel">
     <h2>Recent orders</h2>
-    <p class="sub">Bank debit settles a few business days after checkout, so an ACH order sits at Processing until the webhook clears it. Do not ship on Processing.</p>
+    <p class="sub">ACH settles a few business days after checkout, so an ACH order sits at Processing until the webhook clears it. Do not ship on Processing.</p>
     <table>
       <thead><tr><th>#</th><th>Dealer</th><th>Placed</th><th class="r">Total</th><th>Pay</th><th>Status</th><th>Tracking</th></tr></thead>
       <tbody>${orders.map(o=>`

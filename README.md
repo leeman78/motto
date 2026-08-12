@@ -113,7 +113,7 @@ charge.refunded
 
 Copy the signing secret into `STRIPE_WEBHOOK_SECRET`.
 
-To take bank debit, enable **ACH Direct Debit** under Settings → Payment methods.
+To take ACH, enable **ACH Direct Debit** under Settings → Payment methods.
 This matters more than it sounds: ACH costs 0.8% capped at $5, cards cost
 2.9% + 30¢. On a $2,000 reorder that is $5 versus $58. On wholesale margins the
 difference is real money, and the cart shows dealers the comparison so they pick
@@ -167,10 +167,10 @@ database takes over and the bar disappears.
 
 ## Passwords
 
-A rep creates the account and reads the first password out over the phone, so
-it has been spoken aloud and written on someone's notepad before the dealer
-ever uses it. The dealer is therefore made to replace it the first time they
-sign in — the modal has no close button until they do.
+A rep creates the account and hands the first password over — read out on a
+call, sent in an email, whichever. Either way it has passed through someone
+else before the dealer ever uses it, so the dealer is made to replace it the
+first time they sign in. The modal has no close button until they do.
 
 `Reset password` in the admin does the same thing: new temporary password,
 flag set again. Dealers can also reset themselves with "Forgot your password?"
