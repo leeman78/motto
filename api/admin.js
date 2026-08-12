@@ -12,11 +12,32 @@
 //   send_magic_link → emails a passwordless sign-in link
 //   list_orders     → recent orders
 
-import { db, isAdmin, tempPassword } from './_lib.js';
+import { db, checkAdmin, tempPassword } from './_lib.js';
+
+const FROM = process.env.LEAD_FROM_EMAIL || 'Motto Wholesale <info@mottob2b.com>';
+const esc = s => String(s || '').replace(/[<>&]/g, c => ({ '<':'&lt;', '>':'&gt;', '&':'&amp;' }[c]));
+
+async function sendMail({ to, subject, html }) {
+  if (!process.env.RESEND_API_KEY) throw new Error('RESEND_API_KEY is not set, so no email can be sent.');
+  const r = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ from: FROM, to: [to], subject, html })
+  });
+  if (!r.ok) throw new Error(`Resend ${r.status}: ${await r.text()}`);
+}
 
 export default async function handler(req, res) {
-  if (!isAdmin(req)) return res.status(401).json({ error: 'Not authorized.' });
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+
+  const gate = await checkAdmin(req);
+  if (!gate.ok) {
+    return res.status(gate.locked ? 429 : 401).json({
+      error: gate.locked
+        ? `Too many wrong codes. Try again in about ${gate.minutes} minutes.`
+        : 'That code was not accepted.'
+    });
+  }
 
   const { action, ...p } = req.body || {};
 
@@ -145,13 +166,44 @@ export default async function handler(req, res) {
       }
 
       case 'send_magic_link': {
-        // Passwordless. Better for buyers who will forget a password.
+        // generateLink builds the link but does NOT deliver it — the admin API
+        // never sends mail. Sending is on us, which is fine: it means the email
+        // comes from the Motto domain and looks like the rest of the brand.
+        const origin = req.headers.origin || `https://${req.headers.host}`;
         const { data, error } = await db.auth.admin.generateLink({
           type: 'magiclink',
-          email: p.email
+          email: p.email,
+          options: { redirectTo: origin + '/#catalog' }
         });
         if (error) throw error;
-        return res.status(200).json({ ok: true, link: data?.properties?.action_link });
+
+        const link = data?.properties?.action_link;
+        if (!link) throw new Error('Supabase did not return a link.');
+
+        const dealerName = p.business_name ? esc(p.business_name) : 'there';
+        await sendMail({
+          to: p.email,
+          subject: 'Your Motto Wholesale sign-in link',
+          html: `
+          <div style="font-family:-apple-system,Segoe UI,sans-serif;max-width:520px;color:#0b0b0d">
+            <p style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#8a8d94;margin:0 0 10px">
+              Motto USA · Wholesale</p>
+            <h2 style="margin:0 0 14px;font-size:21px;letter-spacing:-.02em">Sign in to your account</h2>
+            <p style="font-size:15px;line-height:1.6;margin:0 0 22px">
+              Hi ${dealerName}, tap the button to open your Motto wholesale catalog with your
+              account pricing. No password needed.</p>
+            <p style="margin:0 0 22px">
+              <a href="${link}" style="display:inline-block;background:#111;color:#fff;text-decoration:none;
+                 padding:14px 26px;border-radius:999px;font-weight:700;font-size:14px">Open my catalog</a></p>
+            <p style="font-size:12.5px;line-height:1.6;color:#8a8d94;margin:0 0 18px">
+              This link works once and expires in 24 hours. If you did not ask for it, ignore this email.</p>
+            <p style="font-size:12px;color:#9a9da4;line-height:1.6;margin:0">
+              Motto USA · 1445 Mac Arthur Dr Ste 116, Carrollton, TX 75007<br>
+              214-681-8417 · Mon–Fri 9–5 Central</p>
+          </div>`
+        });
+
+        return res.status(200).json({ ok: true, sent_to: p.email });
       }
 
       // ---------------------------------------------------------------

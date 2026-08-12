@@ -33,16 +33,62 @@ export async function getDealer(req) {
   return dealer;
 }
 
-/** Admin routes are gated by a shared secret, not a user session. */
-export function isAdmin(req) {
-  const sent = req.headers['x-admin-token'];
-  const real = process.env.ADMIN_TOKEN;
+const MAX_TRIES = 8;        // per IP
+const WINDOW_MIN = 15;      // rolling window
+const LOCKOUT_MIN = 30;     // how long a tripped IP stays out
+
+function clientIp(req) {
+  return (req.headers['x-forwarded-for'] || '').split(',')[0].trim()
+      || req.socket?.remoteAddress || 'unknown';
+}
+
+function tokenMatches(sent, real) {
   if (!real || !sent) return false;
   // Constant-time-ish compare so the token can't be guessed a byte at a time.
   if (sent.length !== real.length) return false;
   let diff = 0;
   for (let i = 0; i < real.length; i++) diff |= sent.charCodeAt(i) ^ real.charCodeAt(i);
   return diff === 0;
+}
+
+/**
+ * Admin routes are gated by a shared secret plus a lockout. Without the
+ * lockout the secret would have to be long enough to survive unlimited
+ * guessing; with it, eight wrong tries buys an attacker a thirty minute wait,
+ * and a passphrase a person can actually remember becomes workable.
+ *
+ * Returns { ok } or { ok:false, locked:true, minutes }.
+ */
+export async function checkAdmin(req) {
+  const ip = clientIp(req);
+  const since = new Date(Date.now() - WINDOW_MIN * 60000).toISOString();
+
+  const { data: recent } = await db
+    .from('admin_attempts')
+    .select('ok, at')
+    .eq('ip', ip).gte('at', since)
+    .order('at', { ascending: false }).limit(MAX_TRIES + 1);
+
+  const fails = (recent || []).filter(r => !r.ok);
+  if (fails.length >= MAX_TRIES) {
+    const oldest = new Date(fails[fails.length - 1].at).getTime();
+    const minutes = Math.max(1, Math.ceil((oldest + LOCKOUT_MIN * 60000 - Date.now()) / 60000));
+    return { ok: false, locked: true, minutes };
+  }
+
+  const ok = tokenMatches(req.headers['x-admin-token'], process.env.ADMIN_TOKEN);
+
+  // Only failures are worth keeping. Logging every success would grow the
+  // table for no reason, since a valid token is not the thing being defended.
+  if (!ok) await db.from('admin_attempts').insert({ ip, ok: false });
+  else if (fails.length) await db.from('admin_attempts').delete().eq('ip', ip);
+
+  return { ok };
+}
+
+/** Synchronous form, kept for callers that do not need the lockout. */
+export function isAdmin(req) {
+  return tokenMatches(req.headers['x-admin-token'], process.env.ADMIN_TOKEN);
 }
 
 /** Readable temporary password a rep can say out loud on the phone. */

@@ -200,6 +200,18 @@ create table leads (
   created_at    timestamptz default now()
 );
 
+-- ---------------------------------------------------------------- admin gate
+-- A bare token check has no lockout, so a short secret would be guessable at
+-- machine speed. Recording attempts lets the endpoint slow an attacker down,
+-- which is what makes a memorable passphrase safe enough to use.
+create table admin_attempts (
+  id      bigserial primary key,
+  ip      text not null,
+  ok      boolean not null,
+  at      timestamptz not null default now()
+);
+create index admin_attempts_ip_idx on admin_attempts(ip, at desc);
+
 -- =====================================================================
 -- Row Level Security
 --
@@ -215,6 +227,7 @@ alter table dealer_prices   enable row level security;
 alter table orders          enable row level security;
 alter table order_items     enable row level security;
 alter table leads           enable row level security;
+alter table admin_attempts  enable row level security;   -- no policies: server only
 
 -- Public catalog: anyone may read products, but NOT prices.
 create policy cat_read  on categories for select to anon, authenticated using (true);

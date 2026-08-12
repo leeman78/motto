@@ -68,8 +68,12 @@ tr.click:hover td{background:#f7f8fa}
 <div class="scrim open" id="gateScrim"></div>
 <div class="modal open" id="gateModal" role="dialog" aria-label="Admin sign in">
   <h3>Admin access</h3>
-  <p class="msub">Paste the ADMIN_TOKEN from your Vercel environment variables. It is kept in this tab only and cleared when you close it.</p>
-  <div class="f"><label for="tok">Admin token</label><input id="tok" type="password" placeholder="••••••••••••"></div>
+  <p class="msub">Enter your admin code. Eight wrong tries locks this device out for half an hour.</p>
+  <div class="f"><label for="tok">Admin code</label><input id="tok" type="password" placeholder="••••••••••••" autocomplete="current-password"></div>
+  <label style="display:flex;gap:9px;align-items:center;font-size:13px;color:#6e7077;margin:0 0 16px;cursor:pointer">
+    <input type="checkbox" id="remember" checked style="width:16px;height:16px;accent-color:#111">
+    Stay signed in on this device
+  </label>
   <p class="err" id="gateErr" hidden></p>
   <button class="btn dark" id="gateGo" style="width:100%;padding:14px">Unlock</button>
 </div>
@@ -79,7 +83,9 @@ const $ = s => document.querySelector(s);
 const usd = c => '$' + (c/100).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
 const cents = s => Math.round(parseFloat(String(s).replace(/[^0-9.]/g,'')) * 100);
 
-let TOKEN = sessionStorage.getItem('motto_admin') || '';
+// localStorage when the box is ticked, sessionStorage otherwise. Retyping a
+// long code every session is what pushes people toward a short one.
+let TOKEN = localStorage.getItem('motto_admin') || sessionStorage.getItem('motto_admin') || '';
 let tab = 'dealers', dealers = [], view = null;
 
 async function call(action, body = {}){
@@ -95,22 +101,29 @@ async function call(action, body = {}){
 
 /* ---------------- gate ---------------- */
 $('#gateGo').onclick = async () => {
+  const btn = $('#gateGo'), err = $('#gateErr');
   TOKEN = $('#tok').value.trim();
+  if(!TOKEN){ err.textContent = 'Enter your admin code.'; err.hidden = false; return; }
+  btn.disabled = true; btn.textContent = 'Checking…'; err.hidden = true;
   try{
     await call('list_dealers');
-    sessionStorage.setItem('motto_admin', TOKEN);
+    const store = $('#remember').checked ? localStorage : sessionStorage;
+    store.setItem('motto_admin', TOKEN);
     $('#gateScrim').classList.remove('open');
     $('#gateModal').classList.remove('open');
     boot();
   }catch(e){
-    $('#gateErr').textContent = 'That token was not accepted.';
-    $('#gateErr').hidden = false;
+    err.textContent = e.message || 'That code was not accepted.';
+    err.hidden = false;
+    $('#tok').value = ''; $('#tok').focus();
   }
+  btn.disabled = false; btn.textContent = 'Unlock';
 };
 $('#tok').addEventListener('keydown', e => { if(e.key==='Enter') $('#gateGo').click(); });
 
 $('#signOut').onclick = () => {
   if(!confirm('Sign out of the admin console?')) return;
+  localStorage.removeItem('motto_admin');
   sessionStorage.removeItem('motto_admin');
   location.reload();
 };
@@ -405,8 +418,10 @@ async function dealerDetail(id){
 
   $('#magic').onclick = async () => {
     const msg = $('#dMsg'); msg.textContent = 'Sending…';
-    try{ await call('send_magic_link', { email: dealer.email }); msg.textContent = 'Sign-in link sent to ' + dealer.email; }
-    catch(e){ msg.textContent = e.message; }
+    try{
+      await call('send_magic_link', { email: dealer.email, business_name: dealer.business_name });
+      msg.textContent = `Sign-in link sent to ${dealer.email}. Tell them to check junk if it is not there in a couple of minutes.`;
+    }catch(e){ msg.textContent = e.message; }
   };
 
   document.querySelectorAll('.priceinput').forEach(inp => {

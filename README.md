@@ -165,6 +165,26 @@ database takes over and the bar disappears.
 
 ---
 
+## Admin access
+
+`ADMIN_TOKEN` is checked on every admin request, and failures are recorded per
+IP in `admin_attempts`. Eight wrong codes inside fifteen minutes locks that IP
+out for thirty. That lockout is what makes the code length a choice rather than
+a requirement: without it the secret has to survive unlimited guessing, so it
+has to be long. With it, a passphrase you can actually remember is workable.
+
+If you shorten it, use a **passphrase, not a password** — four unrelated words
+like `copper-ranger-maple-8412` is easier to type than a random string and far
+harder to guess than `motto2026`. Do not reuse a password from anywhere else,
+and never use a word connected to the business.
+
+"Stay signed in on this device" keeps the code in the browser so you are not
+retyping it. Untick it on a shared machine. Sign out clears it from both
+places.
+
+This is still one shared secret with no audit trail. Once more than one person
+needs the admin, move it to Supabase Auth with per-person accounts.
+
 ## Passwords
 
 A rep creates the account and hands the first password over — read out on a
@@ -175,6 +195,12 @@ first time they sign in. The modal has no close button until they do.
 `Reset password` in the admin does the same thing: new temporary password,
 flag set again. Dealers can also reset themselves with "Forgot your password?"
 on the sign-in box, which emails a link and never involves a rep.
+
+**Send sign-in link** on the dealer screen emails a one-tap passwordless link.
+Supabase's admin API only *generates* that link, it does not deliver it, so the
+email is sent through Resend from the Motto domain. Without `RESEND_API_KEY`
+the button reports that no email could be sent rather than silently doing
+nothing.
 
 The Dealers list shows a **Temp password** tag next to anyone who has not
 replaced theirs yet. An old account still carrying that tag usually means they

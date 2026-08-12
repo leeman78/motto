@@ -801,6 +801,39 @@ $('#forgotGo').onclick = async (e) => {
   });
 })();
 
+
+/* ---------------- counter reel ---------------- */
+(() => {
+  const v = $('#reel'), btn = $('#reelBtn');
+  if(!v) return;
+  const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const PAUSE = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="5" width="3.4" height="14" rx="1.2"/><rect x="13.6" y="5" width="3.4" height="14" rx="1.2"/></svg>';
+  const PLAY  = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.2v13.6L19 12z"/></svg>';
+  const icon = () => {
+    btn.innerHTML = v.paused ? PLAY : PAUSE;
+    btn.setAttribute('aria-label', v.paused ? 'Play video' : 'Pause video');
+  };
+  v.addEventListener('play', icon);
+  v.addEventListener('pause', icon);
+
+  let manual = false;
+  btn.onclick = () => {
+    manual = true;
+    if(v.paused) v.play().catch(()=>{}); else v.pause();
+  };
+
+  if(calm){ icon(); return; }
+
+  // Nothing plays while it is off screen. A looping video in a background tab
+  // is a battery and data cost the visitor never agreed to.
+  new IntersectionObserver(es => es.forEach(e => {
+    if(manual) return;
+    if(e.isIntersecting) v.play().catch(()=>{}); else v.pause();
+  }), { threshold: 0.25 }).observe(v);
+
+  icon();
+})();
+
 boot();
 </script>
 </body>
