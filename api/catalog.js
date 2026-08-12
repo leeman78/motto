@@ -86,7 +86,8 @@ export default async function handler(req, res) {
         email: dealer.email,
         phone: dealer.phone,
         terms: dealer.terms,
-        moq_cents: dealer.moq_cents ?? MOQ_CENTS
+        moq_cents: dealer.moq_cents ?? MOQ_CENTS,
+        must_change_password: dealer.must_change_password === true
       } : null,
       rules: {
         moq_cents: dealer?.moq_cents ?? MOQ_CENTS,

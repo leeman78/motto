@@ -165,6 +165,47 @@ database takes over and the bar disappears.
 
 ---
 
+## Passwords
+
+A rep creates the account and reads the first password out over the phone, so
+it has been spoken aloud and written on someone's notepad before the dealer
+ever uses it. The dealer is therefore made to replace it the first time they
+sign in — the modal has no close button until they do.
+
+`Reset password` in the admin does the same thing: new temporary password,
+flag set again. Dealers can also reset themselves with "Forgot your password?"
+on the sign-in box, which emails a link and never involves a rep.
+
+The Dealers list shows a **Temp password** tag next to anyone who has not
+replaced theirs yet. An old account still carrying that tag usually means they
+never actually signed in.
+
+## Fees
+
+`FEE_MODE` in `public/config.js` is `absorb`: Motto pays the processing cost,
+a dealer sees one price whichever method they choose, and no fee line appears
+anywhere. `FEE_MODE` in the Vercel environment must match, or the server will
+charge something the cart never showed.
+
+Do not switch to `surcharge` casually. Passing card costs to the buyer is a
+regulated programme, not a setting:
+
+- **Debit cards can never be surcharged**, in any state, under the Durbin
+  Amendment and card network rules — including when a debit card runs as
+  credit. Stripe does not reliably tell you the card is debit before you
+  charge it, so this alone makes a blanket card fee unsafe.
+- **Some states ban it outright**, and Texas has a ban that federal courts
+  found unconstitutional while the Attorney General maintains it is
+  enforceable. Motto is in Texas and sells into Oklahoma, which caps
+  surcharges at 2% — below the 2.9% the code would apply.
+- **The cap is the lower of 3% or your actual cost**, and Visa and Mastercard
+  require 30 days written notice before the first surcharge.
+
+`ach_discount` avoids all of it. A discount for one payment method is legal in
+every state, needs no registration, and works on debit cards. The economics are
+the same; only the framing changes. None of this is legal advice — check with
+your processor and an attorney before turning either one on.
+
 ## Prices
 
 List prices live in the admin **List prices** tab. That is the only place they
@@ -216,10 +257,48 @@ What happens on submit depends on `ORDER_MODE`:
   emailed to sales and to the dealer. Nothing is charged. SKUs that are not
   `in_stock` are flagged at the top of the sales email so a rep checks before
   confirming.
-- `'online'` → `/api/checkout`. Stripe.
+- `'online'` → `/api/checkout`. Goes to Stripe when `STRIPE_SECRET_KEY` is set.
+
+**Before Stripe is connected**, `'online'` still works: the order is recorded
+and the dealer lands on `checkout-preview.html`, which shows the real totals and
+both payment methods with their actual fees, clearly labelled as a preview. No
+card or bank details are collected there — a fake payment form that looks real
+is how you end up with someone's card number in a URL. Set `STRIPE_SECRET_KEY`
+and the same button goes to real Stripe with no other change.
 
 Both re-resolve every price server side. A submitted order is a commitment, so
 it is never priced from whatever the browser had cached.
+
+## Payment fees
+
+`FEE_MODE` in `public/config.js` decides who pays the processing cost. It ships
+on `'absorb'` — one price, any payment method — and that is the recommendation.
+
+I am not a lawyer and this is not legal advice, but before switching to
+`'surcharge'` here is what a card surcharge actually involves in the US:
+
+- **Never on debit cards.** Banned in all 50 states by the Durbin Amendment and
+  by Visa and Mastercard rules, including when a debit card runs as credit.
+  Stripe Checkout does not tell you the card is debit until after it is charged,
+  so a flat card fee will hit debit cards and break this rule.
+- **Capped at 3%**, or your actual cost of acceptance, whichever is lower. The
+  2.9% + 30¢ this code used goes over 3% on any order under about $300.
+- **Oklahoma caps it at 2%**, and you sell into Oklahoma.
+- **Texas has a ban on the books.** Federal courts found it unconstitutional but
+  the Attorney General has said it is enforceable, so it is genuinely unsettled
+  in your home state.
+- **Thirty days written notice** to Visa and Mastercard before the first one,
+  plus disclosure at checkout.
+
+`'ach_discount'` gets you the same economics without any of that. A discount for
+one payment method is legal in all 50 states, needs no network registration, and
+can apply to debit cards. It also reads better to a buyer: "2% off if you pay by
+bank" lands differently from "3% more if you use a card", even though the money
+is identical.
+
+Whatever mode is set, `public/config.js` and the `FEE_MODE` env var must match.
+The browser uses the first to quote and the server uses the second to charge; if
+they disagree, a dealer pays something other than what the cart showed.
 
 ## Availability
 

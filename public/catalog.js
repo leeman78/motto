@@ -4,11 +4,40 @@
 // the built-in copy below, so the site renders before Supabase is connected and
 // the two pages can never disagree about what is in the catalog.
 
-import { SUPABASE_URL, SUPABASE_ANON_KEY, ORDER_MODE } from './config.js';
+import { SUPABASE_URL, SUPABASE_ANON_KEY, ORDER_MODE, FEE_MODE, ACH_DISCOUNT_PCT } from './config.js';
 
 // Ordering online is optional. Signing in never is — a dealer who has an
 // account should always be able to see the pricing that was set for them.
 export const CAN_ORDER = ORDER_MODE === 'online';
+
+/* ------------------------------------------------------------------
+   One place that decides what an order costs. The cart, the payment
+   page and the server all call this, so the number a dealer sees on
+   the catalog is the number they are charged.
+------------------------------------------------------------------ */
+export function orderTotal(subtotal, freight, method) {
+  const base = subtotal + freight;
+  if (!base) return { base, adjust: 0, total: 0, label: null };
+
+  if (FEE_MODE === 'ach_discount') {
+    // A discount for one payment method, not a penalty on another. Legal
+    // everywhere, no network registration, and it works on debit cards.
+    const adjust = method === 'us_bank_account'
+      ? -Math.round(base * (ACH_DISCOUNT_PCT / 100)) : 0;
+    return { base, adjust, total: base + adjust,
+             label: adjust ? `Bank debit discount (${ACH_DISCOUNT_PCT}%)` : null };
+  }
+
+  if (FEE_MODE === 'surcharge') {
+    const adjust = method === 'card'
+      ? Math.round(base * 0.029) + 30 : Math.min(500, Math.round(base * 0.008));
+    return { base, adjust, total: base + adjust, label: 'Processing' };
+  }
+
+  return { base, adjust: 0, total: base, label: null };   // 'absorb'
+}
+export const FEE = FEE_MODE;
+export const ACH_PCT = ACH_DISCOUNT_PCT;
 
 let sbPromise = null;
 export function supabase(){

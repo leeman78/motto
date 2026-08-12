@@ -53,6 +53,26 @@ export function tempPassword() {
   return `${w()}-${w()}-${Math.floor(1000 + Math.random() * 9000)}`;
 }
 
+// Mirror of orderTotal() in public/catalog.js. Keep the two in step: if they
+// drift, a dealer is charged something other than what the cart showed.
+export const FEE_MODE = process.env.FEE_MODE || 'absorb';
+export const ACH_DISCOUNT_PCT = Number(process.env.ACH_DISCOUNT_PCT || 2);
+
+export function feeFor(base, method) {
+  if (!base) return { adjust: 0, label: null };
+  if (FEE_MODE === 'ach_discount') {
+    const adjust = method === 'us_bank_account'
+      ? -Math.round(base * (ACH_DISCOUNT_PCT / 100)) : 0;
+    return { adjust, label: adjust ? `Bank debit discount (${ACH_DISCOUNT_PCT}%)` : null };
+  }
+  if (FEE_MODE === 'surcharge') {
+    const adjust = method === 'card'
+      ? Math.round(base * 0.029) + 30 : Math.min(500, Math.round(base * 0.008));
+    return { adjust, label: 'Processing' };
+  }
+  return { adjust: 0, label: null };
+}
+
 export function freightFor(subtotal) {
   if (subtotal <= 0) return 0;
   return subtotal >= FREE_FREIGHT_CENTS ? 0 : FREIGHT_CENTS;

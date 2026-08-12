@@ -88,6 +88,7 @@
 
   <div class="gate rise" id="gate">
     <div class="txt" id="gateTxt"><b>Pricing is quoted per account.</b> Your numbers depend on the volume you move, so a rep sets them with you. Already a partner? Sign in to see your pricing.</div>
+    <button class="btn soft" id="pwBtn" hidden>Change password</button>
     <button class="btn dark" id="gateBtn">Dealer sign in</button>
   </div>
 
@@ -223,7 +224,7 @@
       </div>
       <div class="f"><label for="c6">What are you looking for</label><textarea id="c6" rows="3" placeholder="Cables and wall chargers for two locations"></textarea></div>
       <button class="btn dark" id="leadBtn">Send inquiry</button>
-      <p class="formnote" id="leadNote">Goes straight to info@mottob2b.com. We reply within one business day.</p>
+      <p class="formnote" id="leadNote">Goes straight to info@mottob2b.com. We reply within one business day — check your junk folder if you do not hear back.</p>
     </div>
   </div>
 </section>
@@ -245,8 +246,24 @@
   <p class="err" id="loginErr" hidden></p>
   <button class="btn dark" id="loginGo" style="width:100%;padding:14px">Sign in</button>
   <button class="btn soft" id="magicGo" style="width:100%;padding:12px;margin-top:8px">Email me a sign-in link instead</button>
-  <p class="msub" style="margin:14px 0 0;text-align:center">No account? Call <a href="tel:2146818417">214-681-8417</a>.</p>
+  <p class="msub" style="margin:14px 0 0;text-align:center">
+    <a href="#" id="forgotGo"><b>Forgot your password?</b></a><br>
+    No account? Call <a href="tel:2146818417">214-681-8417</a>.
+  </p>
   <button class="mclose" id="loginClose" aria-label="Close">×</button>
+</div>
+
+<!-- set / change password -->
+<div class="scrim" id="pwScrim"></div>
+<div class="modal" id="pwModal" role="dialog" aria-label="Set a password">
+  <h3 id="pwTitle">Set your password</h3>
+  <p class="msub" id="pwSub">Your rep read the current one out over the phone, so it is not private. Pick something only you know.</p>
+  <div class="f"><label for="pw1">New password</label><input id="pw1" type="password" autocomplete="new-password" placeholder="At least 8 characters"></div>
+  <div class="f"><label for="pw2">Repeat it</label><input id="pw2" type="password" autocomplete="new-password" placeholder="Same again"></div>
+  <p class="err" id="pwErr" hidden></p>
+  <p class="ok" id="pwOk" hidden></p>
+  <button class="btn dark" id="pwGo" style="width:100%;padding:14px">Save password</button>
+  <button class="mclose" id="pwClose" aria-label="Close">×</button>
 </div>
 
 <!-- cart -->
@@ -257,11 +274,11 @@
   <div class="dfoot">
     <div class="sum"><span>Subtotal</span><b class="mono" id="sSub">$0.00</b></div>
     <div class="sum"><span>Freight</span><b class="mono" id="sShip">$0.00</b></div>
-    <div class="sum"><span>Processing</span><b class="mono" id="sFee">$0.00</b></div>
+    <div class="sum" hidden><span id="feeLabel">Processing</span><b class="mono" id="sFee">$0.00</b></div>
     <div class="sum tot"><span>Total</span><b class="mono" id="sTot">$0.00</b></div>
     <div class="pay" id="payRow" hidden>
-      <button data-pay="us_bank_account" aria-pressed="true">Bank debit<small>0.8%, max $5</small></button>
-      <button data-pay="card" aria-pressed="false">Card<small>2.9% + 30¢</small></button>
+      <button data-pay="us_bank_account" aria-pressed="true">Bank debit<small id="payAch">Clears in a few days</small></button>
+      <button data-pay="card" aria-pressed="false">Card<small id="payCard">Charged right away</small></button>
     </div>
     <button class="btn blue" id="checkout" disabled>Submit order</button>
     <p class="dnote" id="dnote">Quantities are in full cases.</p>
@@ -270,7 +287,8 @@
 
 <script type="module">
 import { loadCatalog, supabase, usd, isFlat, openingShot, stockOf, CAN_ORDER,
-         orderMatrix, matrixTotals, lineKey, splitKey, fullSku } from './catalog.js';
+         orderMatrix, matrixTotals, lineKey, splitKey, fullSku,
+         orderTotal, FEE, ACH_PCT } from './catalog.js';
 import { SALES_PHONE, SALES_EMAIL } from './config.js';
 
 const $ = s => document.querySelector(s);
@@ -322,6 +340,13 @@ function paintAuth(){
     ? 'Reordering, a product that is not on your price sheet, a private label run, a delivery question — send it here or call and we will sort it out.'
     : 'Tell us how many doors you cover and what moves in them. A rep will come back with pricing, minimums and a suggested opening order, usually the same day.';
   $('#leadBtn').textContent = on ? 'Send message' : 'Send inquiry';
+  $('#pwBtn').hidden = !on;
+  if(on && DEALER.must_change_password){
+    $('#pwTitle').textContent = 'Set your password';
+    $('#pwSub').textContent = 'Your rep read the current one out over the phone, so it is not private. Pick something only you know before you order.';
+    $('#pwClose').hidden = true;
+    openPw();
+  }
   // Prefill what the account already tells us. Retyping details the site has
   // on file is the fastest way to make a portal feel like a form, not a tool.
   if(on){
@@ -515,9 +540,8 @@ function totals(){
     if(!v?.case_cents) continue;
     sub += v.case_cents*cart[key]; cases += cart[key]; units += v.pack*cart[key]; }
   const ship = sub===0 ? 0 : (sub >= RULES.free_freight_cents ? 0 : RULES.freight_cents);
-  const base = sub+ship;
-  const fee = base===0 ? 0 : (payMethod==='card' ? Math.round(base*0.029)+30 : Math.min(500, Math.round(base*0.008)));
-  return { sub, ship, fee, cases, units, total: base+fee };
+  const t = orderTotal(sub, ship, payMethod);
+  return { sub, ship, cases, units, adjust: t.adjust, label: t.label, total: t.total };
 }
 function updateCart(){
   saveCart();
@@ -526,8 +550,10 @@ function updateCart(){
   $('#cartCount').textContent = t.cases;
   $('#sSub').textContent = usd(t.sub);
   $('#sShip').textContent = t.sub && !t.ship ? 'Free' : usd(t.ship);
-  $('#sFee').textContent = usd(t.fee);
-  $('#sFee').closest('.sum').hidden = !CAN_ORDER;
+  // Only shown when the payment method actually changes the price.
+  $('#sFee').textContent = (t.adjust > 0 ? '' : '') + usd(t.adjust);
+  $('#feeLabel').textContent = t.label || 'Processing';
+  $('#sFee').closest('.sum').hidden = !(CAN_ORDER && t.adjust);
   $('#sTot').textContent = usd(CAN_ORDER ? t.total : t.sub + t.ship);
 
   const keys = Object.keys(cart);
@@ -542,7 +568,7 @@ function updateCart(){
     </div>`}).join('') : '<div class="empty">No cases added yet.<br>Quantities are in full cases.</div>';
 
   const btn = $('#checkout'), note = $('#dnote'), moq = RULES.moq_cents || 50000;
-  const verb = CAN_ORDER ? 'Checkout' : 'Submit order';
+  const verb = CAN_ORDER ? 'Continue to payment' : 'Submit order';
   if(t.sub===0){ btn.disabled=true; btn.textContent=verb;
     note.textContent = `Minimum order ${usd(moq)}. Freight free over ${usd(RULES.free_freight_cents||150000)}.`; }
   else if(t.sub < moq){ btn.disabled=true; btn.textContent='Minimum order not met';
@@ -559,6 +585,13 @@ document.querySelectorAll('.pay button').forEach(b => b.onclick = () => {
 });
 
 $('#payRow').hidden = !CAN_ORDER;
+if(FEE === 'ach_discount'){
+  $('#payAch').textContent  = `${ACH_PCT}% off this order`;
+  $('#payCard').textContent = 'Full price, charged now';
+}else if(FEE === 'surcharge'){
+  $('#payAch').textContent  = 'Lower processing fee';
+  $('#payCard').textContent = 'Higher processing fee';
+}
 const openCart = () => { $('#scrim').classList.add('open'); $('#drawer').classList.add('open'); };
 const shutCart = () => { $('#scrim').classList.remove('open'); $('#drawer').classList.remove('open'); };
 $('#cartBtn').onclick = openCart; $('#closeCart').onclick = shutCart; $('#scrim').onclick = shutCart;
@@ -592,15 +625,16 @@ $('#magicGo').onclick = async () => {
   if(!email){ err.textContent = 'Enter your email first.'; err.hidden = false; return; }
   if(!sb){ err.textContent = 'This copy is not connected to Supabase yet.'; err.hidden = false; return; }
   const { error } = await sb.auth.signInWithOtp({ email, options:{ shouldCreateUser:false } });
-  err.textContent = error ? 'We could not send a link to that address. Call 214-681-8417.'
-                          : 'Check your email. The link signs you in for 24 hours.';
+  err.textContent = error
+    ? 'We could not send a link to that address. Call 214-681-8417.'
+    : 'Link sent. It signs you in for 24 hours. Check your junk or spam folder if it is not in your inbox in a couple of minutes.';
   err.hidden = false;
 };
 
 $('#checkout').onclick = async () => {
   const btn = $('#checkout'), sb = await supabase();
   const label = btn.textContent;
-  btn.disabled = true; btn.textContent = CAN_ORDER ? 'Opening Stripe…' : 'Sending…';
+  btn.disabled = true; btn.textContent = 'One moment…';
   const session = sb ? (await sb.auth.getSession()).data.session : null;
   const items = Object.keys(cart).map(key => {
     const { sku, color } = splitKey(key);
@@ -621,7 +655,9 @@ $('#checkout').onclick = async () => {
     cart = {}; saveCart();
     $('#ditems').innerHTML = `<div class="empty" style="padding:60px 20px">
         <b style="display:block;color:var(--ink);font-size:15px;margin-bottom:10px">Order sent.</b>
-        ${d.message || 'A rep will confirm stock and totals, usually within a few hours.'}</div>`;
+        ${d.message || 'A rep will confirm stock and totals, usually within a few hours.'}
+        <span style="display:block;margin-top:12px;font-size:12px;color:var(--ink-3);line-height:1.6">
+          Check your junk or spam folder if the confirmation is not in your inbox shortly.</span></div>`;
     updateCart(); render(); watch();
   }catch(err){
     alert(err.message);
@@ -683,10 +719,87 @@ $('#leadBtn').onclick = async () => {
       <div class="tick" aria-hidden="true">✓</div>
       <h3>Got it. Thanks, ${payload.contact_name ? payload.contact_name.split(' ')[0] : 'talk soon'}.</h3>
       <p>Your inquiry is with our sales team. A rep will follow up within one business day with pricing, minimums and a suggested opening order.</p>
-      <p class="small">A confirmation is on its way to <b>${payload.email}</b>. If nothing arrives in a few minutes, check spam or just call us.</p>
+      <p class="small">A confirmation is on its way to <b>${payload.email}</b>.
+        <b class="warn">Check your junk or spam folder</b> if it is not in your inbox within a few minutes —
+        first messages from a new sender often land there.</p>
       <a class="btn dark" href="tel:${SALES_PHONE.replace(/\D/g,'')}">Call ${SALES_PHONE}</a>
     </div>`;
 };
+
+
+/* ---------------- password ---------------- */
+const openPw  = () => { $('#pwScrim').classList.add('open'); $('#pwModal').classList.add('open'); $('#pw1').focus(); };
+const shutPw  = () => { $('#pwScrim').classList.remove('open'); $('#pwModal').classList.remove('open');
+                        $('#pwErr').hidden = true; $('#pwOk').hidden = true; $('#pw1').value = $('#pw2').value = ''; };
+$('#pwClose').onclick = shutPw;
+$('#pwScrim').onclick = shutPw;
+$('#pwBtn').onclick = () => {
+  $('#pwTitle').textContent = 'Change your password';
+  $('#pwSub').textContent = 'Pick something at least 8 characters long that you do not use anywhere else.';
+  $('#pwClose').hidden = false;
+  openPw();
+};
+
+$('#pwGo').onclick = async () => {
+  const a = $('#pw1').value, b = $('#pw2').value, err = $('#pwErr'), ok = $('#pwOk'), btn = $('#pwGo');
+  err.hidden = true; ok.hidden = true;
+  if(a.length < 8){ err.textContent = 'Use at least 8 characters.'; err.hidden = false; return; }
+  if(a !== b){ err.textContent = 'The two passwords do not match.'; err.hidden = false; return; }
+
+  const sb = await supabase();
+  if(!sb){ err.textContent = 'Not connected. Call 214-681-8417.'; err.hidden = false; return; }
+
+  btn.disabled = true; btn.textContent = 'Saving…';
+  const { error } = await sb.auth.updateUser({ password: a });
+  if(error){
+    btn.disabled = false; btn.textContent = 'Save password';
+    err.textContent = error.message || 'That did not save. Try a different password.';
+    err.hidden = false; return;
+  }
+
+  // Clear the forced-change flag. The dealer cannot write their own row, so
+  // this goes through the server with their token.
+  const { data:{ session } } = await sb.auth.getSession();
+  try{
+    await fetch('/api/account', {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json', Authorization:`Bearer ${session.access_token}` },
+      body: JSON.stringify({ action:'password_changed' })
+    });
+  }catch(_){ }
+
+  btn.disabled = false; btn.textContent = 'Save password';
+  ok.textContent = 'Saved. Use this password next time you sign in.';
+  ok.hidden = false;
+  setTimeout(() => { shutPw(); boot(); }, 1400);
+};
+
+$('#forgotGo').onclick = async (e) => {
+  e.preventDefault();
+  const email = $('#le').value.trim(), err = $('#loginErr'), sb = await supabase();
+  if(!email){ err.textContent = 'Enter your email first, then tap this again.'; err.hidden = false; return; }
+  if(!sb){ err.textContent = 'Not connected. Call 214-681-8417.'; err.hidden = false; return; }
+  const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin + '/#reset' });
+  err.textContent = error
+    ? 'We could not send a reset to that address. Call 214-681-8417.'
+    : 'Reset link sent. Check your inbox, and your junk or spam folder if it is not there in a couple of minutes.';
+  err.hidden = false;
+};
+
+/* A reset link drops the visitor back here with a recovery session already
+   established, so all that is left is choosing the new password. */
+(async () => {
+  const sb = await supabase();
+  if(!sb) return;
+  sb.auth.onAuthStateChange((evt) => {
+    if(evt === 'PASSWORD_RECOVERY'){
+      $('#pwTitle').textContent = 'Choose a new password';
+      $('#pwSub').textContent = 'This link signed you in. Set a new password to finish.';
+      $('#pwClose').hidden = true;
+      shutLogin(); openPw();
+    }
+  });
+})();
 
 boot();
 </script>

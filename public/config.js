@@ -20,10 +20,29 @@ export const SUPABASE_ANON_KEY = 'sb_publishable_5ubPlK5Cp8gj0AALJt2AAQ_4l6WU5kO
 //
 // Dealer sign-in works in both. The public catalog never shows a price
 // either way, so this only decides whether orders are placed on the site
-// or over the phone. Start on 'quote' and switch when your list prices
-// are real and Stripe is set up.
+// or over the phone.
+//
+// On 'online' with no STRIPE_SECRET_KEY set, checkout lands on a preview
+// page instead of Stripe: the order is still recorded and emailed, and the
+// dealer sees exactly what the paid flow will look like. Add the key and the
+// same button goes to real Stripe with nothing else to change.
 // -------------------------------------------------------------------
-export const ORDER_MODE = 'quote';
+export const ORDER_MODE = 'online';
+
+// -------------------------------------------------------------------
+// FEE_MODE — who pays the payment processing cost. Motto does, so a dealer
+// sees one price whichever method they pick and no fee line anywhere.
+//
+// The other two modes exist but are switched off. Read the fee notes in
+// README.md before touching this: card surcharging is regulated, banned in
+// several states, capped at 3%, and never allowed on debit cards.
+//
+//   'absorb'       one price, any method   ← current
+//   'ach_discount' bank debit gets a discount
+//   'surcharge'    card orders carry a fee
+// -------------------------------------------------------------------
+export const FEE_MODE = 'absorb';
+export const ACH_DISCOUNT_PCT = 2;   // only used when FEE_MODE is 'ach_discount'
 
 // Shown wherever a buyer is told to get in touch.
 export const SALES_PHONE = '214-681-8417';

@@ -5,9 +5,13 @@
 // price sheet says, no matter what the page had cached.
 
 import Stripe from 'stripe';
-import { db, getDealer, freightFor, MOQ_CENTS, FREE_FREIGHT_CENTS } from './_lib.js';
+import { db, getDealer, freightFor, feeFor, MOQ_CENTS, FREE_FREIGHT_CENTS } from './_lib.js';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+// Stripe is optional until the account is connected. Everything up to the
+// payment page works without it, so the flow can be demonstrated and the
+// order still lands in the database and the sales inbox.
+const LIVE = Boolean(process.env.STRIPE_SECRET_KEY);
+const stripe = LIVE ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
@@ -102,7 +106,7 @@ export default async function handler(req, res) {
       payment_method,
       customer_email: dealer.email,
       customer_name: dealer.business_name
-    }).select('id').single();
+    }).select('id, order_no').single();
     if (oErr) throw oErr;
 
     const { error: iErr } = await db.from('order_items')
@@ -119,15 +123,43 @@ export default async function handler(req, res) {
       });
     }
 
+    // Whatever the fee model does, it has to become a real Stripe line or the
+    // dealer is charged a different number than the cart quoted.
+    const { adjust, label } = feeFor(subtotal + freight, payment_method);
+    if (adjust > 0) {
+      line_items.push({ quantity: 1,
+        price_data: { currency: 'usd', unit_amount: adjust, product_data: { name: label } } });
+    }
+    const discount = adjust < 0 ? -adjust : 0;
+
+    const origin = req.headers.origin || `https://${req.headers.host}`;
+
+    if (!LIVE) {
+      await db.from('orders').update({ status: 'requested' }).eq('id', order.id);
+      return res.status(200).json({
+        url: `${origin}/checkout-preview.html?order=${order.order_no}`
+             + `&total=${subtotal + freight}&method=${payment_method}`
+      });
+    }
+
     // ACH is 0.8% capped at $5. Card is 2.9% + 30c. On a $2,000 reorder that
     // is $5 versus $58, so bank debit is offered first.
     const methods = payment_method === 'card' ? ['card'] : ['us_bank_account', 'card'];
-    const origin = req.headers.origin || `https://${req.headers.host}`;
+
+    // A discount cannot be a negative line item, so it goes through a coupon.
+    let discounts;
+    if (discount) {
+      const coupon = await stripe.coupons.create({
+        amount_off: discount, currency: 'usd', duration: 'once', name: label
+      });
+      discounts = [{ coupon: coupon.id }];
+    }
 
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
       payment_method_types: methods,
       line_items,
+      ...(discounts ? { discounts } : {}),
       customer_email: dealer.email,
       client_reference_id: order.id,
       metadata: { order_id: order.id, dealer_id: dealer.id },

@@ -74,6 +74,11 @@ create table dealer_accounts (
   moq_cents     int  not null default 50000,
   notes         text,
   approved_at   timestamptz,
+  -- A rep reads the first password out over the phone, so it has been spoken
+  -- aloud and written on a notepad before the dealer ever uses it. Force a
+  -- change on first sign-in and it stops being a shared secret.
+  must_change_password boolean not null default true,
+  password_changed_at  timestamptz,
   created_at    timestamptz default now()
 );
 

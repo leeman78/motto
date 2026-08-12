@@ -289,7 +289,8 @@ async function dealerList(){
           <td class="r mono">${Number(x.discount_pct).toFixed(1)}%</td>
           <td class="r">${x.override_count ? `<span class="pill info">${x.override_count} custom</span>` : '<span class="pill grey">none</span>'}</td>
           <td>${x.terms==='prepay'?'<span class="pill grey">Prepay</span>':`<span class="pill warn">${x.terms.toUpperCase()}</span>`}</td>
-          <td>${x.approved_at?'<span class="pill ok">Active</span>':'<span class="pill warn">Pending</span>'}</td>
+          <td>${x.approved_at?'<span class="pill ok">Active</span>':'<span class="pill warn">Pending</span>'}
+              ${x.must_change_password?'<br><span class="pill warn" style="margin-top:4px;display:inline-block">Temp password</span>':''}</td>
         </tr>`).join('') || '<tr><td colspan="6" style="color:#9a9da4;padding:40px 10px;text-align:center">No dealers yet.</td></tr>'}
       </tbody>
     </table>
@@ -313,7 +314,7 @@ async function createDealer(){
       <div class="credbox">
         <div class="k">Login email</div><div class="v">${r.email}</div>
         <div class="k">Temporary password</div><div class="v">${r.password}</div>
-        <p>Read this to the dealer now. It is not stored anywhere you can look it up again — if they lose it, use Reset password on their detail screen. They can also use the "email me a sign-in link" option and skip passwords entirely.</p>
+        <p>Read this to the dealer now. It is not stored anywhere you can look it up again. They are asked to replace it the first time they sign in, so it only has to survive one phone call. If they lose it before then, use Reset password on their detail screen — or tell them to use "Forgot your password?" on the sign-in box and do it themselves.</p>
       </div>`;
     ['#n1','#n2','#n3','#n4','#n7'].forEach(s => $(s).value = '');
     const { dealers: d } = await call('list_dealers'); dealers = d;
@@ -398,7 +399,8 @@ async function dealerDetail(id){
   $('#resetP').onclick = async () => {
     if(!confirm('Generate a new password for this dealer? Their current one stops working immediately.')) return;
     const r = await call('reset_password', { dealer_id: id });
-    $('#dCreds').innerHTML = `<div class="credbox"><div class="k">New password</div><div class="v">${r.password}</div><p>Read it to them now. This is the only time it is shown.</p></div>`;
+    $('#dCreds').innerHTML = `<div class="credbox"><div class="k">New password</div><div class="v">${r.password}</div>
+      <p>Read it to them now. This is the only time it is shown, and they will be asked to replace it the moment they sign in.</p></div>`;
   };
 
   $('#magic').onclick = async () => {

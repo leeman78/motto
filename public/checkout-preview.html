@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Payment preview | Motto Wholesale</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+.pv{max-width:520px;margin:60px auto 110px;padding:0 24px}
+.pvcard{border:1px solid var(--line);border-radius:26px;padding:34px 30px;background:#fff;
+  box-shadow:0 18px 50px rgba(0,0,0,.06)}
+.pvcard h1{font-size:26px;letter-spacing:-.04em;margin:0 0 8px}
+.pvsub{font-size:14px;color:var(--ink-2);line-height:1.6;margin:0 0 26px}
+.banner{background:#fff8e6;border:1px solid #f0dfae;border-radius:14px;padding:14px 16px;
+  font-size:12.5px;line-height:1.6;color:#7a5a12;margin:0 0 24px}
+.banner b{color:#5d440c}
+.lineup{border-top:1px solid var(--line);margin-bottom:22px}
+.lineup div{display:flex;justify-content:space-between;gap:16px;padding:12px 0;
+  border-bottom:1px solid var(--line);font-size:14px}
+.lineup .big{font-size:20px;font-weight:750;border-bottom:0;padding-top:16px}
+.meth{display:grid;gap:10px;margin-bottom:24px}
+.meth label{display:flex;gap:13px;align-items:flex-start;border:1px solid var(--line);border-radius:14px;
+  padding:15px 16px;cursor:pointer;transition:.16s}
+.meth label:has(input:checked){border-color:#111;background:#fafafb}
+.meth input{margin-top:2px;accent-color:#111;width:16px;height:16px;flex:none}
+.meth b{display:block;font-size:14px;margin-bottom:3px}
+.meth span{font-size:12.5px;color:var(--ink-2);line-height:1.5;display:block}
+.meth .fee{font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--ink-2);margin-top:5px;display:block}
+.pvcard .btn{width:100%;padding:15px}
+.pvfoot{font-size:11.5px;color:var(--ink-3);text-align:center;line-height:1.6;margin:16px 0 0}
+</style>
+</head>
+<body>
+
+<div class="top">MOTTO USA · WHOLESALE</div>
+
+<nav><div class="wrap nav">
+  <a class="brand" href="/" aria-label="Motto Wholesale home">
+    <img src="assets/logo.webp" alt="Motto" onerror="this.replaceWith(Object.assign(document.createElement('b'),{textContent:'MOTTO'}))">
+    <span>Wholesale</span>
+  </a>
+  <div class="navright"><a class="navtel" href="tel:2146818417">214-681-8417<small>Mon–Fri 9–5 CT</small></a></div>
+</div></nav>
+
+<main class="pv">
+  <div class="pvcard">
+    <h1>Payment</h1>
+    <p class="pvsub" id="sub">Order is recorded. Choose how you would like to pay.</p>
+
+    <div class="banner">
+      <b>Preview only.</b> The Stripe account is not connected yet, so no card or bank
+      details are collected here and nothing is charged. Your order has already been sent
+      to the Motto sales team and a rep will confirm it. This page shows what the paid
+      checkout will look like once Stripe is live.
+    </div>
+
+    <div class="lineup">
+      <div><span>Order</span><b class="mono" id="ord">—</b></div>
+      <div><span>Subtotal and freight</span><b class="mono" id="base">—</b></div>
+      <div><span id="feeName">Processing</span><b class="mono" id="fee">—</b></div>
+      <div class="big"><span>Total</span><b class="mono" id="tot">—</b></div>
+    </div>
+
+    <div class="meth">
+      <label>
+        <input type="radio" name="m" value="us_bank_account" checked>
+        <span><b>Bank debit (ACH)</b>
+          <span>Pulled straight from your business account. Clears in a few business days.</span>
+          <span class="fee" id="feeAch">—</span></span>
+      </label>
+      <label>
+        <input type="radio" name="m" value="card">
+        <span><b>Card</b>
+          <span>Charged immediately. Costs more, so most partners use it only on a first order.</span>
+          <span class="fee" id="feeCard">—</span></span>
+      </label>
+    </div>
+
+    <button class="btn dark" id="go">Continue</button>
+    <p class="pvfoot" style="margin-top:14px">A confirmation is emailed to you. Check your junk or spam folder if it does not arrive shortly.</p>
+    <p class="pvfoot">Questions? Call <a href="tel:2146818417"><b>214-681-8417</b></a>, Mon–Fri 9–5 Central.</p>
+  </div>
+</main>
+
+<script type="module">
+import { orderTotal, FEE, ACH_PCT } from './catalog.js';
+const q = new URLSearchParams(location.search);
+const base = parseInt(q.get('total'), 10) || 0;
+const usd = c => '$' + (c/100).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+
+// The same function the cart uses, so the number cannot change on this screen.
+const calc = m => orderTotal(base, 0, m);
+
+document.getElementById('ord').textContent  = q.get('order') ? '#' + q.get('order') : '—';
+document.getElementById('base').textContent = usd(base);
+const line = m => {
+  const { adjust } = calc(m);
+  if(FEE === 'ach_discount') return adjust ? `${ACH_PCT}% off — you pay ${usd(base + adjust)}` : 'Full price';
+  if(FEE === 'surcharge')    return 'Fee on this order: ' + usd(adjust);
+  return 'Same price either way';
+};
+document.getElementById('feeAch').textContent  = line('us_bank_account');
+document.getElementById('feeCard').textContent = line('card');
+
+function paint(){
+  const m = document.querySelector('input[name=m]:checked').value;
+  const { adjust, total, label } = calc(m);
+  const row = document.getElementById('fee').closest('div');
+  row.hidden = !adjust;
+  document.getElementById('feeName').textContent = label || '';
+  document.getElementById('fee').textContent = usd(adjust);
+  document.getElementById('tot').textContent = usd(total);
+}
+document.querySelectorAll('input[name=m]').forEach(r => r.onchange = paint);
+const pre = q.get('method');
+if(pre){ const r = document.querySelector(`input[value="${pre}"]`); if(r) r.checked = true; }
+paint();
+
+document.getElementById('go').onclick = () => {
+  location.href = 'order-confirmed.html?preview=1&order=' + encodeURIComponent(q.get('order') || '');
+};
+</script>
+</body>
+</html>

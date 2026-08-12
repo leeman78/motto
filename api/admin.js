@@ -50,6 +50,7 @@ export default async function handler(req, res) {
           id: user.user.id,
           business_name, contact_name, phone, email,
           discount_pct, terms, notes,
+          must_change_password: true,
           approved_at: new Date().toISOString()
         });
         if (rowErr) {
@@ -72,7 +73,7 @@ export default async function handler(req, res) {
       case 'list_dealers': {
         const { data, error } = await db
           .from('dealer_accounts')
-          .select('id, business_name, contact_name, email, phone, discount_pct, terms, approved_at, created_at')
+          .select('id, business_name, contact_name, email, phone, discount_pct, terms, approved_at, created_at, must_change_password, password_changed_at')
           .order('created_at', { ascending: false });
         if (error) throw error;
 
@@ -137,6 +138,9 @@ export default async function handler(req, res) {
         const password = tempPassword();
         const { error } = await db.auth.admin.updateUserById(p.dealer_id, { password });
         if (error) throw error;
+        // A password a rep has read out loud is temporary by definition.
+        await db.from('dealer_accounts')
+          .update({ must_change_password: true }).eq('id', p.dealer_id);
         return res.status(200).json({ password });
       }
 
