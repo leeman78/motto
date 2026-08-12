@@ -229,17 +229,39 @@ api/
   checkout.js         Stripe Checkout session, prices resolved server side
   stripe-webhook.js   the only writer of paid status
   admin.js            dealer accounts, price sheets, orders
+  lead.js             wholesale inquiry form
 public/
-  index.html          public catalog + dealer ordering
+  index.html          home: hero, catalog, private label, why, about, reel, contact
+  product.html        product detail, reads ?p=<slug>
   admin.html          internal console
   order-confirmed.html
+  catalog.js          shared data layer for index and product pages
+  config.js           Supabase URL, anon key, PRICING_MODE
   styles.css
-  config.js           Supabase URL + anon key
   assets/             product photos
 supabase/
   01_schema.sql       tables, pricing functions, RLS
   02_seed.sql         15 product families
 ```
+
+## Editing copy
+
+The About section on the home page carries the company story. Four claims in
+it are load-bearing and repeat in several places, so change them by searching
+the repo rather than editing one spot:
+
+| Claim | Also appears in |
+|---|---|
+| Founded 2016 | top banner, hero kicker, trust bar, footer, Organization schema |
+| 2,000+ retail doors | hero lead, trust bar, About facts |
+| TX · LA · OK · AR | hero lead, trust bar, About facts, meta description |
+| Carrollton warehouse | About facts, Contact block, Organization schema |
+
+One thing to reconcile before launch: the wholesale page on mottousa.com
+currently says "Dallas-based since 2017", while the company's own Instagram
+says founded 2016. This site uses 2016. Fix whichever is wrong on the other
+site too — a buyer who checks both and finds two different years will not ask
+you about it, they will just trust you less.
 
 ---
 

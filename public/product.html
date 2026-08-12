@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Product | Motto Wholesale</title>
+<meta name="description" content="Motto wholesale product detail: specifications, colorways, case packs and SKUs.">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="top" id="topbar">MOTTO USA · WHOLESALE · SERVING RETAIL PARTNERS SINCE 2016</div>
+
+<nav><div class="wrap nav">
+  <a class="brand" href="/" aria-label="Motto Wholesale home">
+    <img src="assets/logo.webp" alt="Motto" onerror="this.replaceWith(Object.assign(document.createElement('b'),{textContent:'MOTTO'}))">
+    <span>Wholesale</span>
+  </a>
+  <div class="links">
+    <a href="/#catalog">Products</a>
+    <a href="/#whitelabel">Private Label</a>
+    <a href="/#why">Why Motto</a>
+    <a href="/#about">About</a>
+    <a href="/#contact">Contact</a>
+  </div>
+  <div class="navright">
+    <a class="navtel" href="tel:2146818417">214-681-8417<small>Mon–Fri 9–5 CT</small></a>
+    <a class="btn dark" href="/#contact">Get a quote</a>
+  </div>
+</div></nav>
+
+<div class="wrap"><div class="crumb" id="crumb"><a href="/">Motto Wholesale</a> / <a href="/#catalog">Catalog</a></div></div>
+
+<main class="wrap">
+  <div id="pdp"><div class="loading" style="padding:120px 0">Loading…</div></div>
+</main>
+
+<section class="wrap related" id="relatedWrap" hidden>
+  <div class="head" style="margin-bottom:22px">
+    <div><div class="eyebrow">Also in this category</div><h2 style="font-size:32px">Related products</h2></div>
+  </div>
+  <div class="grid stag in" id="related"></div>
+</section>
+
+<footer><div class="fin">
+  <span>Motto USA · Wholesale Mobile Accessories · Carrollton, Texas · Since 2016</span>
+  <span><a href="https://mottousa.com">Retail store: mottousa.com →</a></span>
+</div></footer>
+
+<script type="module">
+import { loadCatalog, usd, isFlat, openingShot, bySlug, DEALER_MODE } from './catalog.js';
+import { SALES_PHONE } from './config.js';
+
+const $ = s => document.querySelector(s);
+const slug = new URLSearchParams(location.search).get('p');
+
+const d = await loadCatalog();
+if(!d.live){
+  $('#topbar').className = 'top test';
+  $('#topbar').textContent = 'PREVIEW — showing built-in catalog data. Connect Supabase to go live.';
+}
+
+const p = bySlug(d.products, slug);
+if(!p){
+  $('#pdp').innerHTML = `<div class="loading" style="padding:110px 0">
+    That product is not in the catalog.<br><br>
+    <a class="btn dark" href="/#catalog">Back to the catalog</a></div>`;
+} else {
+  document.title = `${p.name} | Motto Wholesale`;
+  $('#crumb').innerHTML =
+    `<a href="/">Motto Wholesale</a> / <a href="/#catalog">Catalog</a> / <span style="color:var(--ink)">${p.name}</span>`;
+
+  const open = openingShot(p);
+  const withPhoto = p.colors.filter(c => c.image);
+  const packs = [...new Set(p.variants.map(v => v.pack))];
+  const masters = p.variants.map(v => v.master_carton).filter(Boolean);
+
+  $('#pdp').innerHTML = `
+  <div class="pdp">
+    <div>
+      <div class="pdpshot${isFlat(open)?' flat':''}" id="shot" data-label="${p.name}">
+        <img src="${open?'assets/'+open:''}" alt="${p.name}" onerror="miss(this)">
+      </div>
+      <div class="swatchbar" style="margin-top:20px">
+        <div class="swlabel" id="lbl">${p.colors.length>1?'Available colors':'Finish'}</div>
+        <div class="swrow">
+          ${p.colors.map(c => c.image
+            ? `<button class="sw" style="--c:${c.hex};width:30px;height:30px" title="${c.name}" aria-label="${c.name}" data-src="assets/${c.image}" data-name="${c.name}"></button>`
+            : `<button class="sw off" style="--c:${c.hex};width:30px;height:30px" title="${c.name} — photo coming" aria-label="${c.name}, photo coming" disabled></button>`
+          ).join('')}
+          ${p.shots.length ? '<span class="swdiv"></span>' + p.shots.map((s,j)=>
+            `<button class="view${j===0?' active':''}" style="width:40px;height:40px" aria-label="View ${j+1}" data-src="assets/${s}"><img src="assets/${s}" alt="" loading="lazy" onerror="this.style.opacity=0"></button>`).join('') : ''}
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="eyebrow">${p.type||''}</div>
+      <h1>${p.name}</h1>
+      <p class="blurb">${p.desc||''}</p>
+
+      <div class="meta" style="margin:0 0 26px">${p.meta.map(m=>`<span style="background:var(--soft)">${m}</span>`).join('')}</div>
+
+      <div class="specs">
+        <div class="specrow"><span class="k">Colorways</span><span class="v">${p.colors.map(c=>c.name).join(', ') || '—'}</span></div>
+        <div class="specrow"><span class="k">Sizes</span><span class="v">${p.variants.map(v=>v.label).join(' · ')}</span></div>
+        <div class="specrow"><span class="k">Case pack</span><span class="v">${packs.join(' / ')} pcs</span></div>
+        ${masters.length?`<div class="specrow"><span class="k">Master carton</span><span class="v">${[...new Set(masters)].join(' / ')} pcs</span></div>`:''}
+        <div class="specrow"><span class="k">Ships from</span><span class="v">Carrollton, TX</span></div>
+        <div class="specrow"><span class="k">Lead time</span><span class="v">1–2 business days</span></div>
+        <div class="specrow"><span class="k">Private label</span><span class="v">Available on this SKU</span></div>
+      </div>
+
+      <h4 style="margin:30px 0 10px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#81848b">SKUs</h4>
+      <div class="specs" style="border-top:1px solid var(--line)">
+        ${p.variants.map(v=>`
+        <div class="specrow">
+          <span class="k"><b style="color:var(--ink)">${v.label}</b> <span class="mono" style="font-size:11.5px;color:var(--ink-3)">${v.sku}${v.upc?' · UPC '+v.upc:''}</span></span>
+          <span class="v mono">${DEALER_MODE && v.case_cents!=null ? usd(v.case_cents)+' / case' : v.pack+' per case'}</span>
+        </div>`).join('')}
+      </div>
+
+      <div class="pdpbuy">
+        <h4>Wholesale pricing</h4>
+        <p class="sub">Quoted per account against the volume you move. Tell us your door count and we will send numbers the same day, usually within a few hours.</p>
+        <a class="btn dark" href="/#contact">Request pricing on this product</a>
+        <p class="sub" style="margin:12px 0 0;text-align:center">Or call <a href="tel:${SALES_PHONE.replace(/\D/g,'')}"><b>${SALES_PHONE}</b></a>, Mon–Fri 9–5 CT</p>
+      </div>
+    </div>
+  </div>`;
+
+  window.miss = img => { img.style.opacity = 0; $('#shot').classList.add('noimg'); };
+
+  const shot = $('#shot'), img = shot.querySelector('img'), lbl = $('#lbl');
+  document.querySelectorAll('.sw[data-src], .view[data-src]').forEach(b => b.onclick = () => {
+    shot.classList.remove('noimg');
+    shot.classList.toggle('flat', isFlat(b.dataset.src.split('/').pop()));
+    img.style.opacity = 1; img.onerror = () => miss(img); img.src = b.dataset.src;
+    document.querySelectorAll('.sw, .view').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    lbl.textContent = b.dataset.name || (p.colors.length>1 ? 'Available colors' : 'Finish');
+  });
+
+  // related: same category, this one excluded
+  const rel = d.products.filter(x => x.cat === p.cat && x.slug !== p.slug).slice(0,3);
+  if(rel.length){
+    $('#relatedWrap').hidden = false;
+    $('#related').innerHTML = rel.map(r=>{
+      const o = openingShot(r);
+      return `<article class="card">
+        <a href="product.html?p=${r.slug}" class="mainpic${isFlat(o)?' flat':''}" data-label="${r.name}">
+          <img src="${o?'assets/'+o:''}" alt="${r.name}" loading="lazy" onerror="this.style.opacity=0;this.parentElement.classList.add('noimg')">
+        </a>
+        <div class="body">
+          <div class="type">${r.type||''}</div>
+          <h3><a href="product.html?p=${r.slug}">${r.name}</a></h3>
+          <p class="desc">${r.desc||''}</p>
+          <div class="foot"><a class="footlocked" href="product.html?p=${r.slug}"><span>VIEW PRODUCT</span><em>Details &amp; specs →</em></a></div>
+        </div>
+      </article>`;
+    }).join('');
+  }
+
+  // product schema, no price since pricing is quoted
+  const ld = document.createElement('script');
+  ld.type = 'application/ld+json';
+  ld.textContent = JSON.stringify({
+    '@context':'https://schema.org','@type':'Product',
+    name:p.name, description:p.desc, brand:{'@type':'Brand',name:'Motto'},
+    category:p.type, color:p.colors.map(c=>c.name),
+    image: open ? [location.origin + '/assets/' + open] : undefined,
+    sku: p.variants[0]?.sku
+  });
+  document.head.appendChild(ld);
+}
+</script>
+</body>
+</html>

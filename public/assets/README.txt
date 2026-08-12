@@ -47,6 +47,40 @@ IN THIS FOLDER
   adapter_usbc_35_detail.webp   TPE durability graphic
 
 
+CUTOUTS VS FULL-BLEED
+---------------------
+Colorway shots are cutouts on a transparent background. The site floats them
+on a light card with a drop shadow, so a photo with its own white rectangle
+will look boxed-in next to the others. Cut new colorway shots out before
+adding them.
+
+Files ending _hero, _lifestyle or _detail keep their own background and are
+rendered full-bleed, edge to edge. That is why the brand shots on the black
+backdrop still look right.
+
+
+VIDEO
+-----
+  counter_loop.mp4          H.264, 720x1140, 9.6s, silent
+  counter_loop.webm         VP9, same source, served first where supported
+  counter_loop_poster.webp  first visible frame, shown before playback starts
+
+Source was a 1080x1920 Instagram recording in HEVC. Two things had to change
+before it could go on the site: the burned-in "mottousa.official" header and
+timer were cropped off, and HEVC was transcoded to H.264 because Chrome and
+Firefox will not play HEVC in an MP4. The static end card was trimmed off as
+well, since it is four seconds of frozen contact details in a loop and the
+same details are already on the page.
+
+Audio is stripped on purpose. Autoplay only works muted, so the track was
+dead weight.
+
+To replace it, run the same treatment:
+  ffmpeg -i new.mp4 -t <secs> -an -vf "crop=W:H:X:Y,scale=720:-2" \
+    -c:v libx264 -profile:v main -pix_fmt yuv420p -crf 24 -preset slow \
+    -movflags +faststart counter_loop.mp4
+
+
 STILL NEEDED
 ------------
   logo.webp                     nav mark, square, transparent
