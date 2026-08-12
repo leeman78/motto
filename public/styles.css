@@ -198,17 +198,28 @@ nav{height:var(--nav-h);position:sticky;top:0;z-index:60;background:rgba(255,255
 @media(max-width:880px){.why{grid-template-columns:1fr;padding:34px;border-radius:28px;gap:32px}}
 
 /* ---------------------------------------------------------------- about */
-.about{display:grid;grid-template-columns:1fr 1.15fr;gap:60px;align-items:start}
+/* Named areas so the facts can sit under the heading on desktop but read
+   after the story on a phone, where a data table before the prose is backwards. */
+.about{display:grid;grid-template-columns:.85fr 1fr;column-gap:70px;row-gap:0;align-items:start;
+  grid-template-areas:"intro story" "facts story";
+  /* row 1 hugs the heading; the spare height from the longer story column all
+     lands in row 2 instead of opening a gap under it */
+  grid-template-rows:auto 1fr}
+.aintro{grid-area:intro}
+.about .story{grid-area:story}
+.about .facts{grid-area:facts;align-self:start}
 .about h2{font-size:clamp(32px,4.2vw,48px);letter-spacing:-.05em;line-height:1.02;margin:14px 0 0}
 .story p{color:var(--ink-2);line-height:1.75;font-size:15.5px;margin:0 0 18px}
 .story p:first-child{font-size:18px;color:var(--ink);line-height:1.6}
-.facts{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line);
-  border-radius:20px;overflow:hidden;margin-top:28px}
-.facts > div{background:#fff;padding:22px}
-.facts .k{font-size:10px;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-3);font-weight:750}
-.facts .v{font-size:20px;font-weight:700;letter-spacing:-.03em;margin-top:7px}
-.facts .n{font-size:12.5px;color:var(--ink-2);margin-top:5px;line-height:1.5}
-@media(max-width:880px){.about{grid-template-columns:1fr;gap:30px}.facts{grid-template-columns:1fr}}
+/* Sits in the narrow left column, so it reads as a stacked spec list rather
+   than boxes squeezed two-across. */
+.facts{margin-top:34px;border-top:1px solid var(--line)}
+.facts > div{padding:15px 0;border-bottom:1px solid var(--line);
+  display:grid;grid-template-columns:100px minmax(0,1fr);column-gap:18px;row-gap:4px;align-items:baseline}
+.facts .k{font-size:10px;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-3);font-weight:750;padding-top:3px}
+.facts .v{font-size:19px;font-weight:700;letter-spacing:-.03em}
+.facts .n{font-size:12.5px;color:var(--ink-2);margin-top:3px;line-height:1.5;grid-column:2}
+@media(max-width:880px){.about{grid-template-columns:1fr;row-gap:30px;grid-template-areas:"intro" "story" "facts"}}
 
 /* ---------------------------------------------------------------- contact */
 .contactgrid{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:start}
