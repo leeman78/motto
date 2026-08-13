@@ -82,6 +82,12 @@ IN THIS FOLDER
   headset_detail.webp               worn, close up
   headset_box.webp                  what is in the box
 
+  airbuds_a5_hero.webp              A5 with box and tips, opens the card
+  airbuds_a5_lifestyle.webp         running outdoors
+  airbuds_a5_box.webp               case, cable and tips
+  airbuds_a5_detail.webp            retail box front
+  airbuds_a5_specs.webp             retail box back
+
   adapter_lightning_35.webp             adapter, cut out
   adapter_lightning_35_lifestyle.webp   in use, opens the card
   adapter_lightning_35_box.webp         retail box front
@@ -141,8 +147,6 @@ STILL NEEDED
   buds_plus_black.webp          BUDS+
   buds_plus_white.webp
   buds_plus_case.webp
-  airbuds_a5_white.webp
   wired_usbc_black.webp
   wired_usbc_white.webp
 
-  adapter_lightning_usbc.webp

@@ -45,9 +45,13 @@ Create a project, then in **SQL Editor** run these in order:
 ```
 supabase/01_schema.sql
 supabase/02_seed.sql
+supabase/03_cleanup.sql
 ```
 
-The seed loads all 16 product families with placeholder list prices. Replace
+The seed loads all 15 product families with placeholder list prices.
+`03_cleanup.sql` removes SKUs that were seeded from guesses before the real
+product list was confirmed, and lists anything else in your database that is
+not in the current seed so you can decide about it yourself. Replace
 those with your real numbers in the admin before you open any dealer accounts.
 
 **`02_seed.sql` is safe to re-run.** When a product already exists it updates

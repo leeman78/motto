@@ -166,10 +166,12 @@ export const FALLBACK = {
    variants:[{sku:'MT-BUDS-P',label:'Single',pack:6,stock:'in_stock'}]},
 
   {slug:'airbuds-a5',cat:'audio',type:'True Wireless Earbuds',name:'Wireless Airbuds A5',
-   desc:'Entry true wireless earbuds for retailers who want a second price point above wired.',
-   meta:['True Wireless','Charging Case'],
-   colors:[{name:'White',hex:'#f4f4f6',image:null}],shots:[],
-   stock:'low_stock',variants:[{sku:'MT-A5',label:'Single',pack:6,stock:'low_stock'}]},
+   desc:'Clean, compact true wireless in white, with a USB-C magnetic charging case and three sizes of ear tip in the box. Open the case and they pair. No ANC to explain, no app to set up — for the customer who wants working earbuds, not a features list. Sits at the same price as the ANC pair, so a rack can carry both.',
+   meta:['True wireless','USB-C charging case','Instant pairing','3 ear tip sizes'],
+   colors:[{name:'White',hex:'#f4f4f6',image:null}],
+   shots:['airbuds_a5_hero.webp','airbuds_a5_lifestyle.webp','airbuds_a5_box.webp','airbuds_a5_detail.webp','airbuds_a5_specs.webp'],
+   stock:'in_stock',
+   variants:[{sku:'MT-A5',label:'Single',pack:6,stock:'in_stock'}]},
 
   {slug:'headset-anc',cat:'audio',type:'True Wireless Earbuds',name:'ANC/ENC Wireless Earbuds',
    desc:'Dual-mode noise control: ANC blocks the room out, ENC cleans up your voice on calls. The charging case has a touch display showing battery for each bud and the case, and switches modes without reaching for a phone. That screen is what a customer notices on a peg.',
@@ -212,13 +214,7 @@ export const FALLBACK = {
    colors:[{name:'White',hex:'#f4f4f6',image:'adapter_lightning_35.webp'}],
    shots:['adapter_lightning_35_lifestyle.webp','adapter_lightning_35_box.webp','adapter_lightning_35_specs.webp'],
    stock:'in_stock',
-   variants:[{sku:'MT-AD-LT35',upc:'984720174657',label:'Single',pack:20,stock:'in_stock'}]},
-
-  {slug:'adapter-lightning-usbc',cat:'adapters',type:'Connector Adapter',name:'Lightning to USB-C Adapter',
-   desc:'Lets an existing Lightning cable charge a USB-C device. Explains itself on the peg card.',
-   meta:['Lightning','USB-C','Charge + Data'],
-   colors:[{name:'White',hex:'#f4f4f6',image:null}],shots:[],
-   stock:'in_stock',variants:[{sku:'MT-AD-LTUC',label:'Single',pack:20,stock:'in_stock'}]}
+   variants:[{sku:'MT-AD-LT35',upc:'984720174657',label:'Single',pack:20,stock:'in_stock'}]}
 ]};
 /** Returns { categories, products, rules, dealer, live } */
 export async function loadCatalog(){

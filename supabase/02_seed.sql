@@ -95,9 +95,10 @@ values
  '{buds_plus_blue.webp,buds_plus_lifestyle.webp,buds_plus_box.webp,buds_plus_controls.webp}',8),
 
 ((select id from c where slug='audio'),'airbuds-a5','True Wireless Earbuds','Wireless Airbuds A5',
- 'Entry true wireless earbuds for retailers who want a second price point above wired.',
- '{"True Wireless","Charging Case"}',
- '[{"name":"White","hex":"#f4f4f6","image":null}]','{}',8),
+ 'Clean, compact true wireless in white, with a USB-C magnetic charging case and three sizes of ear tip in the box. Open the case and they pair. No ANC to explain, no app to set up — for the customer who wants working earbuds, not a features list. Sits at the same price as the ANC pair, so a rack can carry both.',
+ '{"True wireless","USB-C charging case","Instant pairing","3 ear tip sizes"}',
+ '[{"name":"White","hex":"#f4f4f6","image":null}]',
+ '{airbuds_a5_hero.webp,airbuds_a5_lifestyle.webp,airbuds_a5_box.webp,airbuds_a5_detail.webp,airbuds_a5_specs.webp}',9),
 
 ((select id from c where slug='audio'),'headset-anc','True Wireless Earbuds','ANC/ENC Wireless Earbuds',
  'Dual-mode noise control: ANC blocks the room out, ENC cleans up your voice on calls. The charging case has a touch display showing battery for each bud and the case, and switches modes without reaching for a phone. That screen is what a customer notices on a peg.',
@@ -133,12 +134,7 @@ values
  'Two ports, not one: plug in 3.5mm headphones and keep charging at the same time. That is the difference between this and the dongle in every other rack, and it is the whole reason a customer picks it up. Plug and play, no app. Works with iPhone 7 through 12 and every Lightning device. Model JBC029.',
  '{"Lightning","3.5mm AUX","Charge + listen","Plug and play"}',
  '[{"name":"White","hex":"#f4f4f6","image":"adapter_lightning_35.webp"}]',
- '{adapter_lightning_35_lifestyle.webp,adapter_lightning_35_box.webp,adapter_lightning_35_specs.webp}',15),
-
-((select id from c where slug='adapters'),'adapter-lightning-usbc','Connector Adapter','Lightning to USB-C Adapter',
- 'Lets an existing Lightning cable charge a USB-C device. Explains itself on the peg card.',
- '{"Lightning","USB-C","Charge + Data"}',
- '[{"name":"White","hex":"#f4f4f6","image":null}]','{}',15)
+ '{adapter_lightning_35_lifestyle.webp,adapter_lightning_35_box.webp,adapter_lightning_35_specs.webp}',15)
 
 on conflict (slug) do update set
   category_id = excluded.category_id,
@@ -174,8 +170,7 @@ from (values
  ('wired-usbc','MT-EAR-UC','','Single',12,144, 7040,1299,1,'in_stock'),
  ('wired-lightning','MT-EAR-LT','703977746056','Single',12,144, 7360,1299,1,'in_stock'),
  ('adapter-usbc-35','MT-AD-UC35','','Single',20,200,10530,1299,1,'in_stock'),
- ('adapter-lightning-35','MT-AD-LT35','984720174657','Single',20,200,10930,1299,1,'in_stock'),
- ('adapter-lightning-usbc','MT-AD-LTUC','','Single',20,200,10670,1299,1,'in_stock')
+ ('adapter-lightning-35','MT-AD-LT35','984720174657','Single',20,200,10930,1299,1,'in_stock')
 ) as x(slug,sku,upc,label,pack,master,list,msrp,ord,stock)
 join products p on p.slug = x.slug
 on conflict (sku) do update set
