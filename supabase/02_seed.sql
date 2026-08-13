@@ -72,35 +72,44 @@ values
  '{wall_white.webp,wall_lifestyle.webp}',4),
 
 ((select id from c where slug='power'),'car-45w','Fast Charger','45W PD Car Charger',
- 'USB-C Power Delivery paired with an 18W Quick Charge port in an alloy housing.',
- '{"45W PD","QC 18W","Dual Port"}',
- '[{"name":"Black","hex":"#1a1a1a","image":null}]','{}',5),
+ 'Dual intelligent chips deliver up to 45W USB-C Power Delivery on one port and 18W Quick Charge 3.0 on the other, so two people can charge at speed off one socket. Model CC0200.',
+ '{"45W PD","QC 3.0 18W","Dual Port","12–24V"}',
+ '[{"name":"Black","hex":"#1a1a1a","image":"car_black.webp"}]',
+ '{car_black.webp,car_angle.webp,car_side.webp}',6),
 
-((select id from c where slug='power'),'powerbank-soccer','Portable Power','Soccer Ball Portable Power Bank',
- 'Novelty portable power bank with USB-C in and out. Seasonal and event-driven demand.',
- '{"Portable","USB-C In/Out"}',
- '[{"name":"White","hex":"#f4f4f6","image":null}]','{}',6),
+((select id from c where slug='power'),'powerbank-soccer','Portable Power','Soccer Ball Power Bank',
+ '10,000 mAh with 22.5W PD fast charging and an LED percentage readout. Shaped like a soccer ball, which is the whole point: it sells itself off a counter display, and it moves hardest around tournaments, back-to-school and the World Cup.',
+ '{"10,000 mAh","22.5W PD","LED display","USB-C In/Out"}',
+ '[{"name":"White & Navy","hex":"#2b3a6b","image":"powerbank_soccer.webp"}]',
+ '{powerbank_soccer_lifestyle.webp,powerbank_soccer_box.webp}',7),
 
 -- ------------------------------------------------- AUDIO
 ((select id from c where slug='audio'),'buds-plus','True Wireless Earbuds','Motto BUDS+',
- 'True wireless earbuds with active noise cancellation and a Qi-chargeable case.',
- '{"ANC","Qi Charging","True Wireless"}',
- '[{"name":"Black","hex":"#1a1a1a","image":null},{"name":"White","hex":"#f4f4f6","image":null}]','{}',7),
+ 'True wireless earbuds on Bluetooth 5.0 + EDR with a Qi-compatible magnetic charging case and a battery indicator on the case. Touch controls for play, skip and calls. Five colorways, which is what makes it work on a rack — the same peg sells to five different customers.',
+ '{"Bluetooth 5.0 + EDR","Qi charging case","Battery indicator","Touch controls"}',
+ '[{"name":"Blue","hex":"#9ecbe8","image":"buds_plus_blue.webp"},
+   {"name":"Black","hex":"#1a1a1a","image":"buds_plus_black.webp"},
+   {"name":"Red","hex":"#c8202a","image":"buds_plus_red.webp"},
+   {"name":"White","hex":"#f4f4f6","image":"buds_plus_white.webp"},
+   {"name":"Pink","hex":"#efb3c4","image":"buds_plus_pink.webp"}]',
+ '{buds_plus_blue.webp,buds_plus_lifestyle.webp,buds_plus_box.webp,buds_plus_controls.webp}',8),
 
 ((select id from c where slug='audio'),'airbuds-a5','True Wireless Earbuds','Wireless Airbuds A5',
  'Entry true wireless earbuds for retailers who want a second price point above wired.',
  '{"True Wireless","Charging Case"}',
  '[{"name":"White","hex":"#f4f4f6","image":null}]','{}',8),
 
-((select id from c where slug='audio'),'headset-anc','Wireless Headset','Wireless Headset ANC/ENC',
- 'Over-ear wireless headset with active and environmental noise cancellation.',
- '{"ANC","ENC","Over-Ear"}',
- '[{"name":"Black","hex":"#1a1a1a","image":null},{"name":"White","hex":"#f4f4f6","image":null}]','{}',9),
+((select id from c where slug='audio'),'headset-anc','True Wireless Earbuds','ANC/ENC Wireless Earbuds',
+ 'Dual-mode noise control: ANC blocks the room out, ENC cleans up your voice on calls. The charging case has a touch display showing battery for each bud and the case, and switches modes without reaching for a phone. That screen is what a customer notices on a peg.',
+ '{"ANC + ENC","Touch display case","True wireless","USB-C charging"}',
+ '[{"name":"White","hex":"#f4f4f6","image":null}]',
+ '{headset_hero.webp,headset_lifestyle.webp,headset_detail.webp,headset_box.webp}',10),
 
 ((select id from c where slug='audio'),'wired-35mm','Wired Earphones','Premium 3.5mm AUX Wired Earphones',
- 'Standard 3.5mm wired earphones with in-line mic. Reliable impulse purchase at the counter.',
- '{"3.5mm","In-line Mic"}',
- '[{"name":"Black","hex":"#1a1a1a","image":null},{"name":"White","hex":"#f4f4f6","image":null}]','{}',10),
+ 'Clear, balanced audio through a universal 3.5mm jack, with an in-line mic and volume controls. Works with anything that still has the port — Android phones, laptops, tablets, gaming consoles and older iPhones. In-ear with sound isolation, 20Hz–20KHz.',
+ '{"3.5mm jack","In-line mic","HD mic","20Hz–20KHz"}',
+ '[{"name":"White","hex":"#f4f4f6","image":"wired_35mm_white.webp"}]',
+ '{wired_35mm_white.webp,wired_35mm_lifestyle.webp,wired_35mm_back.webp}',11),
 
 ((select id from c where slug='audio'),'wired-usbc','Wired Earphones','Premium USB-C Wired Earphones',
  'USB-C wired earphones for Android and iPhone 15 and up. Growing share every quarter.',
@@ -108,9 +117,10 @@ values
  '[{"name":"Black","hex":"#1a1a1a","image":null},{"name":"White","hex":"#f4f4f6","image":null}]','{}',11),
 
 ((select id from c where slug='audio'),'wired-lightning','Wired Earphones','Premium Lightning Wired Earphones',
- 'Lightning wired earphones for the installed iPhone base. Still the volume leader on wired.',
- '{"Lightning","In-line Mic"}',
- '[{"name":"Black","hex":"#1a1a1a","image":null},{"name":"White","hex":"#f4f4f6","image":null}]','{}',12),
+ 'Crisp audio and balanced bass through a Lightning plug, with an in-line mic and volume controls. For every iPhone customer who lost the ones in the box. In-ear with sound isolation, 20Hz–20kHz. Model EP-007.',
+ '{"Lightning","In-line mic","HD mic","20Hz–20kHz"}',
+ '[{"name":"White","hex":"#f4f4f6","image":"wired_lightning_white.webp"}]',
+ '{wired_lightning_white.webp,wired_lightning_back.webp}',13),
 
 -- ------------------------------------------------- ADAPTERS
 ((select id from c where slug='adapters'),'adapter-usbc-35','Audio Adapter Cable','USB-C to 3.5mm Audio Adapter Cable',
@@ -119,17 +129,26 @@ values
  '[{"name":"White","hex":"#f4f4f6","image":"adapter_usbc_35_product.webp"}]',
  '{adapter_usbc_35.webp,adapter_usbc_35_detail.webp}',13),
 
-((select id from c where slug='adapters'),'adapter-lightning-35','Audio Adapter','Lightning to 3.5mm Adapter',
- 'Headphone jack adapter for iPhone. Pairs naturally with the wired earphone assortment.',
- '{"Lightning","3.5mm"}',
- '[{"name":"White","hex":"#f4f4f6","image":null}]','{}',14),
+((select id from c where slug='adapters'),'adapter-lightning-35','Audio Adapter','Lightning to 3.5mm AUX Adapter',
+ 'Two ports, not one: plug in 3.5mm headphones and keep charging at the same time. That is the difference between this and the dongle in every other rack, and it is the whole reason a customer picks it up. Plug and play, no app. Works with iPhone 7 through 12 and every Lightning device. Model JBC029.',
+ '{"Lightning","3.5mm AUX","Charge + listen","Plug and play"}',
+ '[{"name":"White","hex":"#f4f4f6","image":"adapter_lightning_35.webp"}]',
+ '{adapter_lightning_35_lifestyle.webp,adapter_lightning_35_box.webp,adapter_lightning_35_specs.webp}',15),
 
 ((select id from c where slug='adapters'),'adapter-lightning-usbc','Connector Adapter','Lightning to USB-C Adapter',
  'Lets an existing Lightning cable charge a USB-C device. Explains itself on the peg card.',
  '{"Lightning","USB-C","Charge + Data"}',
  '[{"name":"White","hex":"#f4f4f6","image":null}]','{}',15)
 
-on conflict (slug) do nothing;
+on conflict (slug) do update set
+  category_id = excluded.category_id,
+  type_label  = excluded.type_label,
+  name        = excluded.name,
+  description = excluded.description,
+  spec_tags   = excluded.spec_tags,
+  colors      = excluded.colors,
+  images      = excluded.images,
+  sort_order  = excluded.sort_order;
 
 -- ---------------------------------------------------------------------
 -- Variants. UPC and weight filled in where known.
@@ -146,17 +165,25 @@ from (values
  ('usba-lightning','MT-AL-03','','3 ft',12,144, 5900, 999,1,'in_stock'),
  ('usba-lightning','MT-AL-10','','10 ft',12,120, 8600,1499,2,'in_stock'),
  ('wall-20w','MT-W20','','Single',10,100, 6470,1299,1,'in_stock'),
- ('car-45w','MT-C45','','Single',10,120, 4270, 999,1,'in_stock'),
+ ('car-45w','MT-C45','850025312035','Single',10,120, 4270, 999,1,'in_stock'),
  ('powerbank-soccer','MT-PB-SOC','','Single',6,48,13200,3999,1,'in_stock'),
  ('buds-plus','MT-BUDS-P','','Single',6,48,12720,3999,1,'in_stock'),
  ('airbuds-a5','MT-A5','','Single',6,48,11360,3999,1,'in_stock'),
  ('headset-anc','MT-HS-ANC','','Single',6,36,12800,3999,1,'in_stock'),
- ('wired-35mm','MT-EAR-35','','Single',12,144, 4960, 999,1,'in_stock'),
+ ('wired-35mm','MT-EAR-35','1500002200006','Single',12,144, 4960, 999,1,'in_stock'),
  ('wired-usbc','MT-EAR-UC','','Single',12,144, 7040,1299,1,'in_stock'),
- ('wired-lightning','MT-EAR-LT','','Single',12,144, 7360,1299,1,'in_stock'),
+ ('wired-lightning','MT-EAR-LT','703977746056','Single',12,144, 7360,1299,1,'in_stock'),
  ('adapter-usbc-35','MT-AD-UC35','','Single',20,200,10530,1299,1,'in_stock'),
- ('adapter-lightning-35','MT-AD-LT35','','Single',20,200,10930,1299,1,'in_stock'),
+ ('adapter-lightning-35','MT-AD-LT35','984720174657','Single',20,200,10930,1299,1,'in_stock'),
  ('adapter-lightning-usbc','MT-AD-LTUC','','Single',20,200,10670,1299,1,'in_stock')
 ) as x(slug,sku,upc,label,pack,master,list,msrp,ord,stock)
 join products p on p.slug = x.slug
-on conflict (sku) do nothing;
+on conflict (sku) do update set
+  product_id    = excluded.product_id,
+  upc           = coalesce(excluded.upc, variants.upc),
+  label         = excluded.label,
+  case_pack     = excluded.case_pack,
+  master_carton = excluded.master_carton,
+  sort_order    = excluded.sort_order;
+  -- list_cents, msrp_cents and stock_status are NOT updated on purpose:
+  -- those are yours to set in the admin, and a re-run must never wipe them.

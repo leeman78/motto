@@ -53,6 +53,40 @@ IN THIS FOLDER
   wall_black.webp
   wall_lifestyle.webp
 
+  car_black.webp                45W car charger, port face
+  car_angle.webp                three-quarter, spec print visible
+  car_side.webp                 back, MOTTO mark visible
+
+  powerbank_soccer.webp             ball, cut out
+  powerbank_soccer_lifestyle.webp   in use, opens the card
+  powerbank_soccer_box.webp         retail box
+
+  wired_35mm_white.webp             earphones, front of pack
+  wired_35mm_lifestyle.webp         in use
+  wired_35mm_back.webp              pack back, specs and barcode
+
+  wired_lightning_white.webp        Lightning earphones, front of pack
+  wired_lightning_back.webp         pack back, specs and barcode
+
+  buds_plus_blue.webp               BUDS+ colourways
+  buds_plus_black.webp
+  buds_plus_red.webp
+  buds_plus_white.webp
+  buds_plus_pink.webp
+  buds_plus_lifestyle.webp          with a phone
+  buds_plus_box.webp                what is in the box
+  buds_plus_controls.webp           touch control guide
+
+  headset_hero.webp                 ANC/ENC buds, opens the card
+  headset_lifestyle.webp            in a cafe
+  headset_detail.webp               worn, close up
+  headset_box.webp                  what is in the box
+
+  adapter_lightning_35.webp             adapter, cut out
+  adapter_lightning_35_lifestyle.webp   in use, opens the card
+  adapter_lightning_35_box.webp         retail box front
+  adapter_lightning_35_specs.webp       box back, specs and barcode
+
   adapter_usbc_35.webp          lifestyle, opens the card
   adapter_usbc_35_product.webp  white colorway
   adapter_usbc_35_detail.webp   TPE durability graphic
@@ -103,22 +137,12 @@ STILL NEEDED
   usba_lightning_gold.webp
   usba_lightning_red.webp
 
-  car_black.webp                45W car charger
-  car_lifestyle.webp
-  powerbank_soccer.webp
 
   buds_plus_black.webp          BUDS+
   buds_plus_white.webp
   buds_plus_case.webp
   airbuds_a5_white.webp
-  headset_black.webp
-  headset_white.webp
-  wired_35mm_black.webp
-  wired_35mm_white.webp
   wired_usbc_black.webp
   wired_usbc_white.webp
-  wired_lightning_black.webp
-  wired_lightning_white.webp
 
-  adapter_lightning_35.webp
   adapter_lightning_usbc.webp

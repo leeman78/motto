@@ -47,8 +47,15 @@ supabase/01_schema.sql
 supabase/02_seed.sql
 ```
 
-The seed loads all 15 product families with placeholder list prices. Replace
-those with your real numbers before you open any dealer accounts.
+The seed loads all 16 product families with placeholder list prices. Replace
+those with your real numbers in the admin before you open any dealer accounts.
+
+**`02_seed.sql` is safe to re-run.** When a product already exists it updates
+the name, description, spec tags, colourways and photos — but deliberately
+leaves `list_cents`, `msrp_cents` and `stock_status` alone. Those are yours to
+set in the admin, and a re-run must never undo that work. So when new photos or
+copy land here, paste the whole file in again and nothing you have entered is
+at risk.
 
 Then go to **Authentication → Providers** and confirm Email is on. If you want
 the passwordless option to work, leave "Enable email confirmations" on and set

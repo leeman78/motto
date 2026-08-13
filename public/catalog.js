@@ -54,7 +54,7 @@ export const usd = c => '$' + (c/100).toLocaleString('en-US',{minimumFractionDig
 
 /* Brand and lifestyle shots are full-bleed on their own dark backdrop. Cutouts
    float on the light card. This decides which treatment a file gets. */
-export const isFlat = f => /_hero\.|_lifestyle\.|_detail\.|^adapter_usbc_35\.webp$/.test(f || '');
+export const isFlat = f => /_hero\.|_lifestyle\.|_detail\.|_box\.|_specs\.|_controls\.|^adapter_usbc_35\.webp$/.test(f || '');
 
 /* Availability. Kept deliberately coarse — a buyer needs to know whether to
    plan around it, not a live unit count that goes stale between page loads. */
@@ -140,22 +140,30 @@ export const FALLBACK = {
    stock:'in_stock',variants:[{sku:'MT-W20',label:'Single',pack:10,stock:'in_stock'}]},
 
   {slug:'car-45w',cat:'power',type:'Fast Charger',name:'45W PD Car Charger',
-   desc:'USB-C Power Delivery paired with an 18W Quick Charge port in an alloy housing.',
-   meta:['45W PD','QC 18W','Dual Port'],
-   colors:[{name:'Black',hex:'#1a1a1a',image:null}],shots:[],
-   stock:'in_stock',variants:[{sku:'MT-C45',label:'Single',pack:10,stock:'in_stock'}]},
+   desc:'Dual intelligent chips deliver up to 45W USB-C Power Delivery on one port and 18W Quick Charge 3.0 on the other, so two people can charge at speed off one socket. Model CC0200.',
+   meta:['45W PD','QC 3.0 18W','Dual Port','12–24V'],
+   colors:[{name:'Black',hex:'#1a1a1a',image:'car_black.webp'}],
+   shots:['car_black.webp','car_angle.webp','car_side.webp'],stock:'in_stock',
+   variants:[{sku:'MT-C45',upc:'850025312035',label:'Single',pack:10,stock:'in_stock'}]},
 
-  {slug:'powerbank-soccer',cat:'power',type:'Portable Power',name:'Soccer Ball Portable Power Bank',
-   desc:'Novelty portable power bank with USB-C in and out. Seasonal and event-driven demand.',
-   meta:['Portable','USB-C In/Out'],
-   colors:[{name:'White',hex:'#f4f4f6',image:null}],shots:[],
-   stock:'pre_order',variants:[{sku:'MT-PB-SOC',label:'Single',pack:6,stock:'pre_order'}]},
+  {slug:'powerbank-soccer',cat:'power',type:'Portable Power',name:'Soccer Ball Power Bank',
+   desc:'10,000 mAh with 22.5W PD fast charging and an LED percentage readout. Shaped like a soccer ball, which is the whole point: it sells itself off a counter display, and it moves hardest around tournaments, back-to-school and the World Cup.',
+   meta:['10,000 mAh','22.5W PD','LED display','USB-C In/Out'],
+   colors:[{name:'White & Navy',hex:'#2b3a6b',image:'powerbank_soccer.webp'}],
+   shots:['powerbank_soccer_lifestyle.webp','powerbank_soccer_box.webp'],stock:'in_stock',
+   variants:[{sku:'MT-PB-SOC',label:'Single',pack:6,stock:'in_stock'}]},
 
   {slug:'buds-plus',cat:'audio',type:'True Wireless Earbuds',name:'Motto BUDS+',
-   desc:'True wireless earbuds with active noise cancellation and a Qi-chargeable case.',
-   meta:['ANC','Qi Charging','True Wireless'],
-   colors:[{name:'Black',hex:'#1a1a1a',image:null},{name:'White',hex:'#f4f4f6',image:null}],shots:[],
-   stock:'in_stock',variants:[{sku:'MT-BUDS-P',label:'Single',pack:6,stock:'in_stock'}]},
+   desc:'True wireless earbuds on Bluetooth 5.0 + EDR with a Qi-compatible magnetic charging case and a battery indicator on the case. Touch controls for play, skip and calls. Five colorways, which is what makes it work on a rack — the same peg sells to five different customers.',
+   meta:['Bluetooth 5.0 + EDR','Qi charging case','Battery indicator','Touch controls'],
+   colors:[{name:'Blue',hex:'#9ecbe8',image:'buds_plus_blue.webp'},
+           {name:'Black',hex:'#1a1a1a',image:'buds_plus_black.webp'},
+           {name:'Red',hex:'#c8202a',image:'buds_plus_red.webp'},
+           {name:'White',hex:'#f4f4f6',image:'buds_plus_white.webp'},
+           {name:'Pink',hex:'#efb3c4',image:'buds_plus_pink.webp'}],
+   shots:['buds_plus_blue.webp','buds_plus_lifestyle.webp','buds_plus_box.webp','buds_plus_controls.webp'],
+   stock:'in_stock',
+   variants:[{sku:'MT-BUDS-P',label:'Single',pack:6,stock:'in_stock'}]},
 
   {slug:'airbuds-a5',cat:'audio',type:'True Wireless Earbuds',name:'Wireless Airbuds A5',
    desc:'Entry true wireless earbuds for retailers who want a second price point above wired.',
@@ -163,17 +171,20 @@ export const FALLBACK = {
    colors:[{name:'White',hex:'#f4f4f6',image:null}],shots:[],
    stock:'low_stock',variants:[{sku:'MT-A5',label:'Single',pack:6,stock:'low_stock'}]},
 
-  {slug:'headset-anc',cat:'audio',type:'Wireless Headset',name:'Wireless Headset ANC/ENC',
-   desc:'Over-ear wireless headset with active and environmental noise cancellation.',
-   meta:['ANC','ENC','Over-Ear'],
-   colors:[{name:'Black',hex:'#1a1a1a',image:null},{name:'White',hex:'#f4f4f6',image:null}],shots:[],
-   stock:'in_stock',variants:[{sku:'MT-HS-ANC',label:'Single',pack:6,stock:'in_stock'}]},
+  {slug:'headset-anc',cat:'audio',type:'True Wireless Earbuds',name:'ANC/ENC Wireless Earbuds',
+   desc:'Dual-mode noise control: ANC blocks the room out, ENC cleans up your voice on calls. The charging case has a touch display showing battery for each bud and the case, and switches modes without reaching for a phone. That screen is what a customer notices on a peg.',
+   meta:['ANC + ENC','Touch display case','True wireless','USB-C charging'],
+   colors:[{name:'White',hex:'#f4f4f6',image:null}],
+   shots:['headset_hero.webp','headset_lifestyle.webp','headset_detail.webp','headset_box.webp'],
+   stock:'in_stock',
+   variants:[{sku:'MT-HS-ANC',label:'Single',pack:6,stock:'in_stock'}]},
 
   {slug:'wired-35mm',cat:'audio',type:'Wired Earphones',name:'Premium 3.5mm AUX Wired Earphones',
-   desc:'Standard 3.5mm wired earphones with in-line mic. Reliable impulse purchase at the counter.',
-   meta:['3.5mm','In-line Mic'],
-   colors:[{name:'Black',hex:'#1a1a1a',image:null},{name:'White',hex:'#f4f4f6',image:null}],shots:[],
-   stock:'in_stock',variants:[{sku:'MT-EAR-35',label:'Single',pack:12,stock:'in_stock'}]},
+   desc:'Clear, balanced audio through a universal 3.5mm jack, with an in-line mic and volume controls. Works with anything that still has the port — Android phones, laptops, tablets, gaming consoles and older iPhones. In-ear with sound isolation, 20Hz–20KHz.',
+   meta:['3.5mm jack','In-line mic','HD mic','20Hz–20KHz'],
+   colors:[{name:'White',hex:'#f4f4f6',image:'wired_35mm_white.webp'}],
+   shots:['wired_35mm_white.webp','wired_35mm_lifestyle.webp','wired_35mm_back.webp'],stock:'in_stock',
+   variants:[{sku:'MT-EAR-35',upc:'1500002200006',label:'Single',pack:12,stock:'in_stock'}]},
 
   {slug:'wired-usbc',cat:'audio',type:'Wired Earphones',name:'Premium USB-C Wired Earphones',
    desc:'USB-C wired earphones for Android and iPhone 15 and up. Growing share every quarter.',
@@ -182,10 +193,11 @@ export const FALLBACK = {
    stock:'in_stock',variants:[{sku:'MT-EAR-UC',label:'Single',pack:12,stock:'in_stock'}]},
 
   {slug:'wired-lightning',cat:'audio',type:'Wired Earphones',name:'Premium Lightning Wired Earphones',
-   desc:'Lightning wired earphones for the installed iPhone base. Still the volume leader on wired.',
-   meta:['Lightning','In-line Mic'],
-   colors:[{name:'Black',hex:'#1a1a1a',image:null},{name:'White',hex:'#f4f4f6',image:null}],shots:[],
-   stock:'in_stock',variants:[{sku:'MT-EAR-LT',label:'Single',pack:12,stock:'in_stock'}]},
+   desc:'Crisp audio and balanced bass through a Lightning plug, with an in-line mic and volume controls. For every iPhone customer who lost the ones in the box. In-ear with sound isolation, 20Hz–20kHz. Model EP-007.',
+   meta:['Lightning','In-line mic','HD mic','20Hz–20kHz'],
+   colors:[{name:'White',hex:'#f4f4f6',image:'wired_lightning_white.webp'}],
+   shots:['wired_lightning_white.webp','wired_lightning_back.webp'],stock:'in_stock',
+   variants:[{sku:'MT-EAR-LT',upc:'703977746056',label:'Single',pack:12,stock:'in_stock'}]},
 
   {slug:'adapter-usbc-35',cat:'adapters',type:'Audio Adapter Cable',name:'USB-C to 3.5mm Audio Adapter Cable',
    desc:'Type-C to 3.5mm AUX cable for headphones and car aux inputs. TPE jacket resists compression and twisting, so it survives being stuffed in a console.',
@@ -194,11 +206,13 @@ export const FALLBACK = {
    shots:['adapter_usbc_35.webp','adapter_usbc_35_detail.webp'],
    stock:'in_stock',variants:[{sku:'MT-AD-UC35',label:'Single',pack:20,stock:'in_stock'}]},
 
-  {slug:'adapter-lightning-35',cat:'adapters',type:'Audio Adapter',name:'Lightning to 3.5mm Adapter',
-   desc:'Headphone jack adapter for iPhone. Pairs naturally with the wired earphone assortment.',
-   meta:['Lightning','3.5mm'],
-   colors:[{name:'White',hex:'#f4f4f6',image:null}],shots:[],
-   stock:'in_stock',variants:[{sku:'MT-AD-LT35',label:'Single',pack:20,stock:'in_stock'}]},
+  {slug:'adapter-lightning-35',cat:'adapters',type:'Audio Adapter',name:'Lightning to 3.5mm AUX Adapter',
+   desc:'Two ports, not one: plug in 3.5mm headphones and keep charging at the same time. That is the difference between this and the dongle in every other rack, and it is the whole reason a customer picks it up. Plug and play, no app. Works with iPhone 7 through 12 and every Lightning device. Model JBC029.',
+   meta:['Lightning','3.5mm AUX','Charge + listen','Plug and play'],
+   colors:[{name:'White',hex:'#f4f4f6',image:'adapter_lightning_35.webp'}],
+   shots:['adapter_lightning_35_lifestyle.webp','adapter_lightning_35_box.webp','adapter_lightning_35_specs.webp'],
+   stock:'in_stock',
+   variants:[{sku:'MT-AD-LT35',upc:'984720174657',label:'Single',pack:20,stock:'in_stock'}]},
 
   {slug:'adapter-lightning-usbc',cat:'adapters',type:'Connector Adapter',name:'Lightning to USB-C Adapter',
    desc:'Lets an existing Lightning cable charge a USB-C device. Explains itself on the peg card.',
