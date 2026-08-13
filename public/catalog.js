@@ -188,11 +188,12 @@ export const FALLBACK = {
    shots:['wired_35mm_white.webp','wired_35mm_lifestyle.webp','wired_35mm_back.webp'],stock:'in_stock',
    variants:[{sku:'MT-EAR-35',upc:'1500002200006',label:'Single',pack:12,stock:'in_stock'}]},
 
-  {slug:'wired-usbc',cat:'audio',type:'Wired Earphones',name:'Premium USB-C Wired Earphones',
-   desc:'USB-C wired earphones for Android and iPhone 15 and up. Growing share every quarter.',
-   meta:['USB-C','In-line Mic'],
-   colors:[{name:'Black',hex:'#1a1a1a',image:null},{name:'White',hex:'#f4f4f6',image:null}],shots:[],
-   stock:'in_stock',variants:[{sku:'MT-EAR-UC',label:'Single',pack:12,stock:'in_stock'}]},
+  {slug:'wired-usbc',cat:'audio',type:'Wired Earphones',name:'Motto Premium USB-C Wired Earphones',
+   desc:'Enhanced drivers and refined acoustics on a plain USB-C plug — no dongle, no adapter, no pairing. For every Android and iPhone 15-and-up customer whose phone lost the headphone jack. In-line mic and volume controls.',
+   meta:['USB-C','In-line mic','Enhanced drivers','No adapter needed'],
+   colors:[{name:'White',hex:'#f4f4f6',image:'wired_usbc_white.webp'}],
+   shots:['wired_usbc_white.webp','wired_usbc_lifestyle.webp'],stock:'in_stock',
+   variants:[{sku:'MT-EAR-UC',label:'Single',pack:12,stock:'in_stock'}]},
 
   {slug:'wired-lightning',cat:'audio',type:'Wired Earphones',name:'Premium Lightning Wired Earphones',
    desc:'Crisp audio and balanced bass through a Lightning plug, with an in-line mic and volume controls. For every iPhone customer who lost the ones in the box. In-ear with sound isolation, 20Hz–20kHz. Model EP-007.',

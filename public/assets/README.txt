@@ -68,6 +68,9 @@ IN THIS FOLDER
   wired_lightning_white.webp        Lightning earphones, front of pack
   wired_lightning_back.webp         pack back, specs and barcode
 
+  wired_usbc_white.webp             USB-C earphones, front of pack
+  wired_usbc_lifestyle.webp         in use on the street
+
   buds_plus_blue.webp               BUDS+ colourways
   buds_plus_black.webp
   buds_plus_red.webp
@@ -147,6 +150,4 @@ STILL NEEDED
   buds_plus_black.webp          BUDS+
   buds_plus_white.webp
   buds_plus_case.webp
-  wired_usbc_black.webp
-  wired_usbc_white.webp
 
