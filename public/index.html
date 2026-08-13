@@ -49,8 +49,21 @@
     <button class="btn soft" id="authBtn">Partner sign in</button>
     <button class="btn dark cartbtn" id="cartBtn" hidden>Cart <b id="cartCount">0</b></button>
     <a class="btn dark" id="navQuote" href="#contact">Get a quote</a>
+    <button class="burger" id="burger" aria-label="Menu" aria-expanded="false" aria-controls="mobmenu">
+      <span></span><span></span><span></span>
+    </button>
   </div>
 </div></nav>
+
+<div class="mobmenu" id="mobmenu"><div class="wrap">
+  <a href="#catalog">Products</a>
+  <a href="#whitelabel">Private Label</a>
+  <a href="#why">Why Motto</a>
+  <a href="#about">About</a>
+  <a href="#contact">Contact</a>
+  <a class="mobtel" href="tel:2146818417">214-681-8417<small>Mon–Fri 9–5 CT</small></a>
+  <a class="btn dark mobcta" href="#contact">Get a quote</a>
+</div></div>
 
 <!-- ============================ HERO ============================ -->
 <header class="hero">
@@ -886,5 +899,6 @@ $('#forgotGo').onclick = async (e) => {
 
 boot();
 </script>
+<script src="nav.js"></script>
 </body>
 </html>

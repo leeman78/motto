@@ -55,8 +55,59 @@ nav{height:var(--nav-h);position:sticky;top:0;z-index:60;background:rgba(255,255
 .cartbtn{position:relative}
 .cartbtn b{position:absolute;top:-3px;right:-3px;background:var(--blue);color:#fff;font-size:10px;min-width:19px;height:19px;
   border-radius:999px;display:grid;place-items:center;padding:0 5px}
-@media(max-width:1080px){.links{display:none}}
-@media(max-width:700px){.navtel{display:none}}
+
+/* ---------------------------------------------------------------- mobile nav */
+/* The burger is hidden on desktop and takes over from .links below 1080px.
+   Without it the links were simply hidden and nothing replaced them, which
+   left a phone with no way to reach any section. */
+.burger{display:none;width:40px;height:40px;border:0;background:transparent;cursor:pointer;
+  padding:0;place-items:center;flex:none;border-radius:10px}
+.burger:hover{background:#f0f1f3}
+.burger span{display:block;width:19px;height:1.8px;background:#111;border-radius:2px;
+  transition:transform .24s,opacity .16s}
+.burger span+span{margin-top:5px}
+.burger[aria-expanded="true"] span:nth-child(1){transform:translateY(6.8px) rotate(45deg)}
+.burger[aria-expanded="true"] span:nth-child(2){opacity:0}
+.burger[aria-expanded="true"] span:nth-child(3){transform:translateY(-6.8px) rotate(-45deg)}
+
+.mobmenu{display:none;position:fixed;left:0;right:0;top:calc(var(--nav-h) + var(--top-h,0px));
+  z-index:59;background:rgba(255,255,255,.97);
+  backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);
+  border-bottom:1px solid var(--line);padding:8px 0 18px;
+  max-height:calc(100vh - var(--nav-h));overflow-y:auto;
+  transform:translateY(-8px);opacity:0;pointer-events:none;transition:transform .22s,opacity .22s}
+.mobmenu.on{transform:translateY(0);opacity:1;pointer-events:auto}
+.mobmenu a{display:block;padding:15px 0;font-size:16px;font-weight:650;color:#1a1c20;
+  border-bottom:1px solid var(--line)}
+.mobmenu a:last-of-type{border-bottom:0}
+/* the two buttons at the foot of the panel are anchors too, so they have to
+   opt back out of the plain-link treatment above */
+.mobmenu a.mobtel,.mobmenu a.mobcta{border-bottom:0;text-align:center}
+.mobmenu a.mobcta{color:#fff;padding:14px 18px}
+.mobtel{display:none;margin-top:16px;padding:14px 0;text-align:center;border-radius:999px;
+  background:#f0f1f3;font-size:14px;font-weight:700;color:#111}
+.mobtel small{display:block;font-size:10px;font-weight:600;color:var(--ink-3);
+  letter-spacing:.09em;text-transform:uppercase;margin-top:3px}
+
+.mobcta{display:none;margin-top:10px;width:100%}
+
+@media(max-width:1080px){
+  .links{display:none}
+  .burger{display:grid}
+  .mobmenu{display:block}
+}
+@media(max-width:700px){
+  .navtel{display:none}
+  .mobtel{display:block}
+  /* Below this the brand, two pill buttons and the burger no longer fit on
+     one row and the bar overflows the viewport. Get a quote moves into the
+     panel; Partner sign in stays, since it is the reason a dealer is here. */
+  #navQuote{display:none}
+  .mobcta{display:flex}
+  .navright{gap:6px}
+  .nav{gap:8px}
+  .btn{padding:10px 14px;font-size:12.5px}
+}
 
 /* ---------------------------------------------------------------- hero */
 .hero{background:var(--panel);color:#fff;border-radius:0 0 40px 40px;overflow:hidden;position:relative}
