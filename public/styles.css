@@ -380,6 +380,21 @@ footer{border-top:1px solid var(--line);padding:34px 0 54px;color:#83868c;font-s
 .related{padding-block:20px 90px}
 @media(max-width:900px){.pdp{grid-template-columns:1fr;gap:32px;padding:20px 0 30px}}
 
+/* long-form detail under the swatches. Each block only renders when the
+   source listing actually had one, so the spacing has to work whether all
+   three are present or only the paragraph. */
+.detail{margin-top:38px;padding-top:30px;border-top:1px solid var(--line)}
+.detail h3{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#81848b;
+  font-weight:750;margin:0 0 12px}
+.detail h3+*{margin-top:0}
+.detail>*+h3{margin-top:28px}
+.detail p{font-size:14.5px;line-height:1.72;color:var(--ink-2);margin:0 0 12px}
+.detail p:last-child{margin-bottom:0}
+.detail ul{margin:0;padding:0;list-style:none}
+.detail li{font-size:14.5px;line-height:1.6;color:var(--ink-2);padding:7px 0 7px 20px;position:relative}
+.detail li::before{content:"";position:absolute;left:2px;top:15px;width:5px;height:5px;
+  border-radius:50%;background:var(--blue)}
+
 /* ---------------------------------------------------------------- counter reel */
 .reel{background:var(--panel);color:#fff;border-radius:38px;padding:52px;display:grid;
   grid-template-columns:.72fr 1fr;gap:56px;align-items:center;position:relative;overflow:hidden}

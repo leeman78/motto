@@ -32,6 +32,7 @@ export default async function handler(req, res) {
       .from('products')
       .select(`
         slug, type_label, name, description, spec_tags, colors, images, sort_order, compliance,
+        description_long, features, compatibility, weight_oz,
         categories ( slug ),
         variants ( sku, upc, label, case_pack, master_carton, is_active, sort_order, stock_status, restock_date )
       `)
@@ -60,6 +61,12 @@ export default async function handler(req, res) {
       colors: p.colors || [],
       shots: p.images || [],
       compliance: p.compliance || [],
+      // long-form detail, product page only. Null or empty means the source
+      // listing had no such block, and the page leaves it out.
+      long: p.description_long || null,
+      features: p.features || [],
+      compat: p.compatibility || null,
+      weight_oz: p.weight_oz != null ? Number(p.weight_oz) : null,
       // a family is only as available as its weakest SKU
       stock: rollUp((p.variants || []).filter(v => v.is_active).map(v => v.stock_status)),
       variants: (p.variants || [])

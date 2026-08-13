@@ -106,6 +106,17 @@ if(!p){
             `<button class="view${j===0?' active':''}" style="width:40px;height:40px" aria-label="View ${j+1}" data-src="assets/${s}"><img src="assets/${s}" alt="" loading="lazy" onerror="this.style.opacity=0"></button>`).join('') : ''}
         </div>
       </div>
+
+      ${(p.long || (p.features && p.features.length) || p.compat) ? `
+      <div class="detail">
+        ${p.long ? `<h3>Product details</h3>${
+          p.long.split(/\n{2,}/).map(t => `<p>${t.trim()}</p>`).join('')
+        }` : ''}
+        ${p.features && p.features.length ? `
+          <h3>Key features</h3>
+          <ul>${p.features.map(f => `<li>${f}</li>`).join('')}</ul>` : ''}
+        ${p.compat ? `<h3>Compatibility</h3><p>${p.compat}</p>` : ''}
+      </div>` : ''}
     </div>
 
     <div>
@@ -123,6 +134,9 @@ if(!p){
         <div class="specrow"><span class="k">Sizes</span><span class="v">${p.variants.map(v=>v.label).join(' · ')}</span></div>
         <div class="specrow"><span class="k">Case pack</span><span class="v">${packs.join(' / ')} pcs</span></div>
         ${masters.length?`<div class="specrow"><span class="k">Master carton</span><span class="v">${[...new Set(masters)].join(' / ')} pcs</span></div>`:''}
+        ${p.weight_oz ? `<div class="specrow"><span class="k">Weight</span><span class="v">${p.weight_oz.toFixed(2)} oz each${
+          packs.length === 1 ? ` · ${(p.weight_oz * packs[0] / 16).toFixed(1)} lb per case` : ''
+        }</span></div>` : ''}
         <div class="specrow"><span class="k">Ships from</span><span class="v">Carrollton, TX</span></div>
         <div class="specrow"><span class="k">Lead time</span><span class="v">1–2 business days</span></div>
         <div class="specrow"><span class="k">Private label</span><span class="v">Available on this SKU</span></div>

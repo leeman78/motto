@@ -40,6 +40,17 @@ create table products (
   -- e.g. {FCC,RoHS}. Only set this once the certificate on file actually
   -- lists this product's model number.
   compliance   text[] default '{}',
+  -- ---- long-form detail, shown only on the product page ----------------
+  -- description above is the short card blurb. These carry the full copy
+  -- from the retail listing. Every one of them is optional on purpose: the
+  -- source pages are inconsistent, some have a feature list and some do not,
+  -- and the page skips whichever block is empty rather than inventing one.
+  description_long text,
+  features         text[] default '{}',
+  compatibility    text,
+  -- per piece, from the retail listing. Cases are case_pack x this, which is
+  -- what a buyer needs to work out freight.
+  weight_oz    numeric(6,2),
   created_at   timestamptz default now()
 );
 

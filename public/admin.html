@@ -58,6 +58,7 @@ tr.click:hover td{background:#f7f8fa}
     <button data-tab="prices" aria-pressed="false">List prices</button>
     <button data-tab="inventory" aria-pressed="false">Inventory</button>
     <button data-tab="compliance" aria-pressed="false">Compliance</button>
+    <button data-tab="copy" aria-pressed="false">Copy</button>
     <button data-tab="orders" aria-pressed="false">Orders</button>
   </div>
   <button class="btn" id="signOut" style="background:#26282d;color:#c9ccd2;padding:8px 14px;font-size:12px">Sign out</button>
@@ -140,6 +141,7 @@ async function boot(){
   if(tab === 'prices')    return priceList();
   if(tab === 'inventory') return inventoryList();
   if(tab === 'compliance') return complianceList();
+  if(tab === 'copy')       return copyList();
   return orderList();
 }
 
@@ -250,6 +252,79 @@ async function complianceList(){
       $('#cmMsg').textContent = `Saved ${slug}: ${marks.length ? marks.join(', ') : 'none'}.`;
       complianceList();
     }catch(e){ $('#cmMsg').textContent = e.message; box.checked = !box.checked; }
+  });
+}
+
+/* ---------------- product copy ---------------- */
+async function copyList(){
+  const { items } = await call('list_detail');
+  const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+  const filled = items.filter(i => i.description_long).length;
+
+  $('#body').innerHTML = `
+  <div class="stats">
+    <div><div class="k">Products</div><div class="v">${items.length}</div></div>
+    <div><div class="k">Full copy in</div><div class="v">${filled}</div></div>
+    <div><div class="k">Still short only</div><div class="v">${items.length - filled}</div></div>
+  </div>
+
+  <div class="panel">
+    <h2>Product copy</h2>
+    <p class="sub">The short blurb is what a buyer reads on the catalog card, so keep it to two or three lines. Everything below it appears on the product page only. Leave a block empty when the source listing has none — the page skips it, which is better than showing a feature list somebody made up to fill the space. One bullet per line under Key features.</p>
+    ${items.map(i => `
+      <div class="panel" style="margin:0 0 14px;padding:18px">
+        <b>${esc(i.name)}</b>
+        <span class="mono" style="color:#9a9da4;font-size:11.5px;margin-left:8px">${esc(i.slug)}</span>
+
+        <label class="k" style="display:block;margin:14px 0 5px">Short blurb — catalog card</label>
+        <textarea data-f="description" data-slug="${esc(i.slug)}" rows="3"
+          style="width:100%;font:inherit;font-size:13px;padding:9px;border:1px solid #e3e4e7;border-radius:8px">${esc(i.description)}</textarea>
+
+        <label class="k" style="display:block;margin:12px 0 5px">Full description — product page. Blank line between paragraphs.</label>
+        <textarea data-f="description_long" data-slug="${esc(i.slug)}" rows="6"
+          style="width:100%;font:inherit;font-size:13px;padding:9px;border:1px solid #e3e4e7;border-radius:8px">${esc(i.description_long)}</textarea>
+
+        <label class="k" style="display:block;margin:12px 0 5px">Key features — one per line, leave empty if the source has none</label>
+        <textarea data-f="features" data-slug="${esc(i.slug)}" rows="5"
+          style="width:100%;font:inherit;font-size:13px;padding:9px;border:1px solid #e3e4e7;border-radius:8px">${esc((i.features||[]).join('\n'))}</textarea>
+
+        <div style="display:flex;gap:14px;margin-top:12px;flex-wrap:wrap">
+          <div style="flex:1;min-width:260px">
+            <label class="k" style="display:block;margin:0 0 5px">Compatibility — one line</label>
+            <input data-f="compatibility" data-slug="${esc(i.slug)}" value="${esc(i.compatibility)}"
+              style="width:100%;font:inherit;font-size:13px;padding:9px;border:1px solid #e3e4e7;border-radius:8px">
+          </div>
+          <div style="width:150px">
+            <label class="k" style="display:block;margin:0 0 5px">Weight, oz each</label>
+            <input data-f="weight_oz" data-slug="${esc(i.slug)}" value="${i.weight_oz ?? ''}" inputmode="decimal"
+              style="width:100%;font:inherit;font-size:13px;padding:9px;border:1px solid #e3e4e7;border-radius:8px">
+          </div>
+        </div>
+
+        <div style="margin-top:12px;display:flex;align-items:center;gap:12px">
+          <button class="btn dark" data-save="${esc(i.slug)}">Save</button>
+          <span class="sub" style="margin:0" data-msg="${esc(i.slug)}"></span>
+        </div>
+      </div>`).join('')}
+  </div>`;
+
+  document.querySelectorAll('[data-save]').forEach(btn => btn.onclick = async () => {
+    const slug = btn.dataset.save;
+    const msg  = document.querySelector(`[data-msg="${slug}"]`);
+    const get  = f => document.querySelector(`[data-f="${f}"][data-slug="${slug}"]`).value;
+    btn.disabled = true; msg.textContent = 'Saving…';
+    try{
+      await call('set_detail', {
+        slug,
+        description:      get('description'),
+        description_long: get('description_long'),
+        features:         get('features').split('\n').map(s=>s.trim()).filter(Boolean),
+        compatibility:    get('compatibility'),
+        weight_oz:        get('weight_oz')
+      });
+      msg.textContent = 'Saved.';
+    }catch(e){ msg.textContent = e.message; }
+    btn.disabled = false;
   });
 }
 

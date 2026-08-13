@@ -100,13 +100,13 @@ values
  '[{"name":"White","hex":"#f4f4f6","image":null}]',
  '{airbuds_a5_hero.webp,airbuds_a5_lifestyle.webp,airbuds_a5_box.webp,airbuds_a5_detail.webp,airbuds_a5_specs.webp}',9),
 
-((select id from c where slug='audio'),'headset-anc','True Wireless Earbuds','ANC/ENC Wireless Earbuds',
+((select id from c where slug='audio'),'headset-anc','True Wireless Earbuds','Wireless Headset ANC/ENC',
  'Dual-mode noise control: ANC blocks the room out, ENC cleans up your voice on calls. The charging case has a touch display showing battery for each bud and the case, and switches modes without reaching for a phone. That screen is what a customer notices on a peg.',
  '{"ANC + ENC","Touch display case","True wireless","USB-C charging"}',
  '[{"name":"White","hex":"#f4f4f6","image":null}]',
  '{headset_hero.webp,headset_lifestyle.webp,headset_detail.webp,headset_box.webp}',10),
 
-((select id from c where slug='audio'),'wired-35mm','Wired Earphones','Premium 3.5mm AUX Wired Earphones',
+((select id from c where slug='audio'),'wired-35mm','Wired Earphones','Motto Premium 3.5mm AUX Wired Earphones',
  'Clear, balanced audio through a universal 3.5mm jack, with an in-line mic and volume controls. Works with anything that still has the port — Android phones, laptops, tablets, gaming consoles and older iPhones. In-ear with sound isolation, 20Hz–20KHz.',
  '{"3.5mm jack","In-line mic","HD mic","20Hz–20KHz"}',
  '[{"name":"White","hex":"#f4f4f6","image":"wired_35mm_white.webp"}]',
@@ -118,7 +118,7 @@ values
  '[{"name":"White","hex":"#f4f4f6","image":"wired_usbc_white.webp"}]',
  '{wired_usbc_white.webp,wired_usbc_lifestyle.webp}',12),
 
-((select id from c where slug='audio'),'wired-lightning','Wired Earphones','Premium Lightning Wired Earphones',
+((select id from c where slug='audio'),'wired-lightning','Wired Earphones','Motto Premium Lightning Wired Earphones',
  'Crisp audio and balanced bass through a Lightning plug, with an in-line mic and volume controls. For every iPhone customer who lost the ones in the box. In-ear with sound isolation, 20Hz–20kHz. Model EP-007.',
  '{"Lightning","In-line mic","HD mic","20Hz–20kHz"}',
  '[{"name":"White","hex":"#f4f4f6","image":"wired_lightning_white.webp"}]',

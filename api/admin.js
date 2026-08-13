@@ -267,6 +267,52 @@ export default async function handler(req, res) {
       }
 
       // ---------------------------------------------------------------
+      case 'list_detail': {
+        const { data, error } = await db
+          .from('products')
+          .select('slug, name, description, description_long, features, compatibility, weight_oz, sort_order')
+          .order('sort_order');
+        if (error) throw error;
+        return res.status(200).json({ items: data });
+      }
+
+      case 'set_detail': {
+        const { slug } = p;
+        if (!slug) return res.status(400).json({ error: 'slug is required.' });
+
+        // Every field here is optional and an empty one is meaningful: it
+        // means the retail listing had no such block, and the product page
+        // then leaves that block out rather than showing a made-up one.
+        const patch = {};
+        if ('description'      in p) patch.description      = String(p.description || '').trim() || null;
+        if ('description_long' in p) patch.description_long = String(p.description_long || '').trim() || null;
+        if ('compatibility'    in p) patch.compatibility    = String(p.compatibility || '').trim() || null;
+        if ('features' in p) {
+          if (!Array.isArray(p.features)) {
+            return res.status(400).json({ error: 'features must be an array.' });
+          }
+          patch.features = p.features.map(f => String(f).trim()).filter(Boolean);
+        }
+        if ('weight_oz' in p) {
+          const raw = p.weight_oz;
+          if (raw === '' || raw === null) patch.weight_oz = null;
+          else {
+            const n = Number(raw);
+            if (!isFinite(n) || n < 0 || n > 9999) {
+              return res.status(400).json({ error: 'weight_oz must be a number of ounces.' });
+            }
+            patch.weight_oz = Math.round(n * 100) / 100;
+          }
+        }
+        if (!Object.keys(patch).length) {
+          return res.status(400).json({ error: 'Nothing to update.' });
+        }
+        const { error } = await db.from('products').update(patch).eq('slug', slug);
+        if (error) throw error;
+        return res.status(200).json({ ok: true });
+      }
+
+      // ---------------------------------------------------------------
       case 'list_inventory': {
         const { data, error } = await db
           .from('variants')
