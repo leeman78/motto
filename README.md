@@ -365,6 +365,28 @@ Whatever mode is set, `public/config.js` and the `FEE_MODE` env var must match.
 The browser uses the first to quote and the server uses the second to charge; if
 they disagree, a dealer pays something other than what the cart showed.
 
+## Compliance marks
+
+`products.compliance` is an array like `{FCC,RoHS}`, edited in the admin
+**Compliance** tab. It defaults to empty, and a product with nothing set shows
+"Certificates on request" on its page — which is honest and costs nothing.
+
+**Only tick a mark once the certificate on file lists that product's model
+number.** Certificates usually cover specific models, so a cable's FCC report
+does not cover the earbuds. In the US an untested wireless device sold as FCC
+certified is a real enforcement matter, not a marketing exaggeration. When in
+doubt, leave it blank; "on request" is the safe and normal answer in wholesale.
+
+CE is included because the certificates exist, but it is deliberately dimmed on
+the site. It is a European declaration and means nothing to a convenience-store
+buyer in Texas. FCC and RoHS are what US buyers and chain accounts actually ask
+for.
+
+The certificates themselves are not hosted yet. When the original per-product
+PDFs are available, drop them in `public/docs/` and link them from the
+Compliance row — a composite screenshot of nine certificates is not something a
+buyer can file.
+
 ## Availability
 
 Every SKU carries a status: In stock, Low stock, Pre-order or Out of stock. It

@@ -37,6 +37,9 @@ create table products (
   images       text[] default '{}',         -- ['usbc_black.png', ...]
   is_published boolean default true,
   sort_order   int default 0,
+  -- e.g. {FCC,RoHS}. Only set this once the certificate on file actually
+  -- lists this product's model number.
+  compliance   text[] default '{}',
   created_at   timestamptz default now()
 );
 

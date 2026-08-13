@@ -31,7 +31,7 @@ export default async function handler(req, res) {
     const { data: products, error } = await db
       .from('products')
       .select(`
-        slug, type_label, name, description, spec_tags, colors, images, sort_order,
+        slug, type_label, name, description, spec_tags, colors, images, sort_order, compliance,
         categories ( slug ),
         variants ( sku, upc, label, case_pack, master_carton, is_active, sort_order, stock_status, restock_date )
       `)
@@ -59,6 +59,7 @@ export default async function handler(req, res) {
       meta: p.spec_tags || [],
       colors: p.colors || [],
       shots: p.images || [],
+      compliance: p.compliance || [],
       // a family is only as available as its weakest SKU
       stock: rollUp((p.variants || []).filter(v => v.is_active).map(v => v.stock_status)),
       variants: (p.variants || [])

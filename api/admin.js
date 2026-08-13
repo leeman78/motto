@@ -247,6 +247,26 @@ export default async function handler(req, res) {
       }
 
       // ---------------------------------------------------------------
+      case 'set_compliance': {
+        const { slug, compliance } = p;
+        const allowed = ['FCC', 'RoHS', 'CE'];
+        if (!slug || !Array.isArray(compliance)) {
+          return res.status(400).json({ error: 'slug and a compliance array are required.' });
+        }
+        const clean = compliance.filter(x => allowed.includes(x));
+        const { error } = await db.from('products').update({ compliance: clean }).eq('slug', slug);
+        if (error) throw error;
+        return res.status(200).json({ ok: true });
+      }
+
+      case 'list_compliance': {
+        const { data, error } = await db
+          .from('products').select('slug, name, compliance, sort_order').order('sort_order');
+        if (error) throw error;
+        return res.status(200).json({ items: data });
+      }
+
+      // ---------------------------------------------------------------
       case 'list_inventory': {
         const { data, error } = await db
           .from('variants')

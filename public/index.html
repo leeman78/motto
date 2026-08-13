@@ -46,7 +46,7 @@
   </div>
   <div class="navright">
     <a class="navtel" href="tel:2146818417">214-681-8417<small>Mon–Fri 9–5 CT</small></a>
-    <button class="btn soft" id="authBtn">Dealer sign in</button>
+    <button class="btn soft" id="authBtn">Partner sign in</button>
     <button class="btn dark cartbtn" id="cartBtn" hidden>Cart <b id="cartCount">0</b></button>
     <a class="btn dark" id="navQuote" href="#contact">Get a quote</a>
   </div>
@@ -89,7 +89,7 @@
   <div class="gate rise" id="gate">
     <div class="txt" id="gateTxt"><b>Pricing is quoted per account.</b> Your numbers depend on the volume you move, so a rep sets them with you. Already a partner? Sign in to see your pricing.</div>
     <button class="btn soft" id="pwBtn" hidden>Change password</button>
-    <button class="btn dark" id="gateBtn">Dealer sign in</button>
+    <button class="btn dark" id="gateBtn">Partner sign in</button>
   </div>
 
   <div class="toolbar rise">
@@ -141,6 +141,12 @@
       <div class="point"><b>Case-pack ordering</b><span>Quantities move in full cases, so warehouse picks match what was sold.</span></div>
       <div class="point" id="whyPay"><b>Ships from Carrollton, TX</b><span>Dallas metro warehouse. Orders picked and out the door in one to two business days.</span></div>
       <div class="point"><b>Net 30 on approval</b><span>Established accounts switch from prepay to invoice terms.</span></div>
+      <div class="comply">
+        <span class="cmark">FCC</span>
+        <span class="cmark">RoHS</span>
+        <span class="cmark ce">CE</span>
+        <p>Products are built to FCC and RoHS standards. Certificates of Conformity are on file and sent on request — <a href="#contact" id="complyLink">ask for the documents</a>.</p>
+      </div>
     </div>
   </div>
 </section>
@@ -238,8 +244,8 @@
 
 <!-- sign-in -->
 <div class="scrim" id="loginScrim"></div>
-<div class="modal" id="loginModal" role="dialog" aria-label="Dealer sign in">
-  <h3>Dealer sign in</h3>
+<div class="modal" id="loginModal" role="dialog" aria-label="Partner sign in">
+  <h3>Partner sign in</h3>
   <p class="msub">Use the email and password your Motto rep set up for your account.</p>
   <div class="f"><label for="le">Email</label><input id="le" type="email" autocomplete="username" placeholder="you@business.com"></div>
   <div class="f"><label for="lp">Password</label><input id="lp" type="password" autocomplete="current-password" placeholder="••••••••"></div>
@@ -325,11 +331,11 @@ function paintAuth(){
   const on = !!DEALER;
   document.body.classList.toggle('dealer', on);
 
-  $('#authBtn').textContent = on ? 'Sign out' : 'Dealer sign in';
+  $('#authBtn').textContent = on ? 'Sign out' : 'Partner sign in';
   $('#cartBtn').hidden = !on;
   $('#gate').classList.toggle('on', on);
   $('#gate').classList.toggle('quoteonly', !on);
-  $('#gateBtn').textContent = on ? 'Sign out' : 'Dealer sign in';
+  $('#gateBtn').textContent = on ? 'Sign out' : 'Partner sign in';
 
   // A signed-in dealer already has pricing. Asking them for their door count
   // so a rep can quote them reads like the site does not know who they are.
@@ -694,6 +700,22 @@ $('#checkout').onclick = async () => {
 };
 
 /* ---------------- lead form ---------------- */
+// A request handed over from a product page.
+(() => {
+  try{
+    const ask = sessionStorage.getItem('motto_ask');
+    if(ask){ const box = $('#c6'); if(box && !box.value) box.value = ask; sessionStorage.removeItem('motto_ask'); }
+  }catch(_){}
+})();
+
+$('#complyLink').onclick = () => {
+  // Land them in the form with the ask already written, so the request takes
+  // one tap instead of making them phrase it themselves.
+  const box = $('#c6');
+  if(box && !box.value) box.value = 'Please send Certificates of Conformity (FCC / RoHS) for your cable and charger line.';
+  setTimeout(() => box && box.focus(), 600);
+};
+
 $('#leadBtn').onclick = async () => {
   const btn = $('#leadBtn'), note = $('#leadNote');
   const payload = {

@@ -32,6 +32,17 @@ IN THIS FOLDER
   usbc_wine.webp
   usbc_orange.webp
 
+  usba_usbc_hero.webp           brand shot
+  usba_usbc_black.webp
+  usba_usbc_darkbrown.webp
+  usba_usbc_lightbrown.webp
+  usba_usbc_red.webp
+  usba_usbc_orange.webp
+
+  usba_lightning_hero.webp      brand shot
+  usba_lightning_wine.webp
+  usba_lightning_orange.webp
+
   lightning_hero.webp           brand shot
   lightning_wine.webp
   lightning_gold.webp
@@ -88,9 +99,9 @@ STILL NEEDED
   usbc_gold.webp                gold colorway, USB-C to USB-C
   lightning_black.webp          black colorway, USB-C to Lightning
 
-  usba_lightning_black.webp     whole product, no photos yet
-  usba_lightning_wine.webp
-  usba_lightning_brown.webp
+  usba_lightning_black.webp     USB-A to Lightning, black colourway
+  usba_lightning_gold.webp
+  usba_lightning_red.webp
 
   car_black.webp                45W car charger
   car_lifestyle.webp

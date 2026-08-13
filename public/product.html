@@ -113,6 +113,11 @@ if(!p){
         <div class="specrow"><span class="k">Ships from</span><span class="v">Carrollton, TX</span></div>
         <div class="specrow"><span class="k">Lead time</span><span class="v">1–2 business days</span></div>
         <div class="specrow"><span class="k">Private label</span><span class="v">Available on this SKU</span></div>
+        <div class="specrow"><span class="k">Compliance</span><span class="v">${
+          (p.compliance && p.compliance.length)
+            ? `<span class="cmarks">${p.compliance.map(c=>`<em>${c}</em>`).join('')}</span>`
+            : 'Certificates on request'
+        }</span></div>
       </div>
 
       <h4 style="margin:30px 0 10px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#81848b">SKUs</h4>
@@ -141,12 +146,14 @@ if(!p){
       <h4>Build an order</h4>
       <p class="sub">Quantities are in full cases. Mix colorways and lengths in one go.</p>
       ${orderMatrix(p, {}, { addLabel: 'Add to order' })}
-      <p class="sub" style="margin:14px 0 0;text-align:center">Questions? Call
+      <a class="docbtn" href="/#contact" id="docBtn">Request compliance documents</a>
+      <p class="sub" style="margin:12px 0 0;text-align:center">Questions? Call
         <a href="tel:${SALES_PHONE.replace(/\D/g,'')}"><b>${SALES_PHONE}</b></a></p>`
     : `
       <h4>Wholesale pricing</h4>
       <p class="sub">Quoted per account against the volume you move. Tell us your door count and we will send numbers the same day, usually within a few hours.</p>
       <a class="btn dark" href="/#contact">Request pricing on this product</a>
+      <a class="docbtn" href="/#contact" id="docBtn">Request compliance documents</a>
       <p class="sub" style="margin:12px 0 0;text-align:center">Or call <a href="tel:${SALES_PHONE.replace(/\D/g,'')}"><b>${SALES_PHONE}</b></a> · <a href="mailto:${SALES_EMAIL}"><b>${SALES_EMAIL}</b></a></p>`;
 
   if(priced){
@@ -173,6 +180,13 @@ if(!p){
     };
     refresh();
   }
+
+  const doc = $('#docBtn');
+  if(doc) doc.onclick = () => {
+    // Hand the request over so the form on the home page opens with it written.
+    try{ sessionStorage.setItem('motto_ask',
+      `Please send Certificates of Conformity for ${p.name}.`); }catch(_){}
+  };
 
   window.miss = img => { img.style.opacity = 0; $('#shot').classList.add('noimg'); };
 

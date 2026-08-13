@@ -465,3 +465,22 @@ footer{border-top:1px solid var(--line);padding:34px 0 54px;color:#83868c;font-s
 .ok{font-size:12.5px;color:#166534;background:#e8f6ec;border-radius:10px;padding:10px 12px;margin:0 0 12px;line-height:1.5}
 
 .sent .small b.warn{color:#8a5a00}
+
+/* ---------------------------------------------------------------- compliance */
+.comply{display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  border-top:1px solid #292a2e;margin-top:4px;padding-top:16px}
+.cmark{font-size:10.5px;font-weight:800;letter-spacing:.09em;color:#c9ccd2;
+  border:1px solid #3a3c42;border-radius:6px;padding:5px 9px;flex:none}
+.cmark.ce{opacity:.55}
+.comply p{flex:1 1 240px;font-size:11.5px;color:#8f939a;line-height:1.55;margin:0}
+.comply a{color:#8baaff;text-decoration:underline;text-underline-offset:2px}
+.comply a:hover{color:#a9c0ff}
+
+/* product page */
+.specrow .cmarks{display:inline-flex;gap:5px;vertical-align:-1px}
+.specrow .cmarks em{font-style:normal;font-size:9.5px;font-weight:800;letter-spacing:.06em;
+  color:var(--ink-2);border:1px solid var(--line);border-radius:5px;padding:3px 6px}
+.docbtn{display:block;width:100%;margin-top:10px;padding:12px;background:#fff;color:var(--ink);
+  border:1px solid var(--line);border-radius:999px;font-family:inherit;font-size:12.5px;font-weight:700;
+  cursor:pointer;text-align:center;text-decoration:none;transition:.16s}
+.docbtn:hover{border-color:#111}
