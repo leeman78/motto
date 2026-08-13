@@ -189,7 +189,7 @@ export const FALLBACK = {
    variants:[{sku:'MT-EAR-35',upc:'1500002200006',label:'Single',pack:12,stock:'in_stock'}]},
 
   {slug:'wired-usbc',cat:'audio',type:'Wired Earphones',name:'Motto Premium USB-C Wired Earphones',
-   desc:'Enhanced drivers and refined acoustics on a plain USB-C plug — no dongle, no adapter, no pairing. For every Android and iPhone 15-and-up customer whose phone lost the headphone jack. In-line mic and volume controls.',
+   desc:'The top of Motto\'s wired audio lineup. Where the standard USB-C earphone delivers clean digital audio, the Premium version steps it up with enhanced drivers, refined acoustics, and a more elevated build quality that matches the look and feel of Motto\'s leather-wrapped accessories. Connects directly to iPhone 15 and newer, Samsung Galaxy, Google Pixel, iPad Pro, or any USB-C MacBook. No adapter, no wireless lag, no battery anxiety. Just high-resolution wired audio, every time you plug in. In-line mic and volume controls. 1.40 oz.',
    meta:['USB-C','In-line mic','Enhanced drivers','No adapter needed'],
    colors:[{name:'White',hex:'#f4f4f6',image:'wired_usbc_white.webp'}],
    shots:['wired_usbc_white.webp','wired_usbc_lifestyle.webp'],stock:'in_stock',
