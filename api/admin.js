@@ -14,6 +14,7 @@
 
 import { db, checkAdmin, tempPassword } from './_lib.js';
 
+// Sender stays on the Resend-verified mottob2b.com domain.
 const FROM = process.env.LEAD_FROM_EMAIL || 'Motto Wholesale <info@mottob2b.com>';
 const esc = s => String(s || '').replace(/[<>&]/g, c => ({ '<':'&lt;', '>':'&gt;', '&':'&amp;' }[c]));
 

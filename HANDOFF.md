@@ -28,7 +28,8 @@ data and auth, Stripe for payment (not connected yet).
 | Secret key | Vercel env `SUPABASE_SERVICE_ROLE_KEY` — never in code |
 | Admin token | Vercel env `ADMIN_TOKEN` — Nam has it saved |
 | Email | Resend, domain `mottob2b.com` verified, key in Vercel |
-| Sales inbox | `info@mottob2b.com` (GoDaddy forwarding to a personal address) |
+| Sales inbox | `info@mottousa.com` — all contact and order mail is delivered here |
+| Sending domain | `mottob2b.com` — verified in Resend. The From address must stay on it |
 | Phone | 214-681-8417 |
 | Warehouse | 1445 Mac Arthur Dr Ste 116, Carrollton, TX 75007 |
 | Founded | **2017** (matches mottousa.com; the Instagram bio still says 2016 and needs fixing) |
@@ -73,7 +74,7 @@ at 2%, below what the code would apply.
 (create accounts, set discount, per-SKU price overrides, reset password),
 List prices, Compliance, Inventory, Orders.
 
-**Email** — contact form and orders notify `info@mottob2b.com` and send the
+**Email** — contact form and orders notify `info@mottousa.com` and send the
 buyer a confirmation. Sent in parallel; a failed email never tells someone
 their message was lost, because the record is already saved.
 

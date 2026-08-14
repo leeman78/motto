@@ -298,20 +298,22 @@ worth keeping honest.
 ## Email
 
 The contact form writes the lead to Supabase and then emails
-`info@mottob2b.com`. The write happens first on purpose: if the mail provider
+`info@mottousa.com`. The write happens first on purpose: if the mail provider
 is down the lead is still saved, and the buyer is never told their message was
 lost when it wasn't.
 
 Set `RESEND_API_KEY` in Vercel to turn the email on. Without it the form still
 works, the leads just sit in the database. The sending domain has to be
 verified in Resend first, or mail from `info@mottob2b.com` will be rejected.
+The From address stays on mottob2b.com for that reason; only the recipient is
+info@mottousa.com.
 
 **Supabase auth emails are separate.** Password resets and the "email me a
 sign-in link" option are sent by Supabase, and out of the box they come from
 `noreply@mail.app.supabase.io` with a hard limit of a few per hour. For real
 dealers, set custom SMTP under Supabase → Project Settings → Authentication →
 SMTP Settings and point it at the same Resend account. Then those come from
-`info@mottob2b.com` too, and the rate limit goes away.
+`info@mottousa.com` too, and the rate limit goes away.
 
 ## Ordering
 

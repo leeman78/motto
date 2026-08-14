@@ -7,7 +7,10 @@
 
 import { db } from './_lib.js';
 
-const NOTIFY_TO   = process.env.LEAD_NOTIFY_EMAIL || 'info@mottob2b.com';
+const NOTIFY_TO   = process.env.LEAD_NOTIFY_EMAIL || 'info@mottousa.com';
+// Sender stays on mottob2b.com: that is the domain verified in Resend.
+// Point it at mottousa.com only after verifying that domain there, or
+// every message silently fails to send.
 const NOTIFY_FROM = process.env.LEAD_FROM_EMAIL   || 'Motto Wholesale <info@mottob2b.com>';
 
 const esc = s => String(s || '').replace(/[<>&]/g, c => ({ '<':'&lt;', '>':'&gt;', '&':'&amp;' }[c]));
@@ -135,6 +138,6 @@ export default async function handler(req, res) {
     return res.status(200).json({ ok: true });
   } catch (err) {
     console.error('lead failed:', err);
-    return res.status(500).json({ error: 'Could not send. Call 214-681-8417 or email info@mottob2b.com.' });
+    return res.status(500).json({ error: 'Could not send. Call 214-681-8417 or email info@mottousa.com.' });
   }
 }

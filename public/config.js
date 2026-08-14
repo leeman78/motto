@@ -46,4 +46,4 @@ export const ACH_DISCOUNT_PCT = 2;   // only used when FEE_MODE is 'ach_discount
 
 // Shown wherever a buyer is told to get in touch.
 export const SALES_PHONE = '214-681-8417';
-export const SALES_EMAIL = 'info@mottob2b.com';
+export const SALES_EMAIL = 'info@mottousa.com';
