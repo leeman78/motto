@@ -33,6 +33,56 @@ tr.click:hover td{background:#f7f8fa}
 .pill.grey{background:#f0f0f2;color:#71747b}
 .inline{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .priceinput{width:104px;font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:13px;text-align:right;border:1px solid #e2e2e6;border-radius:9px;padding:8px 10px;outline:none}
+  /* A number on its own does not say what it counts. "25" and "200" sat next
+     to each other meaning pieces and pieces, but the second one is also
+     eight boxes, and that is the number a freight quote needs. */
+  /* ---- price table -------------------------------------------------
+     Columns were drifting because the unit label sat outside the cell and
+     wrapped onto its own line at some widths. Number and unit now share one
+     nowrap box with a fixed-width label, so every row lines up whatever the
+     value is, and the read-only state occupies exactly the same space as the
+     input it replaces. */
+  .ptable{width:100%;border-collapse:collapse;table-layout:fixed}
+  .ptable th{font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;color:#9a9da4;
+    font-weight:800;padding:0 12px 12px 0;border-bottom:1px solid #ececef;text-align:left;white-space:nowrap}
+  .ptable th.r{text-align:right}
+  .ptable td{padding:11px 12px 11px 0;border-bottom:1px solid #f2f2f4;vertical-align:middle}
+  .ptable td.r{text-align:right}
+  .ptable tr:last-child td{border-bottom:0}
+  .ptable col{}
+  .ptable th:nth-child(1),.ptable td:nth-child(1){width:26%}
+  .ptable th:nth-child(2),.ptable td:nth-child(2){width:11%}
+  .ptable th:nth-child(3),.ptable td:nth-child(3){width:15%}
+  .ptable th:nth-child(4),.ptable td:nth-child(4){width:11%}
+  .ptable th:nth-child(5),.ptable td:nth-child(5){width:13%}
+  .ptable th:nth-child(6),.ptable td:nth-child(6){width:12%}
+  .ptable th:nth-child(7),.ptable td:nth-child(7){width:9%}
+  .ptable th:nth-child(8),.ptable td:nth-child(8){width:8%}
+
+  .pname b{display:block;font-size:13.5px;line-height:1.3}
+  .pname span{display:block;color:#9a9da4;font-size:11.5px;margin-top:2px}
+
+  /* one line, always: value then unit, unit never wraps under */
+  .numcell{display:inline-flex;align-items:baseline;justify-content:flex-end;gap:7px;white-space:nowrap}
+  .numcell i{font-style:normal;font-size:11px;color:#9a9da4;
+    font-family:ui-monospace,Menlo,Consolas,monospace;width:52px;text-align:left;flex:none}
+
+  /* read-only and editable states share a box so nothing shifts on unlock */
+  .ro{display:inline-block;min-width:62px;padding:8px 10px;font-size:13px;
+    font-family:ui-monospace,"SF Mono",Menlo,monospace;color:#0b0b0d;
+    border:1px solid transparent;border-radius:9px}
+  .ro.edited{background:#fff7ed}
+  .pin{font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:13px;color:#0b0b0d;
+    border:1px solid #e2e2e6;border-radius:9px;padding:8px 10px;outline:none;background:#fff}
+  .pin:focus{border-color:#111}
+  .pin.edited{border-color:#f59e0b;background:#fff7ed}
+
+  .pricehead{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;margin-bottom:22px}
+  .pricehead .sub{max-width:640px}
+  .priceacts{display:flex;gap:8px;flex:none}
+  .priceacts .btn[disabled]{opacity:.45;cursor:default}
+  .unit{display:inline-block;margin-left:7px;font-size:11px;color:#9a9da4;
+    white-space:nowrap;font-family:ui-monospace,Menlo,Consolas,monospace}
 .priceinput:focus{border-color:#111}
 .priceinput.over{border-color:var(--blue);background:#f5f8ff;font-weight:700}
 .tiny{border:0;background:none;color:#b3b6bd;font-size:11px;font-weight:700;cursor:pointer;padding:4px}
@@ -145,69 +195,268 @@ async function boot(){
   return orderList();
 }
 
-/* ---------------- list prices ---------------- */
-async function priceList(){
-  $('#pane').innerHTML = '<div class="panel"><p class="sub">Loading…</p></div>';
-  const { items } = await call('list_products');
-  const total = items.reduce((s,i) => s + (i.list_cents||0), 0);
+/* ---------------- list prices ----------------
+   The table is read-only until it is unlocked. Two reasons.
+
+   A row of open inputs invites a stray keystroke, and every one of these
+   numbers is a price somebody gets charged or a part number another table
+   points at. The unlock code is not security: anyone holding the admin token
+   can already call the API directly. It is a guard against changing a price
+   by accident, which is the failure that actually happens.
+
+   Edits are held locally and written in one Save. Saving each field as you
+   leave it meant a redraw between every keystroke, which loses your place in
+   a nineteen row table.
+*/
+const EDIT_CODE = '7979';
+
+let priceRows = [];      // last loaded rows
+let priceEdits = {};     // sku -> { field: value }
+let priceUnlocked = false;
+
+async function priceList(reload = true) {
+  if (reload) {
+    $('#pane').innerHTML = '<div class="panel"><p class="sub">Loading…</p></div>';
+    const { items } = await call('list_products');
+    priceRows = items;
+    priceEdits = {};
+  }
+  renderPrices();
+}
+
+function renderPrices() {
+  const items = priceRows;
+  const pending = Object.keys(priceEdits).length;
+
+  // The value to show: a pending edit if there is one, otherwise the stored one.
+  const val = (sku, field, fallback) =>
+    (priceEdits[sku] && field in priceEdits[sku]) ? priceEdits[sku][field] : fallback;
+
+  const perPiece = i => {
+    const pack = Number(val(i.sku, 'case_pack', i.case_pack)) || 1;
+    const cents = val(i.sku, 'list_pc_cents', i.case_pack ? Math.round(i.list_cents / i.case_pack) : 0);
+    return Number(cents) || 0;
+  };
+
+  // How many inner boxes make a master carton. Only stated when it divides
+  // exactly: a rounded box count is what a freight quote gets built on.
+  const boxes = i => {
+    const pack = Number(val(i.sku, 'case_pack', i.case_pack)) || 0;
+    const mast = Number(val(i.sku, 'master_carton', i.master_carton)) || 0;
+    const b = pack > 0 ? mast / pack : 0;
+    return Number.isInteger(b) && b > 1 ? b + ' boxes' : '';
+  };
+
+  const marginOf = i => {
+    const msrp = Number(val(i.sku, 'msrp_cents', i.msrp_cents)) || 0;
+    return msrp ? Math.round((1 - perPiece(i) / msrp) * 100) : null;
+  };
+
+  const money = c => (Number(c) / 100).toFixed(2);
+  const changed = (sku, field) => priceEdits[sku] && field in priceEdits[sku] ? ' edited' : '';
+
+  const cell = (i, field, shown, opts = {}) => {
+    const w = opts.width || 74;
+    const align = opts.left ? 'left' : 'right';
+    if (!priceUnlocked) {
+      return `<span class="ro${changed(i.sku, field)}" style="text-align:${align}">${shown}</span>`;
+    }
+    return `<input class="pin${changed(i.sku, field)}" style="width:${w}px;text-align:${align}"
+      data-sku="${i.sku}" data-field="${field}" value="${shown}" spellcheck="false">`;
+  };
 
   $('#pane').innerHTML = `
   <div class="summary">
     <div><div class="k">SKUs</div><div class="v">${items.length}</div></div>
-    <div><div class="k">Priced</div><div class="v">${items.filter(i=>i.list_cents>0).length}</div></div>
-    <div><div class="k">Missing UPC</div><div class="v">${items.filter(i=>!i.upc).length}</div></div>
-    <div><div class="k">Avg case</div><div class="v">${usd(Math.round(total/(items.length||1)))}</div></div>
+    <div><div class="k">Priced</div><div class="v">${items.filter(i => i.list_cents > 0).length}</div></div>
+    <div><div class="k">Missing UPC</div><div class="v">${items.filter(i => !i.upc).length}</div></div>
+    <div><div class="k">Unsaved</div><div class="v" style="color:${pending ? '#b45309' : 'inherit'}">${pending}</div></div>
   </div>
 
   <div class="panel">
-    <h2>List prices</h2>
-    <p class="sub">Every dealer's pricing is derived from these. Change a list price and every dealer without a manual override on that SKU moves with it on their next page load. Dealers who were pinned to a specific number stay where they are — the count is shown when you save.</p>
-    <table>
+    <div class="pricehead">
+      <div>
+        <h2>List prices</h2>
+        <p class="sub" style="margin:6px 0 0">Every dealer's pricing is derived from these. Retail price is per piece, the way the supplier quotes it; it is multiplied by the box quantity before it is stored. Dealers pinned to a manual price stay where they are.</p>
+      </div>
+      <div class="priceacts">
+        ${priceUnlocked ? `
+          <button class="btn dark" id="saveAll" ${pending ? '' : 'disabled'}>Save ${pending ? pending + ' change' + (pending > 1 ? 's' : '') : 'changes'}</button>
+          <button class="btn soft" id="cancelAll">Cancel</button>
+        ` : `<button class="btn soft" id="unlockEdit">Edit</button>`}
+      </div>
+    </div>
+
+    <table class="ptable">
       <thead><tr>
-        <th>Product</th><th>SKU</th><th>UPC</th>
-        <th class="r">Case pack</th><th class="r">Master</th>
-        <th class="r">List / case</th><th class="r">MSRP / pc</th><th class="r">Margin at MSRP</th>
+        <th>Product</th>
+        <th>SKU</th>
+        <th>UPC</th>
+        <th class="r">Per box</th>
+        <th class="r">Master</th>
+        <th class="r">Retail price / pc</th>
+        <th class="r">MSRP / pc</th>
+        <th class="r">Margin</th>
       </tr></thead>
-      <tbody>${items.map(i=>{
-        const perPiece = i.case_pack ? Math.round(i.list_cents / i.case_pack) : 0;
-        const margin = i.msrp_cents ? Math.round((1 - perPiece / i.msrp_cents) * 100) : null;
+      <tbody>${items.map(i => {
+        const m = marginOf(i);
         return `<tr>
-          <td><b>${i.products?.name || ''}</b><br><span style="color:#9a9da4;font-size:11.5px">${i.label}</span></td>
-          <td class="mono" style="color:#9a9da4;font-size:11.5px">${i.sku}</td>
-          <td><input class="priceinput" style="width:120px;text-align:left" data-upc="${i.sku}" value="${i.upc||''}" placeholder="—"></td>
-          <td class="r"><input class="priceinput" style="width:62px" data-pack="${i.sku}" value="${i.case_pack||''}"></td>
-          <td class="r"><input class="priceinput" style="width:62px" data-master="${i.sku}" value="${i.master_carton||''}"></td>
-          <td class="r"><input class="priceinput" data-list="${i.sku}" value="${((i.list_cents||0)/100).toFixed(2)}"></td>
-          <td class="r"><input class="priceinput" style="width:82px" data-msrp="${i.sku}" value="${((i.msrp_cents||0)/100).toFixed(2)}"></td>
-          <td class="r mono" style="color:${margin!=null && margin>=45 ? '#166534' : '#9a9da4'}">${margin!=null ? margin+'%' : '—'}</td>
-        </tr>`;}).join('')}
+          <td class="pname"><b>${i.products?.name || ''}</b><span>${i.label}</span></td>
+          <td>${cell(i, 'sku', val(i.sku, 'sku', i.sku), { width: 104, left: true })}</td>
+          <td>${cell(i, 'upc', val(i.sku, 'upc', i.upc || ''), { width: 128, left: true })}</td>
+          <td class="r"><span class="numcell">${cell(i, 'case_pack', val(i.sku, 'case_pack', i.case_pack || ''), { width: 62 })}<i>pcs</i></span></td>
+          <td class="r"><span class="numcell">${cell(i, 'master_carton', val(i.sku, 'master_carton', i.master_carton || ''), { width: 62 })}<i>${boxes(i) || 'pcs'}</i></span></td>
+          <td class="r"><span class="numcell">${cell(i, 'list_pc_cents', money(perPiece(i)), { width: 74 })}<i></i></span></td>
+          <td class="r"><span class="numcell">${cell(i, 'msrp_cents', money(val(i.sku, 'msrp_cents', i.msrp_cents || 0)), { width: 74 })}<i></i></span></td>
+          <td class="r mono margin" style="color:${m != null && m >= 45 ? '#166534' : '#9a9da4'}">${m != null ? m + '%' : '—'}</td>
+        </tr>`;
+      }).join('')}
       </tbody>
     </table>
-    <p class="sub" style="margin:18px 0 0" id="priceMsg">Changes save when you leave a field. "Margin at MSRP" is what the retailer keeps if they sell at your suggested price — it is the number a buyer asks about first.</p>
+    <p class="sub" style="margin:18px 0 0" id="priceMsg">${priceUnlocked
+      ? 'Edits are held here until you press Save. "Margin" is what the retailer keeps at your suggested price.'
+      : 'Press Edit to change prices, part numbers or pack sizes.'}</p>
   </div>`;
 
-  const push = async (sku, patch) => {
-    const msg = $('#priceMsg');
-    try{
-      const r = await call('set_list_price', { sku, ...patch });
-      msg.textContent = r.pinned
-        ? `Saved ${sku}. Note: ${r.pinned} dealer${r.pinned>1?'s have':' has'} a manual price on this SKU and will not move with it.`
-        : `Saved ${sku}.`;
-      priceList();
-    }catch(e){ msg.textContent = e.message; }
-  };
-  const cents = v => Math.round(parseFloat(String(v).replace(/[^0-9.]/g,'')) * 100) || 0;
+  if (!priceUnlocked) {
+    $('#unlockEdit').onclick = () => {
+      const code = prompt('Enter the edit code to unlock pricing.');
+      if (code === null) return;
+      if (code.trim() !== EDIT_CODE) { $('#priceMsg').textContent = 'That code is not correct.'; return; }
+      priceUnlocked = true;
+      renderPrices();
+    };
+    return;
+  }
 
-  document.querySelectorAll('[data-list]').forEach(el =>
-    el.onchange = () => push(el.dataset.list, { list_cents: cents(el.value) }));
-  document.querySelectorAll('[data-msrp]').forEach(el =>
-    el.onchange = () => push(el.dataset.msrp, { msrp_cents: cents(el.value) }));
-  document.querySelectorAll('[data-pack]').forEach(el =>
-    el.onchange = () => push(el.dataset.pack, { case_pack: parseInt(el.value)||1 }));
-  document.querySelectorAll('[data-master]').forEach(el =>
-    el.onchange = () => push(el.dataset.master, { master_carton: parseInt(el.value)||0 }));
-  document.querySelectorAll('[data-upc]').forEach(el =>
-    el.onchange = () => push(el.dataset.upc, { upc: el.value.trim() }));
+  const cents = v => Math.round(parseFloat(String(v).replace(/[^0-9.]/g, '')) * 100) || 0;
+
+  document.querySelectorAll('.pin').forEach(el => {
+    el.oninput = () => {
+      const { sku, field } = el.dataset;
+      const row = priceRows.find(r => r.sku === sku);
+      let v = el.value;
+
+      if (field === 'sku') v = v.trim().toUpperCase();
+      else if (field === 'upc') v = v.trim();
+      else if (field === 'case_pack' || field === 'master_carton') v = parseInt(v, 10) || 0;
+      else v = cents(v);
+
+      // Original value, so backing out an edit clears it rather than storing
+      // a "change" that changes nothing.
+      const orig = field === 'sku'  ? row.sku
+                 : field === 'upc'  ? (row.upc || '')
+                 : field === 'list_pc_cents' ? (row.case_pack ? Math.round(row.list_cents / row.case_pack) : 0)
+                 : row[field] || 0;
+
+      priceEdits[sku] = priceEdits[sku] || {};
+      if (String(v) === String(orig)) delete priceEdits[sku][field];
+      else priceEdits[sku][field] = v;
+      if (!Object.keys(priceEdits[sku]).length) delete priceEdits[sku];
+
+      // Only the derived numbers are refreshed, so the caret stays put.
+      refreshDerived();
+    };
+  });
+
+  $('#cancelAll').onclick = () => { priceEdits = {}; priceUnlocked = false; renderPrices(); };
+  $('#saveAll').onclick = savePrices;
+}
+
+/* Margin, box count and the pending counter follow the inputs without
+   redrawing the table, which would move the caret mid-edit. */
+function refreshDerived() {
+  const n = Object.keys(priceEdits).length;
+  const badge = document.querySelectorAll('.summary .v')[3];
+  if (badge) { badge.textContent = n; badge.style.color = n ? '#b45309' : ''; }
+
+  const save = $('#saveAll');
+  if (save) {
+    save.disabled = !n;
+    save.textContent = n ? `Save ${n} change${n > 1 ? 's' : ''}` : 'Save changes';
+  }
+
+  document.querySelectorAll('.ptable tbody tr').forEach(tr => {
+    const skuEl = tr.querySelector('[data-field="sku"]');
+    if (!skuEl) return;
+    const sku = skuEl.dataset.sku;
+    const e = priceEdits[sku] || {};
+    const row = priceRows.find(r => r.sku === sku) || {};
+
+    const pack = Number('case_pack' in e ? e.case_pack : row.case_pack) || 0;
+    const mast = Number('master_carton' in e ? e.master_carton : row.master_carton) || 0;
+    const pc   = Number('list_pc_cents' in e ? e.list_pc_cents
+                       : (row.case_pack ? Math.round(row.list_cents / row.case_pack) : 0)) || 0;
+    const msrp = Number('msrp_cents' in e ? e.msrp_cents : row.msrp_cents) || 0;
+
+    const b = pack > 0 ? mast / pack : 0;
+    const unit = tr.querySelectorAll('.numcell i')[1];
+    if (unit) unit.textContent = Number.isInteger(b) && b > 1 ? b + ' boxes' : 'pcs';
+
+    const cellM = tr.querySelector('.margin');
+    if (cellM) {
+      const m = msrp ? Math.round((1 - pc / msrp) * 100) : null;
+      cellM.textContent = m != null ? m + '%' : '—';
+      cellM.style.color = m != null && m >= 45 ? '#166534' : '#9a9da4';
+    }
+
+    tr.querySelectorAll('.pin').forEach(el =>
+      el.classList.toggle('edited', !!(priceEdits[el.dataset.sku] || {})[el.dataset.field]));
+  });
+}
+
+async function savePrices() {
+  const msg  = $('#priceMsg');
+  const save = $('#saveAll');
+  const skus = Object.keys(priceEdits);
+  if (!skus.length) return;
+
+  save.disabled = true;
+  let done = 0;
+  const failed = [];
+
+  for (const sku of skus) {
+    const e = priceEdits[sku];
+    let current = sku;
+    try {
+      // The rename goes first, so the fields that follow are addressed by the
+      // name the row will actually have.
+      if (e.sku && e.sku !== sku) {
+        const r = await call('set_sku', { sku, new_sku: e.sku });
+        current = r.to || e.sku;
+      }
+
+      const patch = {};
+      if ('upc' in e) patch.upc = e.upc;
+      if ('case_pack' in e) patch.case_pack = e.case_pack;
+      if ('master_carton' in e) patch.master_carton = e.master_carton;
+      if ('msrp_cents' in e) patch.msrp_cents = e.msrp_cents;
+      if ('list_pc_cents' in e) {
+        const row  = priceRows.find(r => r.sku === sku) || {};
+        const pack = ('case_pack' in e ? e.case_pack : row.case_pack) || 1;
+        patch.list_cents = e.list_pc_cents * pack;
+      }
+      if (Object.keys(patch).length) await call('set_list_price', { sku: current, ...patch });
+      done++;
+    } catch (err) {
+      failed.push(`${sku}: ${err.message}`);
+    }
+  }
+
+  if (failed.length) {
+    msg.textContent = `Saved ${done} of ${skus.length}. ${failed.join(' · ')}`;
+    // The successful ones are gone from the server's point of view, so reload
+    // rather than leave the screen claiming edits that already landed.
+    priceEdits = {};
+    await priceList(true);
+    $('#priceMsg').textContent = `Saved ${done} of ${skus.length}. ${failed.join(' · ')}`;
+    return;
+  }
+
+  priceEdits = {};
+  priceUnlocked = false;
+  await priceList(true);
+  $('#priceMsg').textContent = `Saved ${done} SKU${done > 1 ? 's' : ''}.`;
 }
 
 /* ---------------- compliance ---------------- */
