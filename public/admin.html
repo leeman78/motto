@@ -33,6 +33,11 @@ tr.click:hover td{background:#f7f8fa}
 .pill.grey{background:#f0f0f2;color:#71747b}
 .inline{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .priceinput{width:104px;font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:13px;text-align:right;border:1px solid #e2e2e6;border-radius:9px;padding:8px 10px;outline:none}
+  /* A number on its own does not say what it counts. "25" and "200" sat next
+     to each other meaning pieces and pieces, but the second one is also
+     eight boxes, and that is the number a freight quote needs. */
+  .unit{display:inline-block;margin-left:7px;font-size:11px;color:#9a9da4;
+    white-space:nowrap;font-family:ui-monospace,Menlo,Consolas,monospace}
 .priceinput:focus{border-color:#111}
 .priceinput.over{border-color:var(--blue);background:#f5f8ff;font-weight:700}
 .tiny{border:0;background:none;color:#b3b6bd;font-size:11px;font-weight:700;cursor:pointer;padding:4px}
@@ -170,13 +175,20 @@ async function priceList(){
       </tr></thead>
       <tbody>${items.map(i=>{
         const perPiece = i.case_pack ? Math.round(i.list_cents / i.case_pack) : 0;
+        // How many inner boxes make a master carton. Only stated when it
+        // divides exactly: a rounded box count is what a freight quote gets
+        // built on, so a wrong one is worse than none.
+        const boxCount = r => {
+          const b = r.case_pack > 0 ? r.master_carton / r.case_pack : 0;
+          return Number.isInteger(b) && b > 1 ? b + ' boxes' : 'pcs';
+        };
         const margin = i.msrp_cents ? Math.round((1 - perPiece / i.msrp_cents) * 100) : null;
         return `<tr>
           <td><b>${i.products?.name || ''}</b><br><span style="color:#9a9da4;font-size:11.5px">${i.label}</span></td>
           <td class="mono" style="color:#9a9da4;font-size:11.5px">${i.sku}</td>
           <td><input class="priceinput" style="width:120px;text-align:left" data-upc="${i.sku}" value="${i.upc||''}" placeholder="—"></td>
-          <td class="r"><input class="priceinput" style="width:62px" data-pack="${i.sku}" value="${i.case_pack||''}"></td>
-          <td class="r"><input class="priceinput" style="width:62px" data-master="${i.sku}" value="${i.master_carton||''}"></td>
+          <td class="r"><input class="priceinput" style="width:62px" data-pack="${i.sku}" value="${i.case_pack||''}"><span class="unit">pcs</span></td>
+          <td class="r"><input class="priceinput" style="width:62px" data-master="${i.sku}" value="${i.master_carton||''}"><span class="unit">${boxCount(i)}</span></td>
           <td class="r"><input class="priceinput" data-list="${i.sku}" value="${((i.list_cents||0)/100).toFixed(2)}"></td>
           <td class="r"><input class="priceinput" style="width:82px" data-msrp="${i.sku}" value="${((i.msrp_cents||0)/100).toFixed(2)}"></td>
           <td class="r mono" style="color:${margin!=null && margin>=45 ? '#166534' : '#9a9da4'}">${margin!=null ? margin+'%' : '—'}</td>
