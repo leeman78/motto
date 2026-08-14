@@ -21,7 +21,6 @@
 -- actually your minimum order, change the numbers below before running.
 --
 -- NOT TOUCHED, because they were not in the supplied list:
---   MT-PB-SOC   Soccer Ball Power Bank
 --   MT-BUDS-P   Motto BUDS+
 --   MT-AD-UC35  USB-C to 3.5mm adapter
 --   MT-AD-LT35  Lightning to 3.5mm adapter
@@ -61,7 +60,7 @@ select
   v.case_pack                              as per_box,
   v.master_carton                          as per_case,
   round(v.master_carton::numeric / nullif(v.case_pack, 0), 2) as boxes_per_case,
-  case when v.sku in ('MT-PB-SOC','MT-BUDS-P','MT-AD-UC35','MT-AD-LT35')
+  case when v.sku in ('MT-BUDS-P','MT-AD-UC35','MT-AD-LT35')
        then 'PLACEHOLDER' else 'confirmed' end as source
 from variants v
 order by source, v.sku;

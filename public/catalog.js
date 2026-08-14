@@ -153,13 +153,6 @@ export const FALLBACK = {
    weight_oz:0.60,long:"Power your devices on the go with the Motto 45W PD Car Charger, designed for fast, efficient charging in any vehicle. Featuring dual intelligent chips, it delivers up to 45W USB-C Power Delivery and 18W Quick Charge for high-speed, safe performance. Compatible with a wide range of devices, including iPhone, Samsung, Google Pixel, iPad, and even MacBook, this compact charger keeps all your essentials powered during every drive. Reliable, versatile, and built for everyday convenience.",features:["45W USB-C Power Delivery fast charging", "18W Quick Charge (QC) support", "Dual intelligent chips for safe, efficient power", "Universal compatibility with most vehicles", "Works with iPhone, Samsung, Pixel, iPad, MacBook and more", "Compact, travel-friendly design"],compat:null,
    variants:[{sku:'CC0200',upc:'850025312035',label:'Single',pack:10,stock:'in_stock'}]},
 
-  {slug:'powerbank-soccer',cat:'power',type:'Portable Power',name:'Soccer Ball Power Bank',
-   desc:'10,000 mAh with 22.5W PD fast charging and an LED percentage readout. Shaped like a soccer ball, which is the whole point: it sells itself off a counter display, and it moves hardest around tournaments, back-to-school and the World Cup.',
-   meta:['10,000 mAh','22.5W PD','LED display','USB-C In/Out'],
-   colors:[{name:'White & Navy',hex:'#2b3a6b',image:'powerbank_soccer.webp'}],
-   shots:['powerbank_soccer_lifestyle.webp','powerbank_soccer_box.webp'],stock:'in_stock',
-   weight_oz:9.40,long:"The Motto Soccer Ball Power Bank is a 10000mAh portable charger with 22.5W PD fast charging and a built-in LED battery percentage display.\n\nShaped like a soccer ball, it delivers fast, reliable charging for iPhone, Android, and USB-C devices, and doubles as a conversation starter.",features:[],compat:null,
-   variants:[{sku:'MT-PB-SOC',label:'Single',pack:6,stock:'in_stock'}]},
 
   {slug:'buds-plus',cat:'audio',type:'True Wireless Earbuds',name:'Motto BUDS+',
    desc:'True wireless earbuds on Bluetooth 5.0 + EDR with a Qi-compatible magnetic charging case and a battery indicator on the case. Touch controls for play, skip and calls. Five colorways, which is what makes it work on a rack — the same peg sells to five different customers.',

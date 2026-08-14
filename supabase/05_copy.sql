@@ -94,16 +94,6 @@ update products set
   weight_oz = 0.60
 where slug = 'car-45w';
 
--- ---------------------------------------- 7. powerbank-soccer
-update products set
-  description_long = 'The Motto Soccer Ball Power Bank is a 10000mAh portable charger with 22.5W PD fast charging and a built-in LED battery percentage display.
-
-Shaped like a soccer ball, it delivers fast, reliable charging for iPhone, Android, and USB-C devices, and doubles as a conversation starter.',
-  features = '{}',
-  compatibility = null,
-  weight_oz = 9.40
-where slug = 'powerbank-soccer';
-
 -- ---------------------------------------- 8. buds-plus
 update products set
   description_long = 'Wireless headset with magnetic charging and battery display.',

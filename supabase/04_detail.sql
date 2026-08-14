@@ -29,7 +29,6 @@ from (values
   ('usba-lightning',       2.00),
   ('wall-20w',             1.50),
   ('car-45w',              0.60),
-  ('powerbank-soccer',     9.40),
   ('buds-plus',            3.70),
   ('airbuds-a5',           4.90),
   ('headset-anc',          4.70),

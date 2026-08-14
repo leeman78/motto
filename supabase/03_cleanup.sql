@@ -26,7 +26,7 @@ where v.sku not in (
   'ICL006',
   'OUC003','OUC010',
   'IUL003','IUL010',
-  'WC0200','CC0200','MT-PB-SOC',
+  'WC0200','CC0200',
   'MT-BUDS-P','A5WH','ANC',
   'EPH004','TEPH007','IEP007',
   'MT-AD-UC35','MT-AD-LT35'

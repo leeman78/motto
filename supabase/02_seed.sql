@@ -77,12 +77,6 @@ values
  '[{"name":"Black","hex":"#1a1a1a","image":"car_black.webp"}]',
  '{car_black.webp,car_angle.webp,car_side.webp}',6),
 
-((select id from c where slug='power'),'powerbank-soccer','Portable Power','Soccer Ball Power Bank',
- '10,000 mAh with 22.5W PD fast charging and an LED percentage readout. Shaped like a soccer ball, which is the whole point: it sells itself off a counter display, and it moves hardest around tournaments, back-to-school and the World Cup.',
- '{"10,000 mAh","22.5W PD","LED display","USB-C In/Out"}',
- '[{"name":"White & Navy","hex":"#2b3a6b","image":"powerbank_soccer.webp"}]',
- '{powerbank_soccer_lifestyle.webp,powerbank_soccer_box.webp}',7),
-
 -- ------------------------------------------------- AUDIO
 ((select id from c where slug='audio'),'buds-plus','True Wireless Earbuds','Motto BUDS+',
  'True wireless earbuds on Bluetooth 5.0 + EDR with a Qi-compatible magnetic charging case and a battery indicator on the case. Touch controls for play, skip and calls. Five colorways, which is what makes it work on a rack — the same peg sells to five different customers.',
@@ -163,7 +157,6 @@ from (values
  ('usba-lightning','IUL010','','10 ft',100,200, 8600,1499,2,'in_stock'),
  ('wall-20w','WC0200','','Single',100,400, 6470,1299,1,'in_stock'),
  ('car-45w','CC0200','850025312035','Single',600,600, 4270, 999,1,'in_stock'),
- ('powerbank-soccer','MT-PB-SOC','','Single',6,48,13200,3999,1,'in_stock'),
  ('buds-plus','MT-BUDS-P','','Single',6,48,12720,3999,1,'in_stock'),
  ('airbuds-a5','A5WH','','Single',100,100,11360,3999,1,'in_stock'),
  ('headset-anc','ANC','','Single',100,100,12800,3999,1,'in_stock'),

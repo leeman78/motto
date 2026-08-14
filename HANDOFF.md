@@ -87,7 +87,7 @@ Matched one by one against mottousa.com.
 | Category | Products |
 |---|---|
 | Leather cables (4) | USB-C↔USB-C 65W · USB-C↔Lightning · USB-A↔USB-C · USB-A↔Lightning |
-| Chargers & power (3) | 20W PD Wall · 45W PD Car (CC0200) · Soccer Ball Power Bank |
+| Chargers & power (2) | 20W PD Wall (WC0200) · 45W PD Car (CC0200) |
 | Earbuds & audio (6) | BUDS+ · Airbuds A5 · ANC/ENC · 3.5mm wired · USB-C wired · Lightning wired (EP-007) |
 | Adapters (2) | USB-C→3.5mm cable · Lightning→3.5mm adapter (JBC029) |
 

@@ -22,7 +22,7 @@
 -- guessed part number is worse than an obviously placeholder one. They keep
 -- their MT-* code and can be edited in the admin once the real numbers are
 -- known:
---   MT-PB-SOC   MT-BUDS-P   MT-AD-UC35  MT-AD-LT35
+--   MT-BUDS-P   MT-AD-UC35  MT-AD-LT35
 --
 -- Four cable SKUs ARE renamed from the pattern the priced cables share, since
 -- the scheme is unambiguous once decoded. They are still worth confirming:
