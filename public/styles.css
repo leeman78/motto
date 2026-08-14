@@ -550,3 +550,106 @@ footer{border-top:1px solid var(--line);padding:34px 0 54px;color:#83868c;font-s
   border:1px solid var(--line);border-radius:999px;font-family:inherit;font-size:12.5px;font-weight:700;
   cursor:pointer;text-align:center;text-decoration:none;transition:.16s}
 .docbtn:hover{border-color:#111}
+
+/* ================================================================ retail displays
+   Hero slideshow plus the two program sections that sit above the catalog.
+   Every class here is new. Nothing above this line is touched, and the names
+   are prefixed where the sheet already owns a word: .step is the order-quantity
+   control, so the program steps are .pstep. */
+
+/* -- hero slideshow ------------------------------------------------------
+   Both slides occupy the same grid cell so the trust bar below never shifts
+   when they swap, and they share one aspect ratio for the same reason. The
+   cable shot letterboxes into the black frame it already sits on. */
+.hero .heroart.vid{aspect-ratio:900/720;background:#8f8f8f}
+.heroart.vid video{width:100%;height:100%;object-fit:cover;display:block}
+.heroart .vtag{position:absolute;left:16px;bottom:16px;z-index:2;background:rgba(12,13,15,.72);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:#fff;font-size:10.5px;
+  font-weight:700;letter-spacing:.13em;padding:7px 12px;border-radius:999px}
+.herotag{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:800;
+  letter-spacing:.14em;text-transform:uppercase;color:#0b0b0d;background:#fff;
+  padding:7px 13px;border-radius:999px}
+.beat{font-size:17px;font-weight:700;letter-spacing:-.01em;color:#fff;margin:24px 0 0}
+.beat i{font-style:normal;color:#6f737a;margin:0 9px}
+
+.vbtn{position:absolute;right:14px;bottom:14px;z-index:2;width:34px;height:34px;border:0;
+  border-radius:50%;background:rgba(12,13,15,.72);backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);color:#fff;cursor:pointer;font-size:11px;display:grid;place-items:center}
+
+/* -- program steps ------------------------------------------------------- */
+.psteps{display:grid;grid-template-columns:repeat(4,1fr);margin-top:46px}
+.pstep{padding:0 26px;position:relative}
+.pstep:first-child{padding-left:0}
+.pstep:not(:first-child)::before{content:"";position:absolute;left:0;top:9px;bottom:4px;width:1px;background:var(--line)}
+.pstep .n{width:32px;height:32px;border-radius:50%;background:var(--blue);color:#fff;
+  display:grid;place-items:center;font-size:13.5px;font-weight:800;margin-bottom:16px}
+.pstep h3{font-size:13px;font-weight:800;letter-spacing:.1em;margin-bottom:10px}
+.pstep p{font-size:13.5px;line-height:1.6;color:var(--ink-2);margin:0}
+.ploop{margin-top:42px;padding-top:24px;border-top:1px solid var(--line);font-size:13.5px;color:var(--ink-2)}
+.ploop b{color:var(--ink)}
+
+/* -- what is inside ------------------------------------------------------ */
+.inside{display:grid;grid-template-columns:minmax(0,.78fr) minmax(0,1.22fr);gap:56px;align-items:start}
+.itable{width:100%;border-collapse:collapse;font-size:14px}
+.itable th{text-align:left;font-size:10.5px;font-weight:800;letter-spacing:.13em;color:var(--ink-3);
+  padding:0 0 12px;border-bottom:1px solid var(--line)}
+.itable th:last-child,.itable td:last-child{text-align:right}
+.itable td{padding:12px 0;border-bottom:1px solid var(--line);color:var(--ink-2)}
+.itable td:last-child{color:var(--ink);font-weight:700}
+.itable tfoot td{font-weight:800;color:var(--ink);border-top:2px solid var(--ink);border-bottom:0;padding-top:14px}
+.qbox{background:var(--soft);border-radius:18px;padding:24px;margin-top:26px}
+.qbox .t{font-size:14px;font-weight:800;margin-bottom:8px}
+.qbox p{font-size:13.5px;line-height:1.6;color:var(--ink-2);margin:0 0 16px}
+
+@media(max-width:940px){
+  .psteps{grid-template-columns:1fr 1fr}
+  .pstep{padding:0 18px 26px}
+  .pstep:nth-child(3){padding-left:0}
+  .pstep:nth-child(3)::before{display:none}
+  .inside{grid-template-columns:1fr;gap:34px}
+}
+@media(max-width:600px){
+  .psteps{grid-template-columns:1fr}
+  .pstep{padding:0 0 24px}
+  .pstep::before{display:none!important}
+}
+
+/* the display section owns its heading rather than borrowing .head, which is
+   built to push a paragraph out to the right of the catalog title */
+.dprog h2{font-size:clamp(32px,4.2vw,48px);letter-spacing:-.05em;line-height:1.02;margin:12px 0 0}
+.dprog p{color:var(--ink-2);line-height:1.65;margin:18px 0 0;font-size:16px;max-width:66ch}
+.inside{margin-top:64px;padding-top:56px;border-top:1px solid var(--line)}
+.ih2{font-size:clamp(26px,3vw,34px);letter-spacing:-.04em;line-height:1.05;margin:12px 0 0;font-weight:700}
+.ilead{font-size:15.5px;line-height:1.65;color:var(--ink-2);margin:16px 0 0;max-width:44ch}
+
+/* the single-video hero needs its own play control */
+.hero .heroart{position:relative}
+
+/* The trust strip carries two different kinds of fact: what the company is,
+   and what is in the display. Four identical tiles in a row read as one list,
+   so "112 units" looked like a company number. Labelling the pairs is what
+   makes each figure mean something. */
+.trust2{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:0;
+  border-top:1px solid rgba(255,255,255,.12)}
+.trust2 .tgroup{padding:20px 0 30px}
+.trust2 .tgroup + .tgroup{border-left:1px solid rgba(255,255,255,.12)}
+.trust2 .tgroup:first-child .tcells > div:first-child{padding-left:0}
+.tlabel{font-size:10px;font-weight:800;letter-spacing:.16em;color:#6f737a;
+  padding:0 22px 14px;margin:0}
+.trust2 .tgroup:first-child .tlabel{padding-left:0}
+.tcells{display:grid;grid-template-columns:1fr 1fr}
+.tcells > div{padding:0 22px}
+.tcells > div + div{border-left:1px solid rgba(255,255,255,.12)}
+.trust2 b{display:block;font-size:22px;letter-spacing:-.03em;margin-bottom:5px}
+.trust2 span{font-size:11.5px;color:#8f939a;line-height:1.45;display:block}
+@media(max-width:940px){
+  .trust2{grid-template-columns:1fr}
+  .trust2 .tgroup + .tgroup{border-left:0;border-top:1px solid rgba(255,255,255,.12)}
+  .trust2 .tgroup .tlabel{padding-left:0}
+  .trust2 .tgroup .tcells > div:first-child{padding-left:0}
+}
+@media(max-width:560px){
+  .tcells{grid-template-columns:1fr}
+  .tcells > div + div{border-left:0;border-top:1px solid rgba(255,255,255,.12);padding-top:18px;margin-top:18px}
+  .tcells > div{padding-left:0}
+}

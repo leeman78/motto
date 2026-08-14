@@ -47,7 +47,7 @@ async function acknowledge(lead) {
       </div>
       <p style="font-size:12px;color:#9a9da4;line-height:1.6;margin:22px 0 0">
         Motto USA · 1445 Mac Arthur Dr Ste 116, Carrollton, TX 75007<br>
-        Supplying convenience retail since 2016.
+        Supplying convenience retail since 2017.
       </p>
     </div>`;
   return send({ to: lead.email, subject: 'We have your wholesale inquiry — Motto USA', html });

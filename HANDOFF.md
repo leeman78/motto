@@ -31,7 +31,7 @@ data and auth, Stripe for payment (not connected yet).
 | Sales inbox | `info@mottob2b.com` (GoDaddy forwarding to a personal address) |
 | Phone | 214-681-8417 |
 | Warehouse | 1445 Mac Arthur Dr Ste 116, Carrollton, TX 75007 |
-| Founded | **2016** (Instagram is the source; mottousa.com still says 2017 and needs fixing) |
+| Founded | **2017** (matches mottousa.com; the Instagram bio still says 2016 and needs fixing) |
 | Territory | TX · LA · OK · AR, 2,000+ retail doors |
 
 ---
@@ -113,7 +113,7 @@ at $12.99. Only the adapter is in the catalog. Confirm whether these are two
 products or one duplicate listing.
 
 **3. `mottousa.com/wholesale` says "Dallas-based since 2017"** but this site and
-the company Instagram say 2016. Fix whichever is wrong — a buyer who checks both
+the company Instagram says 2016. Fix the Instagram bio — a buyer who checks both
 and finds two years will not ask, they will just trust you less.
 
 **4. Compliance marks are all off.** `products.compliance` defaults to empty and
@@ -125,7 +125,7 @@ copy so far is a composite image too low-resolution to be usable.
 
 **5. Stripe not connected.** See above.
 
-**6. The About story is partly invented.** Verified: founded 2016, 2,000+ doors,
+**6. The About story is partly invented.** Verified: founded 2017, 2,000+ doors,
 TX/LA/OK/AR, Carrollton warehouse. The narrative around it — starting with
 independent gas stations, the leather cable being the best-turning line — was
 written to sound right and has not been confirmed. Read it before a buyer does.

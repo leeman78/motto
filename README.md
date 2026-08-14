@@ -500,14 +500,14 @@ the repo rather than editing one spot:
 
 | Claim | Also appears in |
 |---|---|
-| Founded 2016 | top banner, hero kicker, trust bar, footer, Organization schema |
+| Founded 2017 | top banner, hero kicker, trust bar, footer, Organization schema |
 | 2,000+ retail doors | hero lead, trust bar, About facts |
 | TX · LA · OK · AR | hero lead, trust bar, About facts, meta description |
 | Carrollton warehouse | About facts, Contact block, Organization schema |
 
 One thing to reconcile before launch: the wholesale page on mottousa.com
 currently says "Dallas-based since 2017", while the company's own Instagram
-says founded 2016. This site uses 2016. Fix whichever is wrong on the other
+says founded 2017. This site uses 2017. Fix whichever is wrong on the other
 site too — a buyer who checks both and finds two different years will not ask
 you about it, they will just trust you less.
 
