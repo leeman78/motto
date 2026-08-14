@@ -715,3 +715,12 @@ footer{border-top:1px solid var(--line);padding:34px 0 54px;color:#83868c;font-s
 footer .fin{display:none}
 .flegal{padding-bottom:0}
 footer{padding-bottom:44px}
+
+/* Retail value of the display. The figure is summed from the contents table
+   at run time rather than typed in, because a hard-coded total silently goes
+   wrong the moment a price or a quantity changes, and a buyer can check this
+   number against mottousa.com in about a minute. */
+.retailval{padding-bottom:16px;margin-bottom:16px;border-bottom:1px solid #e3e4e7}
+.retailval b{display:block;font-size:27px;letter-spacing:-.035em;line-height:1;color:var(--ink)}
+.retailval em{display:block;font-style:normal;font-size:13px;font-weight:700;color:var(--ink-2);margin:6px 0 7px}
+.retailval span{display:block;font-size:12px;line-height:1.5;color:var(--ink-3)}
