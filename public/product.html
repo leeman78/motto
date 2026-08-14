@@ -55,10 +55,47 @@
   <div class="grid stag in" id="related"></div>
 </section>
 
-<footer><div class="fin">
-  <span>Motto USA · Wholesale · Carrollton, Texas · Since 2017 · <a href="mailto:info@mottob2b.com">info@mottob2b.com</a> · <a href="tel:2146818417">214-681-8417</a></span>
-  <span><a href="https://mottousa.com">Retail store: mottousa.com →</a></span>
-</div></footer>
+<footer>
+  <div class="fcols">
+    <div class="fbrand">
+      <b>Motto USA · Wholesale</b>
+      <p>Leather-wrapped charging cables, earbuds and fast chargers for convenience retail. Supplying US convenience retail since 2017.</p>
+      <p>1445 Mac Arthur Dr Ste 116<br>Carrollton, TX 75007</p>
+      <p><a href="tel:2146818417">214-681-8417</a> · <a href="mailto:info@mottob2b.com">info@mottob2b.com</a><br>Monday–Friday, 9–5 CT</p>
+    </div>
+    <div class="fcol">
+      <h4>Wholesale</h4>
+      <a href="/#displays">Retail Displays</a>
+      <a href="/#catalog">Products</a>
+      <a href="/#whitelabel">Private Label</a>
+      <a href="/#contact">Request a quote</a>
+    </div>
+    <div class="fcol">
+      <h4>Company</h4>
+      <a href="/#why">Why Motto</a>
+      <a href="/#about">About</a>
+      <a href="/#contact">Contact</a>
+      <a href="https://mottousa.com">Retail store &rarr;</a>
+    </div>
+    <div class="fcol">
+      <h4>Ordering</h4>
+      <a href="/#catalog">Case-pack ordering</a>
+      <a href="/returns.html">Returns &amp; damages</a>
+      <a href="/#contact">Compliance documents</a>
+      <a href="/report-abuse.html">Report abuse</a>
+    </div>
+  </div>
+  <div class="flegal">
+    <nav>
+      <a href="/terms.html">Terms &amp; Conditions</a>
+      <a href="/privacy.html">Privacy Policy</a>
+      <a href="/returns.html">Return Policy</a>
+      <a href="/cookies.html">Cookie Settings</a>
+      <a href="/report-abuse.html">Report Abuse</a>
+    </nav>
+    <span>&copy; <span id="fyear">2026</span> Motto USA LLC. All rights reserved.</span>
+  </div>
+</footer>
 
 <script type="module">
 import { loadCatalog, supabase, usd, isFlat, openingShot, bySlug, stockOf, STOCK,
@@ -261,5 +298,6 @@ if(!p){
 }
 </script>
 <script src="nav.js"></script>
+<script>document.getElementById("fyear").textContent=new Date().getFullYear();</script>
 </body>
 </html>

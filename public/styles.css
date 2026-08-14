@@ -653,3 +653,65 @@ footer{border-top:1px solid var(--line);padding:34px 0 54px;color:#83868c;font-s
   .tcells > div + div{border-left:0;border-top:1px solid rgba(255,255,255,.12);padding-top:18px;margin-top:18px}
   .tcells > div{padding-left:0}
 }
+
+/* Contact: the five info cards ran 824px against a 632px form, which left a
+   long tail of white space beside it. Tighter cards and a two-up row for the
+   short ones bring the column back to the form's height. */
+.details{gap:9px;margin-top:22px}
+.detail{padding:13px 16px;border-radius:14px}
+.detail small{margin-bottom:3px}
+.detail b{font-size:13.5px;line-height:1.4}
+.details .pair{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+@media(max-width:560px){.details .pair{grid-template-columns:1fr}}
+
+/* Two full-width sections stacked their own vertical padding, so the seam
+   between the display table and the catalog read as a hole. */
+#displays{padding-bottom:34px}
+
+/* ============================================================== footer
+   A one-line footer had nowhere to put the legal pages, and those pages are
+   the ones a buyer looks for before wiring money to a supplier they have not
+   met. Columns first, then the legal row. */
+.fcols{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:40px;
+  max-width:1280px;margin:auto;padding:0 30px 34px}
+.fbrand b{display:block;font-size:15px;color:var(--ink);letter-spacing:-.02em;margin-bottom:10px}
+.fbrand p{margin:0 0 6px;line-height:1.6;font-size:12px;color:#83868c}
+.fbrand a{color:#83868c}
+.fbrand a:hover{color:var(--ink)}
+.fcol h4{font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:800;
+  color:#9a9da4;margin:0 0 12px}
+.fcol a{display:block;font-size:12.5px;color:#5f6268;padding:5px 0;line-height:1.4}
+.fcol a:hover{color:var(--ink)}
+.flegal{border-top:1px solid var(--line);max-width:1280px;margin:auto;padding:20px 30px 0;
+  display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap;align-items:center}
+.flegal nav{display:flex;gap:18px;flex-wrap:wrap}
+.flegal a{color:#83868c}
+.flegal a:hover{color:var(--ink)}
+.flegal button{border:0;background:none;font:inherit;color:#83868c;cursor:pointer;padding:0}
+.flegal button:hover{color:var(--ink)}
+@media(max-width:880px){
+  .fcols{grid-template-columns:1fr 1fr;gap:28px}
+  .flegal{flex-direction:column;align-items:flex-start;gap:12px}
+}
+@media(max-width:520px){.fcols{grid-template-columns:1fr}}
+
+/* legal pages */
+.legal{max-width:760px;margin:auto;padding:54px 30px 80px}
+.legal h1{font-size:clamp(30px,4vw,42px);letter-spacing:-.04em;line-height:1.05;margin:0 0 10px}
+.legal .upd{font-size:12px;color:var(--ink-3);margin:0 0 34px}
+.legal h2{font-size:19px;letter-spacing:-.02em;margin:34px 0 10px}
+.legal h3{font-size:15px;margin:22px 0 8px}
+.legal p,.legal li{font-size:15px;line-height:1.72;color:var(--ink-2)}
+.legal ul{padding-left:20px;margin:10px 0}
+.legal li{margin-bottom:6px}
+.legal strong{color:var(--ink)}
+.legal a{color:var(--blue)}
+.legal .note{background:var(--soft);border-radius:16px;padding:18px 20px;margin:26px 0;font-size:14px}
+.legal table{width:100%;border-collapse:collapse;font-size:14px;margin:16px 0}
+.legal th{text-align:left;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--ink-3);padding:0 10px 10px 0;border-bottom:1px solid var(--line)}
+.legal td{padding:11px 10px 11px 0;border-bottom:1px solid var(--line);vertical-align:top;color:var(--ink-2)}
+/* the old one-line footer rule still drew a rule under the legal row */
+footer .fin{display:none}
+.flegal{padding-bottom:0}
+footer{padding-bottom:44px}
