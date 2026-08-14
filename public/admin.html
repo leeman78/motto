@@ -36,6 +36,8 @@ tr.click:hover td{background:#f7f8fa}
   /* A number on its own does not say what it counts. "25" and "200" sat next
      to each other meaning pieces and pieces, but the second one is also
      eight boxes, and that is the number a freight quote needs. */
+  .skuinput{width:112px;text-align:left;color:#0b0b0d;font-size:12.5px;letter-spacing:.02em}
+  .skuinput:focus{border-color:#111}
   .unit{display:inline-block;margin-left:7px;font-size:11px;color:#9a9da4;
     white-space:nowrap;font-family:ui-monospace,Menlo,Consolas,monospace}
 .priceinput:focus{border-color:#111}
@@ -186,7 +188,7 @@ async function priceList(){
         const margin = i.msrp_cents ? Math.round((1 - perPiece / i.msrp_cents) * 100) : null;
         return `<tr>
           <td><b>${i.products?.name || ''}</b><br><span style="color:#9a9da4;font-size:11.5px">${i.label}</span></td>
-          <td class="mono" style="color:#9a9da4;font-size:11.5px">${i.sku}</td>
+          <td><input class="priceinput skuinput" data-rename="${i.sku}" value="${i.sku}" spellcheck="false"></td>
           <td><input class="priceinput" style="width:120px;text-align:left" data-upc="${i.sku}" value="${i.upc||''}" placeholder="—"></td>
           <td class="r"><input class="priceinput" style="width:62px" data-pack="${i.sku}" value="${i.case_pack||''}"><span class="unit">pcs</span></td>
           <td class="r"><input class="priceinput" style="width:62px" data-master="${i.sku}" value="${i.master_carton||''}"><span class="unit">${boxCount(i)}</span></td>
@@ -215,6 +217,26 @@ async function priceList(){
   // margin is read. list_cents stays per case, because checkout, quotes and
   // dealer_case_price() all work in cases; converting here keeps one number
   // in the database instead of two that can disagree.
+  // The part number is the one value on this row that another table points
+  // at, so a rejected rename puts the field back rather than leaving the
+  // screen showing something the database never accepted.
+  document.querySelectorAll('[data-rename]').forEach(el =>
+    el.onchange = async () => {
+      const from = el.dataset.rename, to = el.value.trim().toUpperCase();
+      const msg = $('#priceMsg');
+      if (!to || to === from) { el.value = from; return; }
+      try {
+        const r = await call('set_sku', { sku: from, new_sku: to });
+        msg.textContent = r.moved
+          ? `Renamed ${from} to ${r.to}. ${r.moved} dealer price${r.moved > 1 ? 's' : ''} moved with it.`
+          : `Renamed ${from} to ${r.to}.`;
+        priceList();
+      } catch (e) {
+        msg.textContent = e.message;
+        el.value = from;
+      }
+    });
+
   document.querySelectorAll('[data-list]').forEach(el =>
     el.onchange = () => {
       const pack = parseInt(el.dataset.packSize, 10) || 1;

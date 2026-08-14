@@ -221,6 +221,47 @@ export default async function handler(req, res) {
         return res.status(200).json({ items: data });
       }
 
+      case 'set_sku': {
+        // Renaming a SKU is not the same as editing a field on it. The part
+        // number is what a store owner reads off the display label before
+        // reordering, and dealer_prices points at it, so the rename is
+        // validated hard and the referencing rows move with it. That last
+        // part is handled by ON UPDATE CASCADE on the foreign key, added in
+        // supabase/07_real_skus.sql; without it this update is rejected.
+        const from = String(p.sku || '').trim();
+        const to   = String(p.new_sku || '').trim().toUpperCase();
+
+        if (!from) return res.status(400).json({ error: 'sku is required.' });
+        if (!to)   return res.status(400).json({ error: 'The new SKU cannot be empty.' });
+        if (to === from) return res.status(200).json({ ok: true, unchanged: true });
+        if (to.length > 40) {
+          return res.status(400).json({ error: 'A SKU must be 40 characters or fewer.' });
+        }
+        if (!/^[A-Z0-9][A-Z0-9._-]*$/.test(to)) {
+          return res.status(400).json({
+            error: 'A SKU may use letters, numbers, dot, dash and underscore, and must start with a letter or number.'
+          });
+        }
+
+        const { data: exists } = await db
+          .from('variants').select('sku').eq('sku', to).maybeSingle();
+        if (exists) {
+          return res.status(409).json({ error: `${to} is already used by another SKU.` });
+        }
+
+        const { data: row } = await db
+          .from('variants').select('sku').eq('sku', from).maybeSingle();
+        if (!row) return res.status(404).json({ error: `${from} was not found.` });
+
+        const { error } = await db.from('variants').update({ sku: to }).eq('sku', from);
+        if (error) throw error;
+
+        const { count } = await db.from('dealer_prices')
+          .select('id', { count: 'exact', head: true }).eq('sku', to);
+
+        return res.status(200).json({ ok: true, from, to, moved: count || 0 });
+      }
+
       case 'set_list_price': {
         const { sku } = p;
         const patch = {};
