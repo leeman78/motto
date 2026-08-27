@@ -33,6 +33,33 @@ export async function getDealer(req) {
   return dealer;
 }
 
+/** Resolve the signed-in rep from the Authorization header.
+ *
+ *  Same shape as getDealer, and deliberately so: a rep signs in through the
+ *  same Supabase auth as a dealer, which is what lets the server tell one
+ *  person from another. The admin password cannot do that, so anything scoped
+ *  to "my accounts" has to come through here.
+ *
+ *  An inactive rep resolves to null. Turning someone off in the admin has to
+ *  actually lock them out, not just hide them from a list.
+ */
+export async function getRep(req) {
+  const token = (req.headers.authorization || '').replace(/^Bearer\s+/i, '');
+  if (!token) return null;
+
+  const { data, error } = await db.auth.getUser(token);
+  if (error || !data?.user) return null;
+
+  const { data: rep } = await db
+    .from('reps')
+    .select('id, name, email, phone, is_active, must_change_password')
+    .eq('id', data.user.id)
+    .single();
+
+  if (!rep || !rep.is_active) return null;
+  return rep;
+}
+
 const MAX_TRIES = 8;        // per IP
 const WINDOW_MIN = 15;      // rolling window
 const LOCKOUT_MIN = 30;     // how long a tripped IP stays out

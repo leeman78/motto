@@ -1,0 +1,240 @@
+// api/rep.js
+//
+// Everything a sales rep can see, and nothing else.
+//
+// The scoping is done here, on the server, against the signed-in user. It is
+// never a filter the browser asks for: a rep who edits a request must not be
+// able to read another rep's book. Every query below either carries
+// .eq('rep_id', rep.id) or is checked against a set of that rep's dealer ids.
+//
+// Cost never appears. A rep sees what the store was charged and what they owe
+// Motto; the difference is theirs. What Motto paid for the goods is the
+// owner's number and is not selected anywhere in this file.
+//
+//   summary       this month and last, plus what is outstanding
+//   dealers       my accounts
+//   dealer        one account, with its price list and recent orders
+//   orders        my orders
+//   set_price     quote one of my stores a price for one SKU
+//   clear_price   drop that quote, fall back to the standard retail price
+
+import { db, getRep } from './_lib.js';
+
+const monthStart = (d = new Date()) => new Date(d.getFullYear(), d.getMonth(), 1).toISOString();
+const lastMonthStart = () => {
+  const d = new Date(); d.setMonth(d.getMonth() - 1);
+  return new Date(d.getFullYear(), d.getMonth(), 1).toISOString();
+};
+
+export default async function handler(req, res) {
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+
+  const rep = await getRep(req);
+  if (!rep) return res.status(401).json({ error: 'Sign in as a rep to see this.' });
+
+  const { action, ...p } = req.body || {};
+
+  // The set of accounts this rep may touch, resolved once and reused. Any
+  // dealer_id arriving in the request is checked against it.
+  const myDealerIds = async () => {
+    const { data } = await db.from('dealer_accounts').select('id').eq('rep_id', rep.id);
+    return new Set((data || []).map(d => d.id));
+  };
+
+  try {
+    switch (action) {
+
+      // ---------------------------------------------------------------
+      case 'summary': {
+        const { data: dealers } = await db
+          .from('dealer_accounts')
+          .select('id, business_name')
+          .eq('rep_id', rep.id);
+
+        const ids = (dealers || []).map(d => d.id);
+        const empty = { orders: 0, retail_cents: 0, wholesale_cents: 0, margin_cents: 0 };
+        if (!ids.length) {
+          return res.status(200).json({ rep, dealers: 0, this_month: empty, last_month: empty, outstanding_cents: 0 });
+        }
+
+        // Paid orders only. Settling on submitted orders pays out money that
+        // has not arrived, and on net terms some of it never does.
+        const { data: rows } = await db
+          .from('orders')
+          .select('id, paid_at, order_items(sku, cases, case_cents)')
+          .eq('rep_id', rep.id)
+          .eq('status', 'paid')
+          .gte('paid_at', lastMonthStart());
+
+        // Wholesale for the SKUs involved, so margin can be worked out
+        // without ever reading cost.
+        const skus = [...new Set((rows || []).flatMap(o => (o.order_items || []).map(i => i.sku)))];
+        const { data: vars } = skus.length
+          ? await db.from('variants').select('sku, list_cents').in('sku', skus)
+          : { data: [] };
+        const wholesale = Object.fromEntries((vars || []).map(v => [v.sku, v.list_cents || 0]));
+
+        const bucket = { ...empty }, prev = { ...empty };
+        const thisMonth = monthStart();
+        (rows || []).forEach(o => {
+          const t = o.paid_at >= thisMonth ? bucket : prev;
+          t.orders++;
+          (o.order_items || []).forEach(i => {
+            t.retail_cents    += i.cases * i.case_cents;
+            t.wholesale_cents += i.cases * (wholesale[i.sku] || 0);
+          });
+        });
+        bucket.margin_cents = bucket.retail_cents - bucket.wholesale_cents;
+        prev.margin_cents   = prev.retail_cents   - prev.wholesale_cents;
+
+        const { data: inv } = await db
+          .from('invoices')
+          .select('total_cents, paid_cents')
+          .eq('rep_id', rep.id)
+          .in('status', ['sent', 'partial']);
+        const outstanding = (inv || []).reduce((s, i) => s + (i.total_cents - i.paid_cents), 0);
+
+        return res.status(200).json({
+          rep, dealers: ids.length,
+          this_month: bucket, last_month: prev,
+          outstanding_cents: outstanding
+        });
+      }
+
+      // ---------------------------------------------------------------
+      case 'dealers': {
+        const { data, error } = await db
+          .from('rep_dealers')
+          .select('*')
+          .eq('rep_id', rep.id)
+          .order('business_name');
+        if (error) throw error;
+        return res.status(200).json({ items: data || [] });
+      }
+
+      // ---------------------------------------------------------------
+      case 'dealer': {
+        const { dealer_id } = p;
+        if (!dealer_id) return res.status(400).json({ error: 'dealer_id is required.' });
+        if (!(await myDealerIds()).has(dealer_id)) {
+          // Same answer as a dealer that does not exist. Confirming that an
+          // id is real but belongs to someone else is still information.
+          return res.status(404).json({ error: 'No such account.' });
+        }
+
+        const { data: dealer } = await db
+          .from('dealer_accounts')
+          .select('id, business_name, contact_name, email, phone, terms, notes, approved_at, created_at')
+          .eq('id', dealer_id).single();
+
+        // variants_public exists so cost cannot leak from a select *.
+        const { data: vars } = await db
+          .from('variants_public')
+          .select('sku, label, case_pack, list_cents, retail_cents, products(name, sort_order)')
+          .order('sku');
+
+        const { data: quoted } = await db
+          .from('dealer_prices').select('sku, case_cents').eq('dealer_id', dealer_id);
+        const mine = Object.fromEntries((quoted || []).map(q => [q.sku, q.case_cents]));
+
+        const prices = (vars || []).map(v => {
+          const charged = mine[v.sku] ?? v.retail_cents ?? v.list_cents ?? 0;
+          return {
+            sku: v.sku,
+            product: v.products?.name || '',
+            label: v.label,
+            case_pack: v.case_pack,
+            wholesale_cents: v.list_cents,
+            standard_cents: v.retail_cents,
+            charged_cents: charged,
+            is_quoted: v.sku in mine,
+            margin_cents: charged - (v.list_cents || 0)
+          };
+        });
+
+        const { data: orders } = await db
+          .from('orders')
+          .select('id, order_no, status, subtotal_cents, total_cents, created_at, paid_at')
+          .eq('dealer_id', dealer_id)
+          .order('created_at', { ascending: false })
+          .limit(20);
+
+        return res.status(200).json({ dealer, prices, orders: orders || [] });
+      }
+
+      // ---------------------------------------------------------------
+      case 'orders': {
+        const { data, error } = await db
+          .from('orders')
+          .select('id, order_no, status, subtotal_cents, total_cents, created_at, paid_at, dealer_accounts(business_name), order_items(sku, cases, case_cents, pieces)')
+          .eq('rep_id', rep.id)
+          .order('created_at', { ascending: false })
+          .limit(100);
+        if (error) throw error;
+
+        const skus = [...new Set((data || []).flatMap(o => (o.order_items || []).map(i => i.sku)))];
+        const { data: vars } = skus.length
+          ? await db.from('variants').select('sku, list_cents').in('sku', skus)
+          : { data: [] };
+        const wholesale = Object.fromEntries((vars || []).map(v => [v.sku, v.list_cents || 0]));
+
+        return res.status(200).json({
+          items: (data || []).map(o => {
+            const items = o.order_items || [];
+            const retail = items.reduce((s, i) => s + i.cases * i.case_cents, 0);
+            const whole  = items.reduce((s, i) => s + i.cases * (wholesale[i.sku] || 0), 0);
+            return { ...o, retail_cents: retail, wholesale_cents: whole, margin_cents: retail - whole };
+          })
+        });
+      }
+
+      // ---------------------------------------------------------------
+      case 'set_price': {
+        const { dealer_id, sku } = p;
+        const cents = parseInt(p.case_cents, 10);
+        if (!dealer_id || !sku || !Number.isInteger(cents) || cents < 0) {
+          return res.status(400).json({ error: 'dealer_id, sku and a whole-cent price are required.' });
+        }
+        if (!(await myDealerIds()).has(dealer_id)) {
+          return res.status(404).json({ error: 'No such account.' });
+        }
+
+        // A rep may quote at or above wholesale. Below it the rep is paying
+        // Motto more than the store paid them, which is a mistake being made
+        // in a hurry rather than a deal anybody meant to do.
+        const { data: v } = await db
+          .from('variants').select('list_cents').eq('sku', sku).single();
+        if (!v) return res.status(404).json({ error: `${sku} was not found.` });
+        if (cents < v.list_cents) {
+          return res.status(400).json({
+            error: `That is below the wholesale price of $${(v.list_cents / 100).toFixed(2)} per box. You would be paying Motto more than the store pays you.`
+          });
+        }
+
+        const { error } = await db.from('dealer_prices').upsert({
+          dealer_id, sku, case_cents: cents, note: `set by ${rep.name}`,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'dealer_id,sku' });
+        if (error) throw error;
+        return res.status(200).json({ ok: true, margin_cents: cents - v.list_cents });
+      }
+
+      case 'clear_price': {
+        const { dealer_id, sku } = p;
+        if (!(await myDealerIds()).has(dealer_id)) {
+          return res.status(404).json({ error: 'No such account.' });
+        }
+        const { error } = await db.from('dealer_prices')
+          .delete().eq('dealer_id', dealer_id).eq('sku', sku);
+        if (error) throw error;
+        return res.status(200).json({ ok: true });
+      }
+
+      default:
+        return res.status(400).json({ error: `Unknown action: ${action}` });
+    }
+  } catch (err) {
+    console.error('rep action failed:', action, err);
+    return res.status(500).json({ error: err.message || 'Action failed.' });
+  }
+}
