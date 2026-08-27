@@ -223,7 +223,7 @@
     </div>
     <div class="points">
       <div class="point"><b>Pricing set per account</b><span>Your terms are agreed with a rep and loaded to your login. No public price list for competitors to shop.</span></div>
-      <div class="point"><b>Case-pack ordering</b><span>Quantities move in full cases, so warehouse picks match what was sold.</span></div>
+      <div class="point"><b>Box ordering</b><span>Quantities move in full boxes, so warehouse picks match what was sold.</span></div>
       <div class="point" id="whyPay"><b>Ships from Carrollton, TX</b><span>Dallas metro warehouse. Orders picked and out the door in one to two business days.</span></div>
       <div class="point"><b>Net 30 on approval</b><span>Established accounts switch from prepay to invoice terms.</span></div>
       <div class="comply">
@@ -350,7 +350,7 @@
     </div>
     <div class="fcol">
       <h4>Ordering</h4>
-      <a href="/#catalog">Case-pack ordering</a>
+      <a href="/#catalog">Box ordering</a>
       <a href="/returns.html">Returns &amp; damages</a>
       <a href="/#contact">Compliance documents</a>
       <a href="/report-abuse.html">Report abuse</a>
@@ -413,7 +413,7 @@
       <button data-pay="card" aria-pressed="false">Card<small id="payCard">Charged right away</small></button>
     </div>
     <button class="btn blue" id="checkout" disabled>Submit order</button>
-    <p class="dnote" id="dnote">Quantities are in full cases.</p>
+    <p class="dnote" id="dnote">Quantities are in full boxes.</p>
   </div>
 </aside>
 
@@ -491,9 +491,9 @@ function paintAuth(){
 
   if(on){
     $('#catalogSub').textContent =
-      'Available in a variety of colors and lengths. Pricing below is your account pricing, and quantities move in full cases.';
+      'Available in a variety of colors and lengths. Pricing below is your account pricing, and quantities move in full boxes.';
     $('#gateTxt').innerHTML = CAN_ORDER
-      ? `<b>Signed in — ${DEALER.business_name}.</b> Pricing below is your account pricing. Quantities are in full cases. Terms: ${DEALER.terms.toUpperCase()}.`
+      ? `<b>Signed in — ${DEALER.business_name}.</b> Pricing below is your account pricing. Quantities are in full boxes. Terms: ${DEALER.terms.toUpperCase()}.`
       : `<b>Signed in — ${DEALER.business_name}.</b> Pricing below is your account pricing. To place an order, call ${SALES_PHONE} or email ${SALES_EMAIL}.`;
   } else {
     $('#catalogSub').textContent =
@@ -550,7 +550,7 @@ function renderList(rows){
         <span class="lname"><small class="mono">${p.variants[0]?.sku || ''}</small>${p.name}</span>
         <span class="lspec">${p.meta.slice(0,3).map(m=>`<em>${m}</em>`).join('')}</span>
         <span class="lstock ${st.tone}"><i style="background:${st.dot}"></i>${st.label}</span>
-        <span class="lcase mono">${packs}/case</span>
+        <span class="lcase mono">${packs}/box</span>
         <span class="lgo">Details →</span>
       </a>`;
     }).join('') || '<div class="loading">Nothing in this category yet.</div>';
@@ -612,8 +612,8 @@ function wireMatrices(root){
       const t = matrixTotals(m, p);
       btn.disabled = !t.cases;
       tot.textContent = t.cases
-        ? `${t.cases} case${t.cases>1?'s':''} · ${t.pieces} pcs · ${usd(t.cents)}`
-        : 'No cases selected';
+        ? `${t.cases} box${t.cases>1?'es':''} · ${t.pieces} pcs · ${usd(t.cents)}`
+        : 'No boxes selected';
     };
     m.querySelectorAll('[data-key]').forEach(el => {
       el.oninput = () => { el.value = el.value.replace(/\D/g,'').slice(0,4); refresh(); };
@@ -694,10 +694,10 @@ function updateCart(){
     return `
     <div class="ditem">
       <div class="n">${v.product}${color?` <span class="cdot" style="background:${colorHex(sku,color)}"></span>${color}`:''}
-        <small class="mono">${v.label} · ${fullSku(sku,color)} · ${cart[key]} case${cart[key]>1?'s':''} · ${v.pack*cart[key]} pcs</small></div>
+        <small class="mono">${v.label} · ${fullSku(sku,color)} · ${cart[key]} box${cart[key]>1?'es':''} · ${v.pack*cart[key]} pcs</small></div>
       <div class="p mono">${usd((v.case_cents||0)*cart[key])}</div>
       <button class="x" onclick="setLine('${key}',0)" aria-label="Remove">×</button>
-    </div>`}).join('') : '<div class="empty">No cases added yet.<br>Quantities are in full cases.</div>';
+    </div>`}).join('') : '<div class="empty">No boxes added yet.<br>Quantities are in full boxes.</div>';
 
   const btn = $('#checkout'), note = $('#dnote'), moq = RULES.moq_cents || 50000;
   const verb = CAN_ORDER ? 'Continue to payment' : 'Submit order';

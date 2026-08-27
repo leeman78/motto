@@ -724,3 +724,11 @@ footer{padding-bottom:44px}
 .retailval b{display:block;font-size:27px;letter-spacing:-.035em;line-height:1;color:var(--ink)}
 .retailval em{display:block;font-style:normal;font-size:13px;font-weight:700;color:var(--ink-2);margin:6px 0 7px}
 .retailval span{display:block;font-size:12px;line-height:1.5;color:var(--ink-3)}
+
+/* Boxes arrive with the colourways mixed, so the grid asks for boxes rather
+   than a quantity per colour. The swatches stay, because a buyer still wants
+   to know what is in the box; they are now a statement of contents rather
+   than a set of choices. */
+.massort{padding:2px 0 13px;font-size:11.5px;line-height:1.5;color:var(--ink-2)}
+.massort b{color:var(--ink);font-weight:700}
+.matrix.single .mlab small{white-space:nowrap}

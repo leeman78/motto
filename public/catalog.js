@@ -257,28 +257,33 @@ export function orderMatrix(p, cart, opts = {}) {
   if (!priced.length) {
     return `<div class="nomatrix">No pricing on file for this product yet. Call for a quote.</div>`;
   }
+
+  // Boxes arrive with the colourways mixed, so a colour cannot be ordered on
+  // its own. The grid used to ask for a quantity per colour, which took an
+  // order the warehouse could not fill. It now asks for boxes and says what
+  // is inside them.
   const cols = (p.colors || []).filter(c => c.name);
-  const multi = cols.length > 1;
-  const cell = (v, colorName) => {
-    const key = lineKey(v.sku, multi ? colorName : '');
-    return `<input class="qty mono" type="text" inputmode="numeric" value="${cart[key] || ''}"
-              placeholder="0" data-key="${key}" aria-label="${p.name} ${v.label} ${colorName || ''} cases">`;
-  };
+  const assorted = cols.length > 1;
 
   return `
-  <div class="matrix${multi ? '' : ' single'}" style="--cols:${multi ? cols.length : 1}">
+  <div class="matrix single" style="--cols:1">
+    ${assorted ? `<div class="massort">Boxes ship <b>assorted</b> &mdash; the colours above arrive mixed and vary by box.</div>` : ''}
     <div class="mhead">
-      <span class="mcorner">Cases</span>
-      ${multi ? cols.map(c => `<span class="mcol"><i style="background:${c.hex}" title="${c.name}"></i><em>${c.name}</em></span>`).join('')
-              : '<span class="mcol"><em>Qty</em></span>'}
+      <span class="mcorner">Boxes</span>
+      <span class="mcol"><em>Qty</em></span>
     </div>
-    ${priced.map(v => `
+    ${priced.map(v => {
+      const key = lineKey(v.sku, '');
+      const each = v.pack ? Math.round(v.case_cents / v.pack) : 0;
+      return `
       <div class="mrow">
-        <span class="mlab">${v.label}<small class="mono">${usd(v.case_cents)} · ${v.pack}/cs</small></span>
-        ${multi ? cols.map(c => cell(v, c.name)).join('') : cell(v, '')}
-      </div>`).join('')}
+        <span class="mlab">${v.label}<small class="mono">${usd(v.case_cents)} / box · ${usd(each)} ea · ${v.pack} pcs</small></span>
+        <input class="qty mono" type="text" inputmode="numeric" value="${cart[key] || ''}"
+               placeholder="0" data-key="${key}" aria-label="${p.name} ${v.label} boxes">
+      </div>`;
+    }).join('')}
     <div class="mfoot">
-      <span class="mtot" data-total="${p.slug}">No cases selected</span>
+      <span class="mtot" data-total="${p.slug}">No boxes selected</span>
       <button class="btn dark madd" data-add="${p.slug}" disabled>${opts.addLabel || 'Add to order'}</button>
     </div>
   </div>`;

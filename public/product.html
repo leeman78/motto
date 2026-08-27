@@ -79,7 +79,7 @@
     </div>
     <div class="fcol">
       <h4>Ordering</h4>
-      <a href="/#catalog">Case-pack ordering</a>
+      <a href="/#catalog">Box ordering</a>
       <a href="/returns.html">Returns &amp; damages</a>
       <a href="/#contact">Compliance documents</a>
       <a href="/report-abuse.html">Report abuse</a>
@@ -220,7 +220,7 @@ if(!p){
   const priced = p.variants.some(v => v.case_cents != null);
   $('#buy').innerHTML = priced ? `
       <h4>Build an order</h4>
-      <p class="sub">Quantities are in full cases. Mix colorways and lengths in one go.</p>
+      <p class="sub">Quantities are in full boxes. Mix colorways and lengths in one go.</p>
       ${orderMatrix(p, {}, { addLabel: 'Add to order' })}
       <a class="docbtn" href="/#contact" id="docBtn">Request compliance documents</a>
       <p class="sub" style="margin:12px 0 0;text-align:center">Questions? Call
@@ -238,8 +238,8 @@ if(!p){
       const t = matrixTotals(m, p);
       btn.disabled = !t.cases;
       tot.textContent = t.cases
-        ? `${t.cases} case${t.cases>1?'s':''} · ${t.pieces} pcs · ${usd(t.cents)}`
-        : 'No cases selected';
+        ? `${t.cases} box${t.cases>1?"es":""} · ${t.pieces} pcs · ${usd(t.cents)}`
+        : 'No boxes selected';
     };
     m.querySelectorAll('[data-key]').forEach(el => {
       el.oninput = () => { el.value = el.value.replace(/\D/g,'').slice(0,4); refresh(); };
