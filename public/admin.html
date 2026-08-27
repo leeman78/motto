@@ -212,7 +212,9 @@ async function repList(){
     call('list_dealers').catch(() => ({}))
   ]);
   const items = repRes.items || [];
-  const ds    = dealerRes.items || [];
+  // list_dealers answers with `dealers`, not `items`. Accept either so this
+  // does not silently render an empty table again.
+  const ds    = dealerRes.dealers || dealerRes.items || [];
   const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
 
   $('#pane').innerHTML = `
