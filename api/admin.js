@@ -306,7 +306,7 @@ export default async function handler(req, res) {
       case 'list_products': {
         const { data, error } = await db
           .from('variants')
-          .select('sku, label, case_pack, master_carton, list_cents, msrp_cents, upc, is_active, sort_order, products(name, sort_order)')
+          .select('sku, label, case_pack, master_carton, cost_cents, list_cents, retail_cents, msrp_cents, upc, is_active, sort_order, products(name, sort_order)')
           .order('sku');
         if (error) throw error;
         data.sort((a, b) =>
@@ -358,7 +358,7 @@ export default async function handler(req, res) {
       case 'set_list_price': {
         const { sku } = p;
         const patch = {};
-        for (const k of ['list_cents','msrp_cents','case_pack','master_carton']) {
+        for (const k of ['cost_cents','list_cents','retail_cents','msrp_cents','case_pack','master_carton']) {
           if (k in p) {
             const n = parseInt(p[k], 10);
             if (!Number.isInteger(n) || n < 0) {

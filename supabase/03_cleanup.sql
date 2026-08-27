@@ -22,12 +22,12 @@ delete from variants where sku = 'MT-CL-03';
 select 'REVIEW: not in the current seed' as note, v.sku, p.name
 from variants v join products p on p.id = v.product_id
 where v.sku not in (
-  'OCC003','OCC006','OCC010',
+  'OCC003','OCC006','OCC0010',
   'ICL006',
-  'OUC003','OUC010',
-  'IUL003','IUL010',
+  'OUC003','OUC0010',
+  'IUL003','IUL0010',
   'WC0200','CC0200',
-  'MT-BUDS-P','A5WH','ANC',
+  '780080','A5WH','ANC',
   'EPH004','TEPH007','IEP007',
-  'MT-AD-UC35','MT-AD-LT35'
+  'JH071','MT-AD-LT35'
 );

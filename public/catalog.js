@@ -95,7 +95,7 @@ export const FALLBACK = {
            {name:'Gold',hex:'#c98b32',image:null}],
    shots:['usbc_hero.webp'],stock:'in_stock',
    weight_oz:2.00,long:"Power your devices with speed and durability using the Motto Leather-Wrapped Type-C to Type-C Cable. Designed to support up to 65W fast charging, this cable delivers efficient power and stable data transfer for smartphones, tablets, and laptops. The premium leather-wrapped exterior provides a tangle-free experience while enhancing durability for everyday use. Strong, flexible, and built to last, it's the perfect charging solution for modern USB-C devices.",features:["Supports up to 65W fast charging (USB-C PD)", "Type-C to Type-C universal compatibility", "Premium leather-wrapped design for durability", "Tangle-free, flexible cable for easy use", "Ideal for phones, tablets, and laptops", "Fast charging + data sync support"],compat:"Works with USB-C devices including Samsung, Google Pixel, iPad, MacBook, and more.",
-   variants:[{sku:'OCC003',label:'3 ft',pack:12,stock:'in_stock'},{sku:'OCC006',label:'6 ft',pack:12,stock:'in_stock'},{sku:'OCC010',label:'10 ft',pack:12,stock:'low_stock'}]},
+   variants:[{sku:'OCC003',label:'3 ft',pack:12,stock:'in_stock'},{sku:'OCC006',label:'6 ft',pack:12,stock:'in_stock'},{sku:'OCC0010',label:'10 ft',pack:12,stock:'low_stock'}]},
 
   {slug:'usbc-lightning',cat:'cables',type:'Leather-Wrapped Lightning Cable',
    name:'USB-C to Lightning Fast Charging Cable',
@@ -120,7 +120,7 @@ export const FALLBACK = {
    shots:['usba_usbc_hero.webp'],stock:'in_stock',
    weight_oz:2.00,long:"The Motto Leather Wrapped USB Type-A to Type-C Cable in 3FT is the desk and nightstand essential, compact enough to keep tidy, long enough to charge comfortably without stretching. The full-grain leather wrap gives it a premium feel that stands out from every plastic or nylon cable on the market, while the reinforced connectors at both ends prevent the fraying that kills ordinary cables within months. Fast charging and stable data transfer come standard, so you can plug into any USB-A port on a wall charger, laptop, power bank, or car charger and your USB-C device charges at full speed. Available in Black, Dark Brown, Light Brown, Red, and Orange.",features:[],compat:null,
    variants:[{sku:'OUC003',label:'3 ft',pack:12,stock:'in_stock'},
-             {sku:'OUC010',label:'10 ft',pack:12,stock:'in_stock'}]},
+             {sku:'OUC0010',label:'10 ft',pack:12,stock:'in_stock'}]},
 
   {slug:'usba-lightning',cat:'cables',type:'Leather-Wrapped Lightning Cable',
    name:'USB-A to Lightning Charging Cable',
@@ -134,7 +134,7 @@ export const FALLBACK = {
    shots:['usba_lightning_hero.webp'],stock:'in_stock',
    weight_oz:2.00,long:"Charge your Apple devices in style with this premium leather-wrapped iPhone cable. Designed with a durable, flexible build, it prevents tangling while supporting fast, reliable charging for everyday use. Compatible with iPhone, iPad, and other Lightning devices, it's a sleek and dependable essential for your setup.",features:["Fast charging for iPhone and Lightning devices", "Lightning to USB-A compatibility", "Premium leather-wrapped design for added durability", "Tangle-free cable for smooth, hassle-free use", "Durable, flexible build for long-lasting performance", "Supports charging and data sync"],compat:"Works with iPhone, iPad, and all Lightning-enabled Apple devices.",
    variants:[{sku:'IUL003',label:'3 ft',pack:12,stock:'in_stock'},
-             {sku:'IUL010',label:'10 ft',pack:12,stock:'in_stock'}]},
+             {sku:'IUL0010',label:'10 ft',pack:12,stock:'in_stock'}]},
 
   {slug:'wall-20w',cat:'power',type:'Fast Charger',name:'20W PD Wall Charger',
    desc:'Compact dual-port wall charger with USB-C PD and USB-A. Supports Lightning, Micro USB and USB-C cables, so one brick covers the whole rack.',
@@ -165,7 +165,7 @@ export const FALLBACK = {
    shots:['buds_plus_blue.webp','buds_plus_lifestyle.webp','buds_plus_box.webp','buds_plus_controls.webp'],
    stock:'in_stock',
    weight_oz:3.70,long:"Wireless headset with magnetic charging and battery display.",features:["Bluetooth version: 5.0 + EDR", "Charging: wireless magnetic charging, Qi-compatible", "Battery indicator: shows charging and power levels", "Connection: automatically connects when opening the case, initial manual pairing required", "Controls: touch control, one, two, or three taps", "Compatibility: works with iPhone and Android", "Features: no ANC support, no wearable app connection, can be renamed", "Water resistance: PX4"],compat:null,
-   variants:[{sku:'MT-BUDS-P',label:'Single',pack:6,stock:'in_stock'}]},
+   variants:[{sku:'780080',label:'Single',pack:6,stock:'in_stock'}]},
 
   {slug:'airbuds-a5',cat:'audio',type:'True Wireless Earbuds',name:'Wireless Airbuds A5',
    desc:'Clean, compact true wireless in white, with a USB-C magnetic charging case and three sizes of ear tip in the box. Open the case and they pair. No ANC to explain, no app to set up — for the customer who wants working earbuds, not a features list. Sits at the same price as the ANC pair, so a rack can carry both.',
@@ -215,7 +215,7 @@ export const FALLBACK = {
    colors:[{name:'White',hex:'#f4f4f6',image:'adapter_usbc_35_product.webp'}],
    shots:['adapter_usbc_35.webp','adapter_usbc_35_detail.webp'],
    weight_oz:0.60,long:"Enhance your audio experience with the Motto Type-C to 3.5mm AUX Adapter Cable, designed for seamless control and high-quality sound from Type-C ports.",features:[],compat:null,
-   stock:'in_stock',variants:[{sku:'MT-AD-UC35',label:'Single',pack:20,stock:'in_stock'}]},
+   stock:'in_stock',variants:[{sku:'JH071',label:'Single',pack:20,stock:'in_stock'}]},
 
   {slug:'adapter-lightning-35',cat:'adapters',type:'Audio Adapter',name:'Lightning to 3.5mm AUX Adapter',
    desc:'Two ports, not one: plug in 3.5mm headphones and keep charging at the same time. That is the difference between this and the dongle in every other rack, and it is the whole reason a customer picks it up. Plug and play, no app. Works with iPhone 7 through 12 and every Lightning device. Model JBC029.',

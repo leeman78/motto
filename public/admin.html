@@ -50,14 +50,26 @@ tr.click:hover td{background:#f7f8fa}
   .ptable td.r{text-align:right}
   .ptable tr:last-child td{border-bottom:0}
   .ptable col{}
-  .ptable th:nth-child(1),.ptable td:nth-child(1){width:26%}
-  .ptable th:nth-child(2),.ptable td:nth-child(2){width:11%}
-  .ptable th:nth-child(3),.ptable td:nth-child(3){width:15%}
-  .ptable th:nth-child(4),.ptable td:nth-child(4){width:11%}
-  .ptable th:nth-child(5),.ptable td:nth-child(5){width:13%}
-  .ptable th:nth-child(6),.ptable td:nth-child(6){width:12%}
+  /* Ten columns: product, sku, upc, per box, master, cost, wholesale,
+     retail, and the two margins. These sum to 100 because table-layout is
+     fixed; the old set was written for eight and pushed the last two off the
+     edge of the table where they drew on top of each other. */
+  .ptable th:nth-child(1),.ptable td:nth-child(1){width:20%}
+  .ptable th:nth-child(2),.ptable td:nth-child(2){width:10%}
+  .ptable th:nth-child(3),.ptable td:nth-child(3){width:12%}
+  .ptable th:nth-child(4),.ptable td:nth-child(4){width:9%}
+  .ptable th:nth-child(5),.ptable td:nth-child(5){width:11%}
+  .ptable th:nth-child(6),.ptable td:nth-child(6){width:8%}
   .ptable th:nth-child(7),.ptable td:nth-child(7){width:9%}
   .ptable th:nth-child(8),.ptable td:nth-child(8){width:8%}
+  .ptable th:nth-child(9),.ptable td:nth-child(9){width:6%}
+  .ptable th:nth-child(10),.ptable td:nth-child(10){width:7%}
+  .ptable th{font-size:9.5px;letter-spacing:.07em}
+
+  /* Motto's own margin. Tinted because it is the one number on this screen
+     that no rep and no store may ever see. */
+  .mottom{color:#7c2d12;background:#fff7ed}
+  .repm{color:#166534}
 
   .pname b{display:block;font-size:13.5px;line-height:1.3}
   .pname span{display:block;color:#9a9da4;font-size:11.5px;margin-top:2px}
@@ -351,11 +363,16 @@ function renderPrices() {
   const val = (sku, field, fallback) =>
     (priceEdits[sku] && field in priceEdits[sku]) ? priceEdits[sku][field] : fallback;
 
-  const perPiece = i => {
+  // Every price is held per box and quoted per piece, so each one is divided
+  // on the way out and multiplied on the way back in.
+  const pc = (i, field, col) => {
     const pack = Number(val(i.sku, 'case_pack', i.case_pack)) || 1;
-    const cents = val(i.sku, 'list_pc_cents', i.case_pack ? Math.round(i.list_cents / i.case_pack) : 0);
-    return Number(cents) || 0;
+    const stored = i[col] != null ? Math.round(i[col] / (i.case_pack || 1)) : 0;
+    return Number(val(i.sku, field, stored)) || 0;
   };
+  const costPc   = i => pc(i, 'cost_pc',   'cost_cents');
+  const wholePc  = i => pc(i, 'list_pc',   'list_cents');
+  const retailPc = i => pc(i, 'retail_pc', 'retail_cents');
 
   // How many inner boxes make a master carton. Only stated when it divides
   // exactly: a rounded box count is what a freight quote gets built on.
@@ -366,10 +383,10 @@ function renderPrices() {
     return Number.isInteger(b) && b > 1 ? b + ' boxes' : '';
   };
 
-  const marginOf = i => {
-    const msrp = Number(val(i.sku, 'msrp_cents', i.msrp_cents)) || 0;
-    return msrp ? Math.round((1 - perPiece(i) / msrp) * 100) : null;
-  };
+  // Two margins, both in dollars per piece rather than percentages, because
+  // that is how the price sheet is written and how a rep is settled.
+  const mottoM = i => wholePc(i) - costPc(i);      // owner only
+  const repM   = i => retailPc(i) - wholePc(i);
 
   const money = c => (Number(c) / 100).toFixed(2);
   const changed = (sku, field) => priceEdits[sku] && field in priceEdits[sku] ? ' edited' : '';
@@ -413,21 +430,24 @@ function renderPrices() {
         <th>UPC</th>
         <th class="r">Per box</th>
         <th class="r">Master</th>
-        <th class="r">Retail price / pc</th>
-        <th class="r">MSRP / pc</th>
-        <th class="r">Margin</th>
+        <th class="r">Cost / pc</th>
+        <th class="r">Wholesale / pc</th>
+        <th class="r">Retail / pc</th>
+        <th class="r">Motto</th>
+        <th class="r">Rep</th>
       </tr></thead>
       <tbody>${items.map(i => {
-        const m = marginOf(i);
         return `<tr>
           <td class="pname"><b>${i.products?.name || ''}</b><span>${i.label}</span></td>
           <td>${cell(i, 'sku', val(i.sku, 'sku', i.sku), { width: 104, left: true })}</td>
           <td>${cell(i, 'upc', val(i.sku, 'upc', i.upc || ''), { width: 128, left: true })}</td>
           <td class="r"><span class="numcell">${cell(i, 'case_pack', val(i.sku, 'case_pack', i.case_pack || ''), { width: 62 })}<i>pcs</i></span></td>
           <td class="r"><span class="numcell">${cell(i, 'master_carton', val(i.sku, 'master_carton', i.master_carton || ''), { width: 62 })}<i>${boxes(i) || 'pcs'}</i></span></td>
-          <td class="r"><span class="numcell">${cell(i, 'list_pc_cents', money(perPiece(i)), { width: 74 })}<i></i></span></td>
-          <td class="r"><span class="numcell">${cell(i, 'msrp_cents', money(val(i.sku, 'msrp_cents', i.msrp_cents || 0)), { width: 74 })}<i></i></span></td>
-          <td class="r mono margin" style="color:${m != null && m >= 45 ? '#166534' : '#9a9da4'}">${m != null ? m + '%' : '—'}</td>
+          <td class="r"><span class="numcell">${cell(i, 'cost_pc', money(costPc(i)), { width: 68 })}<i></i></span></td>
+          <td class="r"><span class="numcell">${cell(i, 'list_pc', money(wholePc(i)), { width: 68 })}<i></i></span></td>
+          <td class="r"><span class="numcell">${cell(i, 'retail_pc', money(retailPc(i)), { width: 68 })}<i></i></span></td>
+          <td class="r mono mottom">${money(mottoM(i))}</td>
+          <td class="r mono repm">${money(repM(i))}</td>
         </tr>`;
       }).join('')}
       </tbody>
@@ -463,9 +483,12 @@ function renderPrices() {
 
       // Original value, so backing out an edit clears it rather than storing
       // a "change" that changes nothing.
-      const orig = field === 'sku'  ? row.sku
-                 : field === 'upc'  ? (row.upc || '')
-                 : field === 'list_pc_cents' ? (row.case_pack ? Math.round(row.list_cents / row.case_pack) : 0)
+      // The per-piece fields are stored per box, so compare against the
+      // divided value or backing out an edit never clears it.
+      const perBox = { cost_pc: 'cost_cents', list_pc: 'list_cents', retail_pc: 'retail_cents' };
+      const orig = field === 'sku' ? row.sku
+                 : field === 'upc' ? (row.upc || '')
+                 : perBox[field]   ? (row.case_pack ? Math.round((row[perBox[field]] || 0) / row.case_pack) : 0)
                  : row[field] || 0;
 
       priceEdits[sku] = priceEdits[sku] || {};
@@ -504,20 +527,19 @@ function refreshDerived() {
 
     const pack = Number('case_pack' in e ? e.case_pack : row.case_pack) || 0;
     const mast = Number('master_carton' in e ? e.master_carton : row.master_carton) || 0;
-    const pc   = Number('list_pc_cents' in e ? e.list_pc_cents
-                       : (row.case_pack ? Math.round(row.list_cents / row.case_pack) : 0)) || 0;
-    const msrp = Number('msrp_cents' in e ? e.msrp_cents : row.msrp_cents) || 0;
+    const div = (f, col) => Number('  ' && (f in e ? e[f]
+                  : (row.case_pack ? Math.round((row[col] || 0) / row.case_pack) : 0))) || 0;
+    const cost   = div('cost_pc',   'cost_cents');
+    const whole  = div('list_pc',   'list_cents');
+    const retail = div('retail_pc', 'retail_cents');
 
     const b = pack > 0 ? mast / pack : 0;
     const unit = tr.querySelectorAll('.numcell i')[1];
     if (unit) unit.textContent = Number.isInteger(b) && b > 1 ? b + ' boxes' : 'pcs';
 
-    const cellM = tr.querySelector('.margin');
-    if (cellM) {
-      const m = msrp ? Math.round((1 - pc / msrp) * 100) : null;
-      cellM.textContent = m != null ? m + '%' : '—';
-      cellM.style.color = m != null && m >= 45 ? '#166534' : '#9a9da4';
-    }
+    const fmt = c => (c / 100).toFixed(2);
+    const mm = tr.querySelector('.mottom'); if (mm) mm.textContent = fmt(whole - cost);
+    const rm = tr.querySelector('.repm');   if (rm) rm.textContent = fmt(retail - whole);
 
     tr.querySelectorAll('.pin').forEach(el =>
       el.classList.toggle('edited', !!(priceEdits[el.dataset.sku] || {})[el.dataset.field]));
@@ -550,11 +572,13 @@ async function savePrices() {
       if ('case_pack' in e) patch.case_pack = e.case_pack;
       if ('master_carton' in e) patch.master_carton = e.master_carton;
       if ('msrp_cents' in e) patch.msrp_cents = e.msrp_cents;
-      if ('list_pc_cents' in e) {
-        const row  = priceRows.find(r => r.sku === sku) || {};
-        const pack = ('case_pack' in e ? e.case_pack : row.case_pack) || 1;
-        patch.list_cents = e.list_pc_cents * pack;
-      }
+      // Back to per box on the way in, using the pack size as it will be
+      // after this save rather than as it was loaded.
+      const row  = priceRows.find(r => r.sku === sku) || {};
+      const pack = ('case_pack' in e ? e.case_pack : row.case_pack) || 1;
+      if ('cost_pc'   in e) patch.cost_cents   = e.cost_pc   * pack;
+      if ('list_pc'   in e) patch.list_cents   = e.list_pc   * pack;
+      if ('retail_pc' in e) patch.retail_cents = e.retail_pc * pack;
       if (Object.keys(patch).length) await call('set_list_price', { sku: current, ...patch });
       done++;
     } catch (err) {
