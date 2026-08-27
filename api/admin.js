@@ -46,6 +46,99 @@ export default async function handler(req, res) {
     switch (action) {
 
       // ---------------------------------------------------------------
+      // ---------------------------------------------------------------
+      // Reps. A rep signs in the same way a dealer does, so the sign-in,
+      // forced first password change and reset all work unchanged. That
+      // shared machinery is also what makes per-rep scoping possible: one
+      // shared admin password cannot tell two people apart.
+      case 'create_rep': {
+        const { name, email, phone = '', commission_pct = 0, notes = '' } = p;
+        if (!name || !email) {
+          return res.status(400).json({ error: 'Name and email are required.' });
+        }
+        // A caller may set the first password, because handing it over on the
+        // phone is how this actually happens. Supabase rejects anything under
+        // six characters, so say so here rather than surfacing its error.
+        const password = p.password ? String(p.password) : tempPassword();
+        if (password.length < 6) {
+          return res.status(400).json({ error: 'A password must be at least 6 characters.' });
+        }
+
+        const { data: user, error: authErr } = await db.auth.admin.createUser({
+          email, password,
+          email_confirm: true,
+          user_metadata: { rep_name: name }
+        });
+        if (authErr) {
+          if (/already|exists|registered/i.test(authErr.message)) {
+            return res.status(409).json({ error: 'That email already has an account.' });
+          }
+          throw authErr;
+        }
+
+        const { error: rowErr } = await db.from('reps').insert({
+          id: user.user.id,
+          name, email, phone, commission_pct, notes,
+          must_change_password: true
+        });
+        if (rowErr) {
+          await db.auth.admin.deleteUser(user.user.id);   // no orphan auth user
+          throw rowErr;
+        }
+        return res.status(200).json({ ok: true, id: user.user.id, email, password });
+      }
+
+      case 'list_reps': {
+        const { data, error } = await db
+          .from('reps')
+          .select('id, name, email, phone, commission_pct, is_active, must_change_password, created_at')
+          .order('name');
+        if (error) throw error;
+
+        // Book size per rep, so the list is worth reading on its own.
+        const { data: counts } = await db.from('dealer_accounts').select('rep_id');
+        const per = {};
+        (counts || []).forEach(d => { if (d.rep_id) per[d.rep_id] = (per[d.rep_id] || 0) + 1; });
+
+        return res.status(200).json({
+          items: (data || []).map(r => ({ ...r, dealers: per[r.id] || 0 }))
+        });
+      }
+
+      case 'set_rep': {
+        const { id } = p;
+        if (!id) return res.status(400).json({ error: 'id is required.' });
+        const patch = {};
+        if ('name' in p)           patch.name = String(p.name || '').trim();
+        if ('email' in p)          patch.email = String(p.email || '').trim();
+        if ('phone' in p)          patch.phone = String(p.phone || '').trim();
+        if ('notes' in p)          patch.notes = String(p.notes || '');
+        if ('is_active' in p)      patch.is_active = !!p.is_active;
+        if ('commission_pct' in p) {
+          const n = Number(p.commission_pct);
+          if (!isFinite(n) || n < 0 || n > 100) {
+            return res.status(400).json({ error: 'Commission must be between 0 and 100.' });
+          }
+          patch.commission_pct = n;
+        }
+        if (!Object.keys(patch).length) return res.status(400).json({ error: 'Nothing to update.' });
+        const { error } = await db.from('reps').update(patch).eq('id', id);
+        if (error) throw error;
+        return res.status(200).json({ ok: true });
+      }
+
+      case 'assign_dealer': {
+        // Reassigning changes who owns the relationship from now on. Past
+        // orders keep the rep_id they were stamped with, so commission
+        // already earned does not move.
+        const { dealer_id, rep_id } = p;
+        if (!dealer_id) return res.status(400).json({ error: 'dealer_id is required.' });
+        const { error } = await db.from('dealer_accounts')
+          .update({ rep_id: rep_id || null }).eq('id', dealer_id);
+        if (error) throw error;
+        return res.status(200).json({ ok: true });
+      }
+
       case 'create_dealer': {
         const { email, business_name, contact_name, phone,
                 discount_pct = 0, terms = 'prepay', notes = '' } = p;
@@ -95,7 +188,7 @@ export default async function handler(req, res) {
       case 'list_dealers': {
         const { data, error } = await db
           .from('dealer_accounts')
-          .select('id, business_name, contact_name, email, phone, discount_pct, terms, approved_at, created_at, must_change_password, password_changed_at')
+          .select('id, business_name, contact_name, email, phone, discount_pct, terms, approved_at, created_at, must_change_password, password_changed_at, rep_id')
           .order('created_at', { ascending: false });
         if (error) throw error;
 

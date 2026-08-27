@@ -105,6 +105,7 @@ tr.click:hover td{background:#f7f8fa}
   <b>Motto Wholesale · Admin</b>
   <div class="tabs">
     <button data-tab="dealers" aria-pressed="true">Dealers</button>
+    <button data-tab="reps" aria-pressed="false">Reps</button>
     <button data-tab="prices" aria-pressed="false">List prices</button>
     <button data-tab="inventory" aria-pressed="false">Inventory</button>
     <button data-tab="compliance" aria-pressed="false">Compliance</button>
@@ -188,11 +189,127 @@ document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => {
 
 async function boot(){
   if(tab === 'dealers')   return view ? dealerDetail(view) : dealerList();
+  if(tab === 'reps')      return repList();
   if(tab === 'prices')    return priceList();
   if(tab === 'inventory') return inventoryList();
   if(tab === 'compliance') return complianceList();
   if(tab === 'copy')       return copyList();
   return orderList();
+}
+
+/* ---------------- reps ----------------
+   A rep owns a set of dealers. Assignment decides who sees the account and
+   who is copied on its orders from now on; it does not move commission that
+   has already been earned, because each order carries the rep it was placed
+   under.
+*/
+async function repList(){
+  $('#pane').innerHTML = '<div class="panel"><p class="sub">Loading…</p></div>';
+  // Either call can come back empty on a fresh database, so neither result
+  // is assumed to have an items array.
+  const [repRes, dealerRes] = await Promise.all([
+    call('list_reps').catch(() => ({})),
+    call('list_dealers').catch(() => ({}))
+  ]);
+  const items = repRes.items || [];
+  const ds    = dealerRes.items || [];
+  const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+
+  $('#pane').innerHTML = `
+  <div class="summary">
+    <div><div class="k">Reps</div><div class="v">${items.length}</div></div>
+    <div><div class="k">Active</div><div class="v">${items.filter(r=>r.is_active).length}</div></div>
+    <div><div class="k">Dealers assigned</div><div class="v">${ds.filter(d=>d.rep_id).length}</div></div>
+    <div><div class="k">Unassigned</div><div class="v" style="color:${ds.filter(d=>!d.rep_id).length?'#b45309':'inherit'}">${ds.filter(d=>!d.rep_id).length}</div></div>
+  </div>
+
+  <div class="panel">
+    <h2>Add a rep</h2>
+    <p class="sub">The rep signs in with this email and is made to replace the password the first time, because you will have read it out to them.</p>
+    <div class="formrow" style="margin-top:16px">
+      <input id="rName"  placeholder="Full name">
+      <input id="rEmail" placeholder="name@mottousa.com">
+      <input id="rPhone" placeholder="Phone (optional)">
+      <input id="rPct"   placeholder="Commission %" inputmode="decimal" style="width:130px">
+      <input id="rPass"  placeholder="First password (6+)" style="width:180px">
+      <button class="btn dark" id="rAdd">Create rep</button>
+    </div>
+    <p class="sub" id="rMsg" style="margin-top:12px"></p>
+  </div>
+
+  <div class="panel">
+    <h2>Reps</h2>
+    <table class="ptable">
+      <thead><tr><th>Name</th><th>Email</th><th class="r">Commission</th><th class="r">Dealers</th><th class="r">Status</th></tr></thead>
+      <tbody>${items.map(r => `<tr>
+        <td class="pname"><b>${esc(r.name)}</b><span>${r.must_change_password ? 'Password not changed yet' : 'Active sign-in'}</span></td>
+        <td class="mono" style="font-size:12px">${esc(r.email)}</td>
+        <td class="r"><input class="pin" style="width:70px;text-align:right" data-rpct="${r.id}" value="${r.commission_pct}"><span class="unit">%</span></td>
+        <td class="r mono">${r.dealers}</td>
+        <td class="r"><button class="btn soft" data-rtog="${r.id}" data-on="${r.is_active}">${r.is_active ? 'Active' : 'Off'}</button></td>
+      </tr>`).join('') || '<tr><td colspan="5" class="sub">No reps yet.</td></tr>'}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="panel">
+    <h2>Who covers whom</h2>
+    <p class="sub">Changing this moves the account from now on. Orders already placed keep the rep they were placed under.</p>
+    <table class="ptable" style="margin-top:16px">
+      <thead><tr><th>Dealer</th><th>Email</th><th>Rep</th></tr></thead>
+      <tbody>${ds.map(d => `<tr>
+        <td class="pname"><b>${esc(d.business_name)}</b><span>${esc(d.contact_name || '')}</span></td>
+        <td class="mono" style="font-size:12px">${esc(d.email || '')}</td>
+        <td><select class="pin" data-assign="${d.id}" style="width:190px">
+          <option value="">— unassigned —</option>
+          ${items.map(r => `<option value="${r.id}"${d.rep_id === r.id ? ' selected' : ''}>${esc(r.name)}</option>`).join('')}
+        </select></td>
+      </tr>`).join('') || '<tr><td colspan="3" class="sub">No dealers yet.</td></tr>'}
+      </tbody>
+    </table>
+  </div>`;
+
+  $('#rAdd').onclick = async () => {
+    const msg = $('#rMsg');
+    const body = {
+      name: $('#rName').value.trim(),
+      email: $('#rEmail').value.trim(),
+      phone: $('#rPhone').value.trim(),
+      commission_pct: parseFloat($('#rPct').value) || 0
+    };
+    if ($('#rPass').value.trim()) body.password = $('#rPass').value.trim();
+    if (!body.name || !body.email) { msg.textContent = 'Name and email are required.'; return; }
+    msg.textContent = 'Creating…';
+    try {
+      const r = await call('create_rep', body);
+      // Shown once. It is not stored anywhere readable, so if it is lost the
+      // rep uses the reset link rather than anyone looking it up.
+      msg.textContent = `Created ${body.email}. First password: ${r.password} — give it to them now, it is not shown again.`;
+      $('#rName').value = $('#rEmail').value = $('#rPhone').value = $('#rPct').value = $('#rPass').value = '';
+      const keep = msg.textContent;
+      await repList();
+      $('#rMsg').textContent = keep;
+    } catch (e) { msg.textContent = e.message; }
+  };
+
+  document.querySelectorAll('[data-rpct]').forEach(el =>
+    el.onchange = async () => {
+      try { await call('set_rep', { id: el.dataset.rpct, commission_pct: parseFloat(el.value) || 0 }); el.classList.remove('edited'); }
+      catch (e) { $('#rMsg').textContent = e.message; }
+    });
+
+  document.querySelectorAll('[data-rtog]').forEach(el =>
+    el.onclick = async () => {
+      const on = el.dataset.on !== 'true';
+      try { await call('set_rep', { id: el.dataset.rtog, is_active: on }); repList(); }
+      catch (e) { $('#rMsg').textContent = e.message; }
+    });
+
+  document.querySelectorAll('[data-assign]').forEach(el =>
+    el.onchange = async () => {
+      try { await call('assign_dealer', { dealer_id: el.dataset.assign, rep_id: el.value || null }); repList(); }
+      catch (e) { $('#rMsg').textContent = e.message; }
+    });
 }
 
 /* ---------------- list prices ----------------
