@@ -95,6 +95,19 @@ tbody tr.click:hover td{background:#fafafb}
   <div id="pane"></div>
 </div>
 
+<div class="gate" id="pwgate" hidden>
+  <div class="card">
+    <h2>Choose a password</h2>
+    <p class="sub">The one you were given was read out to you, so it is not private. Pick your own before going any further.</p>
+    <label for="np">New password</label>
+    <input id="np" type="password" autocomplete="new-password" placeholder="At least 8 characters">
+    <label for="np2">Type it again</label>
+    <input id="np2" type="password" autocomplete="new-password">
+    <p class="err" id="perr"></p>
+    <button class="btn dark" id="pgo" style="width:100%;padding:14px;margin-top:6px">Save and continue</button>
+  </div>
+</div>
+
 <div class="gate" id="gate">
   <div class="card">
     <h2>Rep sign in</h2>
@@ -163,11 +176,49 @@ async function start() {
     session = null;
     return;
   }
-  $('#gate').remove();
+  $('#gate')?.remove();
+  $('#who').textContent = me.rep.name;
+
+  // A password handed over on the phone stops being a secret the moment it is
+  // spoken. Nothing else on this screen opens until it has been replaced,
+  // including by way of a magic link, which is otherwise a way straight past
+  // the prompt.
+  if (me.rep.must_change_password) return forceNewPassword(me);
+
+  $('#pwgate').hidden = true;
   $('#tabs').hidden = false;
   $('#out').hidden = false;
-  $('#who').textContent = me.rep.name;
   render(me);
+}
+
+function forceNewPassword(me) {
+  $('#pwgate').hidden = false;
+  $('#out').hidden = false;
+  const err = $('#perr');
+
+  $('#pgo').onclick = async () => {
+    const a = $('#np').value, b = $('#np2').value;
+    err.textContent = '';
+    // Eight rather than Supabase's six: this one is chosen, not dictated over
+    // a phone line, so there is no reason to accept a weak one.
+    if (a.length < 8)  { err.textContent = 'Use at least 8 characters.'; return; }
+    if (a !== b)       { err.textContent = 'Those two do not match.'; return; }
+
+    $('#pgo').disabled = true;
+    try {
+      const c = await client();
+      const { error } = await c.auth.updateUser({ password: a });
+      if (error) throw new Error(error.message);
+      await call('password_changed');
+      $('#pwgate').hidden = true;
+      $('#tabs').hidden = false;
+      render(await call('summary'));
+    } catch (e) {
+      err.textContent = e.message || 'That did not save. Try again.';
+      $('#pgo').disabled = false;
+    }
+  };
+  $('#np2').addEventListener('keydown', e => { if (e.key === 'Enter') $('#pgo').click(); });
 }
 
 document.querySelectorAll('#tabs button').forEach(b => b.onclick = () => {

@@ -102,6 +102,19 @@ export default async function handler(req, res) {
       }
 
       // ---------------------------------------------------------------
+      case 'password_changed': {
+        // The password itself is changed by the browser against Supabase auth,
+        // which is the only thing that can hash it. This just clears the flag
+        // that forces the prompt, and it is keyed to the signed-in user, so a
+        // rep can only ever clear their own.
+        const { error } = await db.from('reps')
+          .update({ must_change_password: false, password_changed_at: new Date().toISOString() })
+          .eq('id', rep.id);
+        if (error) throw error;
+        return res.status(200).json({ ok: true });
+      }
+
+      // ---------------------------------------------------------------
       case 'dealers': {
         const { data, error } = await db
           .from('rep_dealers')
