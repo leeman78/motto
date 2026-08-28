@@ -170,7 +170,7 @@ export default async function handler(req, res) {
 
         const { data: orders } = await db
           .from('orders')
-          .select('id, order_no, status, subtotal_cents, total_cents, created_at, paid_at')
+          .select('id, order_no, status, subtotal_cents, freight_cents, total_cents, created_at, paid_at')
           .eq('dealer_id', dealer_id)
           .order('created_at', { ascending: false })
           .limit(20);

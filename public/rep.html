@@ -405,7 +405,7 @@ async function account(id) {
       <tbody>${orders.length ? orders.map(o => `<tr>
         <td class="mono">#${o.order_no}</td>
         <td><span class="pill ${o.status === 'paid' ? 'ok' : ''}">${o.status}</span></td>
-        <td class="r mono">${usd(o.total_cents)}</td>
+        <td class="r mono">${usd(o.total_cents ?? (o.subtotal_cents + (o.freight_cents || 0)))}</td>
         <td class="r mono" style="color:var(--ink-3)">${o.created_at.slice(0, 10)}</td>
       </tr>`).join('') : '<tr><td colspan="4" class="sub">No orders yet.</td></tr>'}
       </tbody>
