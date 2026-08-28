@@ -157,7 +157,7 @@ from (values
  ('usba-lightning','IUL0010','','10 ft',100,200, 8600,1499,2,'in_stock'),
  ('wall-20w','WC0200','','Single',100,400, 6470,1299,1,'in_stock'),
  ('car-45w','CC0200','850025312035','Single',600,600, 4270, 999,1,'in_stock'),
- ('buds-plus','780080','','Single',6,48,12720,3999,1,'in_stock'),
+ ('buds-plus','MT-BUDS-P','','Single',6,48,12720,3999,1,'in_stock'),
  ('airbuds-a5','A5WH','','Single',100,100,11360,3999,1,'in_stock'),
  ('headset-anc','ANC','','Single',100,100,12800,3999,1,'in_stock'),
  ('wired-35mm','EPH004','1500002200006','Single',100,300, 4960, 999,1,'in_stock'),

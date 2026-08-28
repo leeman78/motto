@@ -183,6 +183,70 @@ export default async function handler(req, res) {
         return res.status(200).json({ ok: true, sent_to: rep.email });
       }
 
+      // ---------------------------------------------------------------
+      // Deleting. Only the admin token reaches this file at all, so these are
+      // owner-only by construction; there is no rep path to them.
+      //
+      // Neither delete touches orders or invoices. A sold order and a raised
+      // invoice are records of things that happened, and an accountant asking
+      // why invoice 41 is missing is a worse problem than a stale name.
+      case 'delete_rep': {
+        const { id } = p;
+        if (!id) return res.status(400).json({ error: 'id is required.' });
+
+        const { data: rep } = await db.from('reps').select('name').eq('id', id).single();
+        if (!rep) return res.status(404).json({ error: 'No such rep.' });
+
+        // Typing the name is the confirmation. A dialog is too easy to click
+        // through when the row above is the one you meant.
+        if (String(p.confirm || '').trim() !== rep.name) {
+          return res.status(400).json({ error: `Type the rep's name exactly (${rep.name}) to confirm.` });
+        }
+
+        const { count } = await db.from('dealer_accounts')
+          .select('id', { count: 'exact', head: true }).eq('rep_id', id);
+        if (count) {
+          return res.status(409).json({
+            error: `${rep.name} still covers ${count} account${count > 1 ? 's' : ''}. Move them to another rep first, or the accounts end up with nobody watching them.`
+          });
+        }
+
+        // dealer_accounts.rep_id and orders.rep_id are ON DELETE SET NULL, so
+        // past orders keep their totals and lose only the pointer.
+        await db.from('reps').delete().eq('id', id);
+        await db.auth.admin.deleteUser(id);          // the sign-in goes too
+        return res.status(200).json({ ok: true, deleted: rep.name });
+      }
+
+      case 'delete_dealer': {
+        const { id } = p;
+        if (!id) return res.status(400).json({ error: 'id is required.' });
+
+        const { data: d } = await db.from('dealer_accounts')
+          .select('business_name').eq('id', id).single();
+        if (!d) return res.status(404).json({ error: 'No such account.' });
+
+        if (String(p.confirm || '').trim() !== d.business_name) {
+          return res.status(400).json({ error: `Type the business name exactly (${d.business_name}) to confirm.` });
+        }
+
+        const { count } = await db.from('orders')
+          .select('id', { count: 'exact', head: true }).eq('dealer_id', id);
+        if (count && !p.force) {
+          return res.status(409).json({
+            error: `${d.business_name} has ${count} order${count > 1 ? 's' : ''} on file. Deleting the account keeps those orders but detaches them from a name. Send force to go ahead.`,
+            orders: count
+          });
+        }
+
+        // dealer_prices cascades. orders.dealer_id is a plain reference, so
+        // clear it first rather than letting the delete fail on it.
+        await db.from('orders').update({ dealer_id: null }).eq('dealer_id', id);
+        await db.from('dealer_accounts').delete().eq('id', id);
+        await db.auth.admin.deleteUser(id);
+        return res.status(200).json({ ok: true, deleted: d.business_name });
+      }
+
       case 'assign_dealer': {
         // Reassigning changes who owns the relationship from now on. Past
         // orders keep the rep_id they were stamped with, so commission

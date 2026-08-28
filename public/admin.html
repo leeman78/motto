@@ -78,6 +78,8 @@ tr.click:hover td{background:#f7f8fa}
   .ptable.cover3{table-layout:auto}
   .ptable.cover3 th:nth-child(n),.ptable.cover3 td:nth-child(n){width:auto}
 
+  .btn.danger{color:#b42318}
+  .btn.danger:hover{background:#fef2f2}
   .note{display:flex;align-items:flex-start;gap:14px;margin:16px 0 0;padding:16px 18px;
     border-radius:14px;font-size:13.5px;line-height:1.55;border:1px solid}
   .note.ok{background:#f0fdf4;border-color:#bbf7d0;color:#14532d}
@@ -331,6 +333,7 @@ async function repList(){
           <button class="btn soft" data-rpass="${r.id}">Reset password</button>
           <button class="btn soft" data-rlink="${r.id}">Send link</button>
           <button class="btn soft" data-rtog="${r.id}" data-on="${r.is_active}">${r.is_active ? 'Active' : 'Off'}</button>
+          <button class="btn soft danger" data-rdel="${r.id}" data-name="${esc(r.name)}">Delete</button>
         </td>
       </tr>`).join('') || '<tr><td colspan="5" class="sub">No reps yet.</td></tr>'}
       </tbody>
@@ -412,6 +415,20 @@ async function repList(){
         note('bad', 'The link was not sent.', e.message);
       }
       el.disabled = false; el.textContent = label;
+    });
+
+  // Typing the name is the confirmation. A yes/no dialog is clicked through
+  // by reflex, and the row above is always the one somebody meant.
+  document.querySelectorAll('[data-rdel]').forEach(el =>
+    el.onclick = async () => {
+      const name = el.dataset.name;
+      const typed = prompt(`Delete ${name}?\n\nThis removes the rep and their sign-in. Orders and invoices they earned stay on file.\n\nType the name to confirm:`);
+      if (typed === null) return;
+      try {
+        const r = await call('delete_rep', { id: el.dataset.rdel, confirm: typed });
+        note('ok', `${r.deleted} deleted.`, 'Their past orders and invoices are untouched.');
+        repList();
+      } catch (e) { note('bad', 'Not deleted.', e.message); }
     });
 
   document.querySelectorAll('[data-rtog]').forEach(el =>
@@ -980,6 +997,7 @@ async function dealerDetail(id){
       <button class="btn dark" id="saveD">Save account</button>
       <button class="btn soft" id="resetP">Reset password</button>
       <button class="btn soft" id="magic">Send sign-in link</button>
+      <button class="btn soft danger" id="ddel">Delete account</button>
       <span id="dMsg" style="font-size:12.5px;color:#8a8d94"></span>
     </div>
     <div id="dCreds"></div>
@@ -1009,6 +1027,28 @@ async function dealerDetail(id){
   </div>`;
 
   $('#back').onclick = () => go('dealers', null);
+
+  // Same shape as deleting a rep: name typed out, and orders survive it.
+  $('#ddel').onclick = async () => {
+    const name = d.business_name;
+    const typed = prompt(`Delete ${name}?\n\nThis removes the account and its sign-in. Orders already placed stay on file but stop showing a customer name.\n\nType the business name to confirm:`);
+    if (typed === null) return;
+    try {
+      const r = await call('delete_dealer', { id, confirm: typed });
+      note('ok', `${r.deleted} deleted.`, 'Past orders are kept.');
+      go('dealers', null);
+    } catch (e) {
+      if (e.message.includes('Send force')) {
+        if (confirm(e.message + '\n\nGo ahead?')) {
+          try {
+            const r = await call('delete_dealer', { id, confirm: typed, force: true });
+            note('ok', `${r.deleted} deleted.`, 'Past orders are kept but no longer show a customer name.');
+            go('dealers', null);
+          } catch (e2) { note('bad', 'Not deleted.', e2.message); }
+        }
+      } else note('bad', 'Not deleted.', e.message);
+    }
+  };
 
   $('#saveD').onclick = async () => {
     const msg = $('#dMsg'); msg.textContent = 'Saving…';

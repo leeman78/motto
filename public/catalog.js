@@ -165,7 +165,7 @@ export const FALLBACK = {
    shots:['buds_plus_blue.webp','buds_plus_lifestyle.webp','buds_plus_box.webp','buds_plus_controls.webp'],
    stock:'in_stock',
    weight_oz:3.70,long:"Wireless headset with magnetic charging and battery display.",features:["Bluetooth version: 5.0 + EDR", "Charging: wireless magnetic charging, Qi-compatible", "Battery indicator: shows charging and power levels", "Connection: automatically connects when opening the case, initial manual pairing required", "Controls: touch control, one, two, or three taps", "Compatibility: works with iPhone and Android", "Features: no ANC support, no wearable app connection, can be renamed", "Water resistance: PX4"],compat:null,
-   variants:[{sku:'780080',label:'Single',pack:6,stock:'in_stock'}]},
+   variants:[{sku:'MT-BUDS-P',label:'Single',pack:6,stock:'in_stock'}]},
 
   {slug:'airbuds-a5',cat:'audio',type:'True Wireless Earbuds',name:'Wireless Airbuds A5',
    desc:'Clean, compact true wireless in white, with a USB-C magnetic charging case and three sizes of ear tip in the box. Open the case and they pair. No ANC to explain, no app to set up — for the customer who wants working earbuds, not a features list. Sits at the same price as the ANC pair, so a rack can carry both.',

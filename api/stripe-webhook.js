@@ -6,6 +6,7 @@
 
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
+import { invoiceForOrder } from './_invoice.js';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const db = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
@@ -21,6 +22,19 @@ function rawBody(req) {
     req.on('end', () => resolve(Buffer.concat(chunks)));
     req.on('error', reject);
   });
+}
+
+// Raising the invoice must never fail the webhook. Stripe retries anything
+// that does not return 200, which would re-run the order update as well; and
+// the payment is real whether or not the paperwork went out. So this logs and
+// swallows, and the invoice can be raised by hand from the admin if needed.
+async function raise(orderId) {
+  try {
+    const inv = await invoiceForOrder(orderId);
+    if (inv) console.log('invoice raised', inv.invoice_no, 'for order', orderId);
+  } catch (e) {
+    console.error('invoice failed for order', orderId, e);
+  }
 }
 
 export default async function handler(req, res) {
@@ -58,6 +72,9 @@ export default async function handler(req, res) {
           total_cents: s.amount_total,
           paid_at: settled ? new Date().toISOString() : null
         }).eq('id', orderId);
+        // Card settles here. ACH does not, and gets its invoice below when the
+        // money actually clears.
+        if (settled) await raise(orderId);
         break;
       }
 
@@ -66,6 +83,7 @@ export default async function handler(req, res) {
         await db.from('orders')
           .update({ status: 'paid', paid_at: new Date().toISOString() })
           .eq('id', orderId);
+        await raise(orderId);
         break;
 
       case 'checkout.session.async_payment_failed':

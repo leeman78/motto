@@ -205,17 +205,37 @@ function forceNewPassword(me) {
     if (a !== b)       { err.textContent = 'Those two do not match.'; return; }
 
     $('#pgo').disabled = true;
+    $('#pgo').textContent = 'Saving…';
     try {
       const c = await client();
       const { error } = await c.auth.updateUser({ password: a });
       if (error) throw new Error(error.message);
-      await call('password_changed');
-      $('#pwgate').hidden = true;
-      $('#tabs').hidden = false;
-      render(await call('summary'));
     } catch (e) {
+      // Only the password change itself belongs in this catch. Anything after
+      // it has already succeeded, and treating a rendering slip as a failed
+      // save left the button greyed out with no message, which reads as the
+      // screen having frozen.
       err.textContent = e.message || 'That did not save. Try again.';
       $('#pgo').disabled = false;
+      $('#pgo').textContent = 'Save and continue';
+      return;
+    }
+
+    // Past this point the password is changed. The gate comes down first, so
+    // a later hiccup cannot trap someone behind a prompt they have satisfied.
+    $('#pwgate').hidden = true;
+    $('#tabs').hidden = false;
+    $('#out').hidden = false;
+    $('#pgo').disabled = false;
+    $('#pgo').textContent = 'Save and continue';
+
+    try { await call('password_changed'); }
+    catch (e) { console.error('could not clear the change-password flag', e); }
+
+    try { render(await call('summary')); }
+    catch (e) {
+      $('#pane').innerHTML = `<div class="panel"><h2>Password saved</h2>
+        <p class="sub" style="margin-top:8px">Your new password is in place. Reload the page to load your accounts.</p></div>`;
     }
   };
   $('#np2').addEventListener('keydown', e => { if (e.key === 'Enter') $('#pgo').click(); });
