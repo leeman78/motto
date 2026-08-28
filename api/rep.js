@@ -170,7 +170,7 @@ export default async function handler(req, res) {
 
         const { data: orders } = await db
           .from('orders')
-          .select('id, order_no, status, subtotal_cents, freight_cents, total_cents, created_at, paid_at')
+          .select('id, order_no, status, subtotal_cents, freight_cents, total_cents, created_at, paid_at, order_items(sku, cases, case_cents, pieces)')
           .eq('dealer_id', dealer_id)
           .order('created_at', { ascending: false })
           .limit(20);
@@ -190,16 +190,18 @@ export default async function handler(req, res) {
 
         const skus = [...new Set((data || []).flatMap(o => (o.order_items || []).map(i => i.sku)))];
         const { data: vars } = skus.length
-          ? await db.from('variants').select('sku, list_cents').in('sku', skus)
+          ? await db.from('variants').select('sku, list_cents, label, products(name)').in('sku', skus)
           : { data: [] };
         const wholesale = Object.fromEntries((vars || []).map(v => [v.sku, v.list_cents || 0]));
+        const names = Object.fromEntries((vars || []).map(v =>
+          [v.sku, `${v.products?.name || v.sku} — ${v.label || ''}`]));
 
         return res.status(200).json({
           items: (data || []).map(o => {
-            const items = o.order_items || [];
+            const items = (o.order_items || []).map(i => ({ ...i, name: names[i.sku] || i.sku }));
             const retail = items.reduce((s, i) => s + i.cases * i.case_cents, 0);
             const whole  = items.reduce((s, i) => s + i.cases * (wholesale[i.sku] || 0), 0);
-            return { ...o, retail_cents: retail, wholesale_cents: whole, margin_cents: retail - whole };
+            return { ...o, order_items: items, retail_cents: retail, wholesale_cents: whole, margin_cents: retail - whole };
           })
         });
       }

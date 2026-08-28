@@ -63,6 +63,13 @@ tbody tr.click:hover td{background:#fafafb}
   border:1px solid #e2e2e6;border-radius:9px;padding:8px 10px;width:92px;outline:none}
 .pin:focus{border-color:#111}
 .pin.q{border-color:#f59e0b;background:#fff7ed}
+.chev{color:var(--ink-3);font-weight:400}
+tr.click{cursor:pointer}
+tr.odetail>td{background:var(--soft);border-radius:10px;padding:14px 16px}
+.otbl{width:100%;border-collapse:collapse;font-size:12.5px}
+.otbl th{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);text-align:left;padding-bottom:6px}
+.otbl th.r,.otbl td.r{text-align:right;padding-left:12px}
+.otbl td{padding:7px 0;border-top:1px solid var(--line)}
 .obar{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;
   margin-top:16px;padding:13px 16px;background:var(--soft);border-radius:12px;font-size:13.5px}
 .ea{display:block;font-size:11px;color:var(--ink-3);font-weight:400;margin-top:2px}
@@ -198,7 +205,11 @@ async function start() {
   $('#pwgate').hidden = true;
   $('#tabs').hidden = false;
   $('#out').hidden = false;
-  render(me);
+  // Arriving with a hash (a bookmark, a refresh mid-portal, back/forward)
+  // lands on that screen; a clean arrival starts at the overview.
+  const h = location.hash.replace(/^#/, '');
+  if (h && !h.includes('access_token=')) applyHash();
+  else render(me);
 }
 
 function forceNewPassword(me) {
@@ -281,11 +292,24 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Enter' && e.target.id === 'np2') $('#pgo').click();
 });
 
-document.querySelectorAll('#tabs button').forEach(b => b.onclick = () => {
-  tab = b.dataset.tab; open = null;
+// Navigation goes through the URL hash so the browser's back button walks
+// back through the portal instead of leaving the site. The magic-link
+// fragment (#access_token=...) belongs to Supabase, not to us — leave it.
+function applyHash() {
+  const h = location.hash.replace(/^#/, '');
+  if (h.includes('access_token=')) return;
+  const [t, id] = h.split('/');
+  tab = ['home', 'accounts', 'orders'].includes(t) ? t : 'home';
+  open = (tab === 'accounts' && id) ? id : null;
   document.querySelectorAll('#tabs button').forEach(x =>
-    x.setAttribute('aria-pressed', x === b ? 'true' : 'false'));
+    x.setAttribute('aria-pressed', x.dataset.tab === tab ? 'true' : 'false'));
   route();
+}
+window.addEventListener('hashchange', applyHash);
+
+document.querySelectorAll('#tabs button').forEach(b => b.onclick = () => {
+  if (location.hash === '#' + b.dataset.tab) return applyHash();   // re-click = refresh
+  location.hash = b.dataset.tab;
 });
 
 async function route() {
@@ -346,7 +370,7 @@ async function accounts() {
     </table>
   </div>`;
   document.querySelectorAll('[data-open]').forEach(tr =>
-    tr.onclick = () => { open = tr.dataset.open; account(open); });
+    tr.onclick = () => { location.hash = 'accounts/' + tr.dataset.open; });
 }
 
 /* ---------------- one account ---------------- */
@@ -402,17 +426,20 @@ async function account(id) {
     <h2>Recent orders</h2>
     <table style="margin-top:18px">
       <thead><tr><th>Order</th><th>Status</th><th class="r">Total</th><th class="r">Placed</th></tr></thead>
-      <tbody>${orders.length ? orders.map(o => `<tr>
-        <td class="mono">#${o.order_no}</td>
-        <td><span class="pill ${o.status === 'paid' ? 'ok' : ''}">${o.status}</span></td>
+      <tbody>${orders.length ? orders.map(o => `<tr class="click" data-oid="${o.id}">
+        <td class="mono">#${o.order_no} <span class="chev">›</span></td>
+        <td><span class="pill ${o.status === 'paid' ? 'ok' : (o.status === 'requested' ? 'warn' : '')}">${o.status}</span></td>
         <td class="r mono">${usd(o.total_cents ?? (o.subtotal_cents + (o.freight_cents || 0)))}</td>
         <td class="r mono" style="color:var(--ink-3)">${o.created_at.slice(0, 10)}</td>
-      </tr>`).join('') : '<tr><td colspan="4" class="sub">No orders yet.</td></tr>'}
+      </tr>
+      <tr class="odetail" data-od="${o.id}" hidden><td colspan="4">${orderDetail(o, prices)}</td></tr>`).join('')
+      : '<tr><td colspan="4" class="sub">No orders yet.</td></tr>'}
       </tbody>
     </table>
   </div>`;
 
-  $('#back').onclick = () => { open = null; accounts(); };
+  $('#back').onclick = () => { location.hash = 'accounts'; };
+  bindOrderRows();
 
   // ---- order builder ----
   // Freight mirrors the site rule: free at $1,500, else $18 flat.
@@ -497,18 +524,70 @@ async function orders() {
     <table style="margin-top:18px">
       <thead><tr><th>Order</th><th>Account</th><th>Status</th>
         <th class="r">Charged</th><th class="r">Wholesale</th><th class="r">My margin</th><th class="r">Placed</th></tr></thead>
-      <tbody>${items.length ? items.map(o => `<tr>
-        <td class="mono">#${o.order_no}</td>
+      <tbody>${items.length ? items.map(o => `<tr class="click" data-oid="${o.id}">
+        <td class="mono">#${o.order_no} <span class="chev">›</span></td>
         <td>${esc(o.dealer_accounts?.business_name || '')}</td>
         <td><span class="pill ${o.status === 'paid' ? 'ok' : (o.status === 'requested' ? 'warn' : '')}">${o.status}</span></td>
         <td class="r mono">${usd(o.retail_cents)}</td>
         <td class="r mono" style="color:var(--ink-3)">${usd(o.wholesale_cents)}</td>
         <td class="r mono ${o.status === 'paid' ? 'margin' : ''}" style="${o.status === 'paid' ? '' : 'color:var(--ink-3)'}">${usd(o.margin_cents)}</td>
         <td class="r mono" style="color:var(--ink-3)">${o.created_at.slice(0, 10)}</td>
-      </tr>`).join('') : '<tr><td colspan="7" class="sub">No orders yet.</td></tr>'}
+      </tr>
+      <tr class="odetail" data-od="${o.id}" hidden><td colspan="7">${orderDetail(o)}</td></tr>`).join('')
+      : '<tr><td colspan="7" class="sub">No orders yet.</td></tr>'}
       </tbody>
     </table>
   </div>`;
+  bindOrderRows();
+}
+
+// ---------------------------------------------------------------
+// One order, opened up: the boxes inside it and, while it is still
+// unpaid, a button to email the approve-and-pay link again.
+// ---------------------------------------------------------------
+function orderDetail(o, prices) {
+  const items = o.order_items || [];
+  if (!items.length) return '<p class="sub">No line detail on this order.</p>';
+  const bySku = Object.fromEntries((prices || []).map(p => [p.sku, `${p.product} — ${p.label}`]));
+  const resendable = ['requested', 'pending', 'payment_failed', 'abandoned'].includes(o.status);
+  return `
+    <table class="otbl">
+      <thead><tr><th>Item</th><th class="r">Boxes</th><th class="r">Per box</th><th class="r">Amount</th></tr></thead>
+      <tbody>${items.map(i => `<tr>
+        <td>${esc(i.name || bySku[i.sku] || i.sku)}<br><span class="mono" style="font-size:11px;color:var(--ink-3)">${esc(i.sku)} · ${i.pieces} pcs</span></td>
+        <td class="r mono">${i.cases}</td>
+        <td class="r mono">${usd(i.case_cents)}</td>
+        <td class="r mono">${usd(i.case_cents * i.cases)}</td>
+      </tr>`).join('')}</tbody>
+    </table>
+    ${resendable ? `<div style="margin-top:12px;display:flex;gap:10px;align-items:center">
+      <button class="btn soft" data-resend="${o.id}">Resend pay link</button>
+      <span class="msg" data-rmsg="${o.id}" style="margin:0"></span>
+    </div>` : ''}`;
+}
+
+function bindOrderRows() {
+  document.querySelectorAll('tr[data-oid]').forEach(tr => {
+    tr.onclick = () => {
+      const d = document.querySelector(`tr[data-od="${tr.dataset.oid}"]`);
+      if (d) d.hidden = !d.hidden;
+    };
+  });
+  document.querySelectorAll('[data-resend]').forEach(b => {
+    b.onclick = async (ev) => {
+      ev.stopPropagation();
+      b.disabled = true; b.textContent = 'Sending…';
+      const m = document.querySelector(`[data-rmsg="${b.dataset.resend}"]`);
+      try {
+        const r = await call('send_pay_link', { order_id: b.dataset.resend });
+        b.textContent = 'Sent';
+        m.textContent = 'On its way to ' + r.sent_to;
+      } catch (e) {
+        b.disabled = false; b.textContent = 'Resend pay link';
+        m.textContent = e.message;
+      }
+    };
+  });
 }
 
 function esc(s) {
