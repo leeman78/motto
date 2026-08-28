@@ -63,6 +63,7 @@ tbody tr.click:hover td{background:#fafafb}
   border:1px solid #e2e2e6;border-radius:9px;padding:8px 10px;width:92px;outline:none}
 .pin:focus{border-color:#111}
 .pin.q{border-color:#f59e0b;background:#fff7ed}
+.ea{display:block;font-size:11px;color:var(--ink-3);font-weight:400;margin-top:2px}
 .quoted{display:inline-block;font-size:10px;font-weight:800;letter-spacing:.09em;
   text-transform:uppercase;color:var(--warn);background:#fff7ed;padding:2px 7px;border-radius:999px;margin-top:3px}
 .msg{font-size:12.5px;color:var(--ink-2);margin-top:12px;min-height:18px}
@@ -360,24 +361,22 @@ async function account(id) {
   <div class="panel">
     <h2>Prices for this account</h2>
     <p class="sub" style="margin-top:6px">
-      What this store is charged and what you keep on it. Prices are set by Motto:
-      call or email to have one changed for this account, and a line marked
-      <b>quoted</b> is already on its own price rather than the standard one.</p>
+      What this store pays and what you keep on it, per box and per piece.
+      Prices are set by Motto: call or email to have one changed for this account.</p>
     <table style="margin-top:18px">
       <thead><tr><th>Product</th><th>SKU</th><th class="r">Per box</th>
-        <th class="r">Wholesale</th><th class="r">Standard</th>
-        <th class="r">This store pays</th><th class="r">Per piece</th><th class="r">My margin</th></tr></thead>
+        <th class="r">Wholesale</th><th class="r">This store pays</th><th class="r">My margin</th></tr></thead>
       <tbody>${prices.map(r => `<tr>
         <td class="nm"><b>${esc(r.product)}</b><span>${esc(r.label)}</span></td>
         <td class="mono" style="font-size:12px;color:var(--ink-3)">${esc(r.sku)}</td>
         <td class="r mono">${r.case_pack}</td>
         <td class="r mono" style="color:var(--ink-3)">${usd(r.wholesale_cents)}<br>
-          <span style="font-size:11px">${usd(Math.round(r.wholesale_cents / (r.case_pack || 1)))} ea</span></td>
-        <td class="r mono" style="color:var(--ink-3)">${usd(r.standard_cents)}<br>
-          <span style="font-size:11px">${usd(Math.round(r.standard_cents / (r.case_pack || 1)))} ea</span></td>
-        <td class="r mono"><b>${usd(r.charged_cents)}</b>${r.is_quoted ? '<br><span class="quoted">quoted</span>' : ''}</td>
-        <td class="r mono" style="color:var(--ink-3)" data-ea="${r.sku}">${usd(Math.round(r.charged_cents / (r.case_pack || 1)))}</td>
-        <td class="r mono margin" data-m="${r.sku}">${usd(r.margin_cents)}</td>
+          <span class="ea">${usd(Math.round(r.wholesale_cents / (r.case_pack || 1)))} each</span></td>
+        <td class="r mono"><b>${usd(r.charged_cents)}</b><br>
+          <span class="ea">${usd(Math.round(r.charged_cents / (r.case_pack || 1)))} each</span>
+          ${r.is_quoted ? '<br><span class="quoted">special price</span>' : ''}</td>
+        <td class="r mono margin">${usd(r.margin_cents)}<br>
+          <span class="ea">${usd(Math.round(r.margin_cents / (r.case_pack || 1)))} each</span></td>
       </tr>`).join('')}
       </tbody>
     </table>
