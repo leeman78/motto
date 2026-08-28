@@ -63,6 +63,9 @@ tbody tr.click:hover td{background:#fafafb}
   border:1px solid #e2e2e6;border-radius:9px;padding:8px 10px;width:92px;outline:none}
 .pin:focus{border-color:#111}
 .pin.q{border-color:#f59e0b;background:#fff7ed}
+.mailbox{margin-top:16px;border:1.5px solid var(--line);border-radius:14px;padding:6px 16px 14px;position:relative}
+.mailtag{position:absolute;top:-9px;left:14px;background:#fff;padding:0 8px;
+  font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
 .chev{color:var(--ink-3);font-weight:400}
 tr.click{cursor:pointer}
 tr.odetail>td{background:var(--soft);border-radius:10px;padding:14px 16px}
@@ -517,23 +520,26 @@ async function account(id) {
     panel.hidden = false;
     panel.innerHTML = `
       <h2>Review order — ${esc(dealer.business_name)}</h2>
-      <p class="sub" style="margin-top:6px">This is exactly what lands in their inbox, with an
-      approve-and-pay button. They pay Motto directly — bank (ACH) or card, their choice.</p>
-      <table style="margin-top:18px">
-        <thead><tr><th>Item</th><th class="r">Boxes</th><th class="r">Per box</th><th class="r">Amount</th></tr></thead>
-        <tbody>
-          ${c.map(x => `<tr>
-            <td class="nm"><b>${x.name}</b><span class="mono">${esc(x.sku)} · ${x.pack * x.cases} pcs</span></td>
-            <td class="r mono">${x.cases}</td>
-            <td class="r mono">${usd(x.cents)}</td>
-            <td class="r mono">${usd(x.cents * x.cases)}</td>
-          </tr>`).join('')}
-          <tr><td colspan="3" style="border:0;padding-top:12px">Subtotal</td><td class="r mono" style="border:0;padding-top:12px">${usd(sub)}</td></tr>
-          <tr><td colspan="3" style="border:0">Ground freight</td><td class="r mono" style="border:0">${fr ? usd(fr) : 'Free'}</td></tr>
-          <tr><td colspan="3" style="border:0;font-weight:800;font-size:15px">Total</td><td class="r mono" style="border:0;font-weight:800;font-size:15px">${usd(sub + fr)}</td></tr>
-          <tr><td colspan="3" style="border:0;color:var(--ink-3)">Your margin on this order</td><td class="r mono margin" style="border:0">${usd(mar)}</td></tr>
-        </tbody>
-      </table>
+      <p class="sub" style="margin-top:6px">The box below is the store's email, line for line —
+      items, freight, total, and an approve-and-pay button.</p>
+      <div class="mailbox">
+        <div class="mailtag">What the store receives</div>
+        <table>
+          <thead><tr><th>Item</th><th class="r">Boxes</th><th class="r">Per box</th><th class="r">Amount</th></tr></thead>
+          <tbody>
+            ${c.map(x => `<tr>
+              <td class="nm"><b>${x.name}</b><span class="mono">${esc(x.sku)} · ${x.pack * x.cases} pcs</span></td>
+              <td class="r mono">${x.cases}</td>
+              <td class="r mono">${usd(x.cents)}</td>
+              <td class="r mono">${usd(x.cents * x.cases)}</td>
+            </tr>`).join('')}
+            <tr><td colspan="3" style="border:0;padding-top:12px">Subtotal</td><td class="r mono" style="border:0;padding-top:12px">${usd(sub)}</td></tr>
+            <tr><td colspan="3" style="border:0">Ground freight</td><td class="r mono" style="border:0">${fr ? usd(fr) : 'Free'}</td></tr>
+            <tr><td colspan="3" style="border:0;font-weight:800;font-size:15px">Total</td><td class="r mono" style="border:0;font-weight:800;font-size:15px">${usd(sub + fr)}</td></tr>
+          </tbody>
+        </table>
+      </div>
+
       <div style="display:flex;gap:10px;margin-top:18px;align-items:center;flex-wrap:wrap">
         <button class="btn dark" id="oSend">Send to ${esc(dealer.email)} for approval</button>
         <button class="btn soft" id="oEdit">← Edit</button>
@@ -552,7 +558,7 @@ async function account(id) {
           <h2>Order #${o.order_no} sent</h2>
           <p class="sub" style="margin-top:6px"><b>${usd(o.total_cents)}</b> — the approve-and-pay
           email is on its way to <b>${esc(r.sent_to)}</b>. When they pay, it shows under
-          Recent orders and on your dashboard, with your margin of ${usd(mar)} credited to you.</p>
+          Recent orders and on your dashboard.</p>
           <button class="btn soft" style="margin-top:14px" id="oDone">Done</button>`;
         $('#oDone').onclick = () => account(id);
       } catch (e) {
