@@ -165,7 +165,7 @@ export const FALLBACK = {
    shots:['buds_plus_blue.webp','buds_plus_lifestyle.webp','buds_plus_box.webp','buds_plus_controls.webp'],
    stock:'in_stock',
    weight_oz:3.70,long:"Wireless headset with magnetic charging and battery display.",features:["Bluetooth version: 5.0 + EDR", "Charging: wireless magnetic charging, Qi-compatible", "Battery indicator: shows charging and power levels", "Connection: automatically connects when opening the case, initial manual pairing required", "Controls: touch control, one, two, or three taps", "Compatibility: works with iPhone and Android", "Features: no ANC support, no wearable app connection, can be renamed", "Water resistance: PX4"],compat:null,
-   variants:[{sku:'MT-BUDS-P',label:'Single',pack:6,stock:'in_stock'}]},
+   variants:[{sku:'BUDS',label:'Single',pack:6,stock:'in_stock'}]},
 
   {slug:'airbuds-a5',cat:'audio',type:'True Wireless Earbuds',name:'Wireless Airbuds A5',
    desc:'Clean, compact true wireless in white, with a USB-C magnetic charging case and three sizes of ear tip in the box. Open the case and they pair. No ANC to explain, no app to set up — for the customer who wants working earbuds, not a features list. Sits at the same price as the ANC pair, so a rack can carry both.',
@@ -225,7 +225,7 @@ export const FALLBACK = {
    stock:'in_stock',
    weight_oz:0.60,long:"Enhance your audio experience with the Motto Type-C to 3.5mm AUX Adapter Cable, designed for seamless control and high-quality sound from Type-C ports.",features:[],compat:null,
    weight_oz:0.60,long:"Enjoy music and charge your iPhone at the same time with the Motto Lightning to 3.5mm AUX Adapter. Designed for seamless compatibility, this adapter lets you connect your Lightning (Apple) device to any 3.5mm headphone or car audio system while keeping your device powered. Compact, durable, and perfect for everyday use at home, in the car, or on the go.",features:["Simultaneous charging and audio support", "Connects Lightning (Apple) to 3.5mm AUX", "Stable, high-quality sound output", "Compatible with iPhone and Lightning devices", "Compact, portable, and easy to use"],compat:null,
-   variants:[{sku:'MT-AD-LT35',upc:'984720174657',label:'Single',pack:20,stock:'in_stock'}]}
+   variants:[{sku:'780080',upc:'984720174657',label:'Single',pack:20,stock:'in_stock'}]}
 ]};
 /** Returns { categories, products, rules, dealer, live } */
 export async function loadCatalog(){

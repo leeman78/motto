@@ -157,14 +157,14 @@ from (values
  ('usba-lightning','IUL0010','','10 ft',100,200, 8600,1499,2,'in_stock'),
  ('wall-20w','WC0200','','Single',100,400, 6470,1299,1,'in_stock'),
  ('car-45w','CC0200','850025312035','Single',600,600, 4270, 999,1,'in_stock'),
- ('buds-plus','MT-BUDS-P','','Single',6,48,12720,3999,1,'in_stock'),
+ ('buds-plus','BUDS','','Single',6,48,12720,3999,1,'in_stock'),
  ('airbuds-a5','A5WH','','Single',100,100,11360,3999,1,'in_stock'),
  ('headset-anc','ANC','','Single',100,100,12800,3999,1,'in_stock'),
  ('wired-35mm','EPH004','1500002200006','Single',100,300, 4960, 999,1,'in_stock'),
  ('wired-usbc','TEPH007','','Single',100,300, 7040,1299,1,'in_stock'),
  ('wired-lightning','IEP007','703977746056','Single',100,300, 7360,1299,1,'in_stock'),
  ('adapter-usbc-35','JH071','','Single',20,200,10530,1299,1,'in_stock'),
- ('adapter-lightning-35','MT-AD-LT35','984720174657','Single',20,200,10930,1299,1,'in_stock')
+ ('adapter-lightning-35','780080','984720174657','Single',20,200,10930,1299,1,'in_stock')
 ) as x(slug,sku,upc,label,pack,master,list,msrp,ord,stock)
 join products p on p.slug = x.slug
 on conflict (sku) do update set
