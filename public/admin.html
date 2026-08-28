@@ -78,6 +78,17 @@ tr.click:hover td{background:#f7f8fa}
   .ptable.cover3{table-layout:auto}
   .ptable.cover3 th:nth-child(n),.ptable.cover3 td:nth-child(n){width:auto}
 
+  .note{display:flex;align-items:flex-start;gap:14px;margin:16px 0 0;padding:16px 18px;
+    border-radius:14px;font-size:13.5px;line-height:1.55;border:1px solid}
+  .note.ok{background:#f0fdf4;border-color:#bbf7d0;color:#14532d}
+  .note.bad{background:#fef2f2;border-color:#fecaca;color:#7f1d1d}
+  .note b{display:block;font-size:14.5px;margin-bottom:3px;
+    font-family:ui-monospace,Menlo,Consolas,monospace;user-select:all}
+  .note span{display:block;opacity:.8;font-size:12.5px}
+  .note button{margin-left:auto;border:0;background:none;font-size:20px;line-height:1;
+    cursor:pointer;color:inherit;opacity:.5;padding:0 2px}
+  .note button:hover{opacity:1}
+
   .mottom{color:#7c2d12;background:#fff7ed}
   .repm{color:#166534}
 
@@ -186,7 +197,10 @@ $('#gateGo').onclick = async () => {
     store.setItem('motto_admin', TOKEN);
     $('#gateScrim').classList.remove('open');
     $('#gateModal').classList.remove('open');
-    boot();
+    // Honour a hash that was already in the address bar, so a bookmarked or
+    // refreshed screen comes back where it was rather than on Dealers.
+    fromHash();
+    go(tab, view, true);
   }catch(e){
     err.textContent = e.message || 'That code was not accepted.';
     err.hidden = false;
@@ -203,11 +217,38 @@ $('#signOut').onclick = () => {
   location.reload();
 };
 
-document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => {
-  tab = b.dataset.tab; view = null;
-  document.querySelectorAll('.tabs button').forEach(x => x.setAttribute('aria-pressed', x===b));
+/* Where you are is kept in the address bar.
+   Without this the URL never changes, so Back leaves the admin entirely
+   instead of returning to the previous tab, and a refresh drops you on
+   Dealers no matter what you were doing. */
+function syncTabs(){
+  document.querySelectorAll('.tabs button').forEach(x =>
+    x.setAttribute('aria-pressed', x.dataset.tab === tab));
+}
+
+function go(next, id, replace){
+  tab = next; view = id || null;
+  const hash = '#' + tab + (view ? '/' + view : '');
+  if (location.hash !== hash) {
+    history[replace ? 'replaceState' : 'pushState']({ tab, view }, '', hash);
+  }
+  syncTabs();
   boot();
-});
+}
+
+function fromHash(){
+  const [t, id] = decodeURIComponent(location.hash.replace(/^#/, '')).split('/');
+  const known = [...document.querySelectorAll('.tabs button')].map(b => b.dataset.tab);
+  tab = known.includes(t) ? t : 'dealers';
+  view = id || null;
+  syncTabs();
+}
+
+document.querySelectorAll('.tabs button').forEach(b =>
+  b.onclick = () => go(b.dataset.tab, null));
+
+// Back and Forward move between screens rather than out of the admin.
+window.addEventListener('popstate', () => { fromHash(); boot(); });
 
 async function boot(){
   if(tab === 'dealers')   return view ? dealerDetail(view) : dealerList();
@@ -217,6 +258,23 @@ async function boot(){
   if(tab === 'compliance') return complianceList();
   if(tab === 'copy')       return copyList();
   return orderList();
+}
+
+/* A result you cannot miss.
+   The old confirmation was one line of grey text at the bottom of a long
+   panel, which is indistinguishable from not having pressed the button. This
+   sits at the top of the screen, stays until dismissed, and can be copied —
+   it is often carrying a password somebody has to read out. */
+function note(kind, title, detail){
+  document.getElementById('note')?.remove();
+  const el = document.createElement('div');
+  el.id = 'note';
+  el.className = 'note ' + kind;
+  el.innerHTML = `<div><b>${title}</b>${detail ? `<span>${detail}</span>` : ''}</div>
+                  <button aria-label="Dismiss">&times;</button>`;
+  el.querySelector('button').onclick = () => el.remove();
+  document.querySelector('.wrap').prepend(el);
+  el.scrollIntoView({ block: 'nearest' });
 }
 
 /* ---------------- reps ----------------
@@ -308,13 +366,10 @@ async function repList(){
     msg.textContent = 'Creating…';
     try {
       const r = await call('create_rep', body);
-      // Shown once. It is not stored anywhere readable, so if it is lost the
-      // rep uses the reset link rather than anyone looking it up.
-      msg.textContent = `Created ${body.email}. First password: ${r.password} — give it to them now, it is not shown again.`;
+      note('ok', `${body.email} created. First password: ${r.password}`,
+           'Give it to them now. It is stored only as a hash, so it cannot be looked up later.');
       $('#rName').value = $('#rEmail').value = $('#rPhone').value = $('#rPass').value = '';
-      const keep = msg.textContent;
       await repList();
-      $('#rMsg').textContent = keep;
     } catch (e) { msg.textContent = e.message; }
   };
 
@@ -337,17 +392,26 @@ async function repList(){
         const body = { id: el.dataset.rpass };
         if (chosen.trim()) body.password = chosen.trim();
         const r = await call('reset_rep_password', body);
-        $('#rMsg').textContent = `New password: ${r.password} — read it to them now, it is not shown again.`;
+        note('ok', `New password: ${r.password}`,
+             'Read it to them now. It is stored only as a hash, so nobody can look it up later. They will be asked to change it when they sign in.');
       } catch (e) { $('#rMsg').textContent = e.message; }
     });
 
+  // Sending mail takes a second and produces nothing visible on the page, so
+  // the button says what it is doing and the result is stated loudly enough
+  // to tell "sent" from "not pressed".
   document.querySelectorAll('[data-rlink]').forEach(el =>
     el.onclick = async () => {
-      $('#rMsg').textContent = 'Sending…';
+      const label = el.textContent;
+      el.disabled = true; el.textContent = 'Sending…';
       try {
         const r = await call('send_rep_link', { id: el.dataset.rlink });
-        $('#rMsg').textContent = `Sign-in link sent to ${r.sent_to}. It works once and expires in 24 hours.`;
-      } catch (e) { $('#rMsg').textContent = e.message; }
+        note('ok', `Sign-in link sent to ${r.sent_to}.`,
+             'It works once and expires in 24 hours. If it is not there in a minute, check the junk folder — it arrives from info@mottob2b.com.');
+      } catch (e) {
+        note('bad', 'The link was not sent.', e.message);
+      }
+      el.disabled = false; el.textContent = label;
     });
 
   document.querySelectorAll('[data-rtog]').forEach(el =>
@@ -862,7 +926,7 @@ async function dealerList(){
   </div>`;
 
   $('#newGo').onclick = createDealer;
-  document.querySelectorAll('tr.click').forEach(tr => tr.onclick = () => { view = tr.dataset.id; dealerDetail(view); });
+  document.querySelectorAll('tr.click').forEach(tr => tr.onclick = () => go('dealers', tr.dataset.id));
 }
 
 async function createDealer(){
@@ -944,7 +1008,7 @@ async function dealerDetail(id){
     <p class="sub" style="margin:18px 0 0">Changes save the moment you leave a field.</p>
   </div>`;
 
-  $('#back').onclick = () => { view = null; dealerList(); };
+  $('#back').onclick = () => go('dealers', null);
 
   $('#saveD').onclick = async () => {
     const msg = $('#dMsg'); msg.textContent = 'Saving…';
