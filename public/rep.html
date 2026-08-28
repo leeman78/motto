@@ -71,7 +71,39 @@ tr.odetail>td{background:var(--soft);border-radius:10px;padding:14px 16px}
 .otbl th.r,.otbl td.r{text-align:right;padding-left:12px}
 .otbl td{padding:7px 0;border-top:1px solid var(--line)}
 .obar{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;
-  margin-top:16px;padding:13px 16px;background:var(--soft);border-radius:12px;font-size:13.5px}
+  margin-top:16px;padding:13px 16px;font-size:13.5px;
+  position:sticky;bottom:10px;z-index:5;background:#fff;border:1px solid var(--line);
+  border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.10)}
+
+/* ---- grouped order list ---- */
+.plist{margin-top:18px;display:flex;flex-direction:column;gap:10px}
+.pgroup{border:1px solid var(--line);border-radius:14px;padding:4px 16px 6px}
+.pg-name{font-weight:750;font-size:14px;letter-spacing:-.01em;padding:12px 0 4px}
+.pg-var{display:grid;grid-template-columns:minmax(80px,1fr) 118px 118px 126px;
+  grid-template-areas:"lab price mar step";gap:6px 14px;align-items:center;
+  padding:9px 0;border-top:1px solid var(--line)}
+.pg-lab{grid-area:lab}
+.pg-lab b{font-size:13.5px}
+.pg-lab span,.pg-price span,.pg-mar span{display:block;font-size:11px;color:var(--ink-3);margin-top:2px}
+.pg-price{grid-area:price;text-align:right;font-size:13.5px}
+.pg-mar{grid-area:mar;text-align:right;font-size:13.5px}
+.pg-mar span{white-space:nowrap}
+.quoted{font-style:normal}
+.stepper{grid-area:step;display:flex;align-items:center;gap:6px;justify-content:flex-end}
+.st{width:38px;height:38px;border:1px solid var(--line);border-radius:10px;background:#fff;
+  font-size:19px;font-weight:600;color:var(--ink);cursor:pointer;line-height:1;flex:none}
+.st:active{background:var(--soft)}
+.stepper .oq{width:46px;height:38px;border:1px solid var(--line);border-radius:10px;text-align:center;
+  font-family:ui-monospace,Menlo,monospace;font-size:14px;-moz-appearance:textfield}
+.stepper .oq::-webkit-outer-spin-button,.stepper .oq::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.stepper .oq:focus{border-color:#111;outline:none}
+
+@media (max-width:640px){
+  .pg-var{grid-template-columns:1fr auto;grid-template-areas:"lab step" "price mar"}
+  .pg-price{text-align:left}
+  .pg-price span,.pg-mar span{display:inline;margin-left:5px}
+  .obar{bottom:6px}
+}
 .ea{display:block;font-size:11px;color:var(--ink-3);font-weight:400;margin-top:2px}
 .quoted{display:inline-block;font-size:10px;font-weight:800;letter-spacing:.09em;
   text-transform:uppercase;color:var(--warn);background:#fff7ed;padding:2px 7px;border-radius:999px;margin-top:3px}
@@ -389,27 +421,38 @@ async function account(id) {
     <p class="sub" style="margin-top:6px">
       What this store pays and what you keep on it, per box and per piece.
       Prices are set by Motto: call or email to have one changed for this account.</p>
-    <table style="margin-top:18px">
-      <thead><tr><th>Product</th><th>SKU</th><th class="r">Per box</th>
-        <th class="r">Wholesale</th><th class="r">This store pays</th><th class="r">My margin</th>
-        <th class="r" style="width:82px">Order</th></tr></thead>
-      <tbody>${prices.map(r => `<tr>
-        <td class="nm"><b>${esc(r.product)}</b><span>${esc(r.label)}</span></td>
-        <td class="mono" style="font-size:12px;color:var(--ink-3)">${esc(r.sku)}</td>
-        <td class="r mono">${r.case_pack}</td>
-        <td class="r mono" style="color:var(--ink-3)">${usd(r.wholesale_cents)}<br>
-          <span class="ea">${usd(Math.round(r.wholesale_cents / (r.case_pack || 1)))} each</span></td>
-        <td class="r mono"><b>${usd(r.charged_cents)}</b><br>
-          <span class="ea">${usd(Math.round(r.charged_cents / (r.case_pack || 1)))} each</span>
-          ${r.is_quoted ? '<br><span class="quoted">special price</span>' : ''}</td>
-        <td class="r mono margin">${usd(r.margin_cents)}<br>
-          <span class="ea">${usd(Math.round(r.margin_cents / (r.case_pack || 1)))} each</span></td>
-        <td class="r"><input class="pin oq" data-sku="${r.sku}" data-name="${esc(r.product)} — ${esc(r.label)}"
-          data-cents="${r.charged_cents}" data-margin="${r.margin_cents}" data-pack="${r.case_pack}"
-          type="number" min="0" step="1" placeholder="0" style="width:64px"></td>
-      </tr>`).join('')}
-      </tbody>
-    </table>
+    <div class="plist">${(() => {
+      // Same product, one card: the eighteen-row wall becomes "pick a length,
+      // tap plus". Lengths sort short to long; singles come as they are.
+      const groups = [], byName = {};
+      for (const r of prices) {
+        if (!byName[r.product]) { byName[r.product] = []; groups.push([r.product, byName[r.product]]); }
+        byName[r.product].push(r);
+      }
+      const ft = l => { const m = /^([\d.]+)\s*ft/i.exec(l || ''); return m ? +m[1] : 999; };
+      groups.forEach(([, rows]) => rows.sort((a, b) => ft(a.label) - ft(b.label)));
+
+      return groups.map(([name, rows]) => `
+      <div class="pgroup">
+        <div class="pg-name">${esc(name)}</div>
+        ${rows.map(r => `
+        <div class="pg-var">
+          <div class="pg-lab"><b>${esc(r.label)}</b>
+            <span class="mono">${esc(r.sku)} · ${r.case_pack} pcs/box</span></div>
+          <div class="pg-price mono"><b>${usd(r.charged_cents)}</b>
+            <span>${usd(Math.round(r.charged_cents / (r.case_pack || 1)))} each${r.is_quoted ? ' · <i class="quoted">special</i>' : ''}</span></div>
+          <div class="pg-mar mono"><b class="margin">+${usd(r.margin_cents)}</b>
+            <span>whsl ${usd(r.wholesale_cents)}</span></div>
+          <div class="stepper">
+            <button class="st" data-st="-1" data-for="${r.sku}" aria-label="one box fewer">−</button>
+            <input class="oq" data-sku="${r.sku}" data-name="${esc(r.product)} — ${esc(r.label)}"
+              data-cents="${r.charged_cents}" data-margin="${r.margin_cents}" data-pack="${r.case_pack}"
+              type="number" min="0" step="1" placeholder="0" inputmode="numeric">
+            <button class="st" data-st="1" data-for="${r.sku}" aria-label="one box more">+</button>
+          </div>
+        </div>`).join('')}
+      </div>`).join('');
+    })()}</div>
     <div class="obar" id="obar" hidden>
       <div>
         <b class="mono" id="oTot">$0.00</b> <span style="color:var(--ink-3)">order total</span>
@@ -460,6 +503,12 @@ async function account(id) {
     return { c, sub, fr, mar };
   };
   document.querySelectorAll('.oq').forEach(i => i.oninput = oTotals);
+  document.querySelectorAll('.st').forEach(b => b.onclick = () => {
+    const inp = document.querySelector(`.oq[data-sku="${b.dataset.for}"]`);
+    const next = Math.max(0, (parseInt(inp.value, 10) || 0) + Number(b.dataset.st));
+    inp.value = next || '';
+    oTotals();
+  });
 
   $('#oReview').onclick = () => {
     const { c, sub, fr, mar } = oTotals();
