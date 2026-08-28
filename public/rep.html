@@ -63,6 +63,8 @@ tbody tr.click:hover td{background:#fafafb}
   border:1px solid #e2e2e6;border-radius:9px;padding:8px 10px;width:92px;outline:none}
 .pin:focus{border-color:#111}
 .pin.q{border-color:#f59e0b;background:#fff7ed}
+.quoted{display:inline-block;font-size:10px;font-weight:800;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--warn);background:#fff7ed;padding:2px 7px;border-radius:999px;margin-top:3px}
 .msg{font-size:12.5px;color:var(--ink-2);margin-top:12px;min-height:18px}
 
 .gate{position:fixed;inset:0;background:rgba(10,10,12,.55);display:grid;place-items:center;z-index:80}
@@ -358,19 +360,23 @@ async function account(id) {
   <div class="panel">
     <h2>Prices for this account</h2>
     <p class="sub" style="margin-top:6px">
-      Set what this store pays. Leave a row alone to use the standard price. You cannot
-      quote below wholesale, because then you would owe Motto more than the store paid you.</p>
+      What this store is charged and what you keep on it. Prices are set by Motto:
+      call or email to have one changed for this account, and a line marked
+      <b>quoted</b> is already on its own price rather than the standard one.</p>
     <table style="margin-top:18px">
       <thead><tr><th>Product</th><th>SKU</th><th class="r">Per box</th>
-        <th class="r">Wholesale</th><th class="r">Standard</th><th class="r">This store pays</th><th class="r">My margin</th></tr></thead>
+        <th class="r">Wholesale</th><th class="r">Standard</th>
+        <th class="r">This store pays</th><th class="r">Per piece</th><th class="r">My margin</th></tr></thead>
       <tbody>${prices.map(r => `<tr>
         <td class="nm"><b>${esc(r.product)}</b><span>${esc(r.label)}</span></td>
         <td class="mono" style="font-size:12px;color:var(--ink-3)">${esc(r.sku)}</td>
         <td class="r mono">${r.case_pack}</td>
-        <td class="r mono" style="color:var(--ink-3)">${usd(r.wholesale_cents)}</td>
-        <td class="r mono" style="color:var(--ink-3)">${usd(r.standard_cents)}</td>
-        <td class="r"><input class="pin${r.is_quoted ? ' q' : ''}" data-sku="${r.sku}"
-             data-whole="${r.wholesale_cents}" value="${(r.charged_cents / 100).toFixed(2)}"></td>
+        <td class="r mono" style="color:var(--ink-3)">${usd(r.wholesale_cents)}<br>
+          <span style="font-size:11px">${usd(Math.round(r.wholesale_cents / (r.case_pack || 1)))} ea</span></td>
+        <td class="r mono" style="color:var(--ink-3)">${usd(r.standard_cents)}<br>
+          <span style="font-size:11px">${usd(Math.round(r.standard_cents / (r.case_pack || 1)))} ea</span></td>
+        <td class="r mono"><b>${usd(r.charged_cents)}</b>${r.is_quoted ? '<br><span class="quoted">quoted</span>' : ''}</td>
+        <td class="r mono" style="color:var(--ink-3)" data-ea="${r.sku}">${usd(Math.round(r.charged_cents / (r.case_pack || 1)))}</td>
         <td class="r mono margin" data-m="${r.sku}">${usd(r.margin_cents)}</td>
       </tr>`).join('')}
       </tbody>
@@ -394,24 +400,6 @@ async function account(id) {
 
   $('#back').onclick = () => { open = null; accounts(); };
 
-  document.querySelectorAll('.pin[data-sku]').forEach(el => el.onchange = async () => {
-    const sku = el.dataset.sku;
-    const cents = Math.round(parseFloat(String(el.value).replace(/[^0-9.]/g, '')) * 100);
-    const msg = $('#pmsg');
-    if (!isFinite(cents)) { msg.textContent = 'That is not a price.'; return; }
-    try {
-      const r = await call('set_price', { dealer_id: id, sku, case_cents: cents });
-      el.classList.add('q');
-      document.querySelector(`[data-m="${sku}"]`).textContent = usd(r.margin_cents);
-      msg.textContent = `Saved. This store now pays ${usd(cents)} a box for ${sku}.`;
-    } catch (e) {
-      // The row goes back to what the server holds, but the reason has to
-      // survive that redraw or the price silently reverts with no
-      // explanation, which reads as the screen being broken.
-      await account(id);
-      $('#pmsg').textContent = e.message;
-    }
-  });
 }
 
 /* ---------------- orders ---------------- */

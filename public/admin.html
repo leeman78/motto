@@ -1005,11 +1005,13 @@ async function dealerDetail(id){
 
   <div class="panel">
     <h2>Price sheet</h2>
-    <p class="sub">Every line starts at list minus ${Number(dealer.discount_pct).toFixed(1)}%. Type a different number in any row to lock that SKU to a manual price — the blue rows are the ones you have overridden. Clear an override and the line goes back to following the discount, so a list price change carries through automatically.</p>
+    <p class="sub">What this store is charged, per box. Every line starts at the standard retail price; type a different number to quote this store its own, and the amber rows are the ones that have been. Clear a quote and the line follows the standard price again, so a price change carries through on its own.</p>
+    <p class="sub" style="margin-top:8px">Wholesale is what the rep owes Motto on the same box. The difference between the two columns is the rep's margin.</p>
     <table>
       <thead><tr>
-        <th>Product</th><th>SKU</th><th class="r">Case</th>
-        <th class="r">List</th><th class="r">This dealer pays</th><th class="r">Per piece</th><th></th>
+        <th>Product</th><th>SKU</th><th class="r">Per box</th>
+        <th class="r">Wholesale</th><th class="r">This store pays</th>
+        <th class="r">Per piece</th><th class="r">Rep margin</th><th></th>
       </tr></thead>
       <tbody>${rows.map(r=>`
         <tr>
@@ -1019,6 +1021,7 @@ async function dealerDetail(id){
           <td class="r mono" style="color:#9a9da4">${usd(r.list_cents)}</td>
           <td class="r"><input class="priceinput${r.is_override?' over':''}" data-sku="${r.sku}" value="${(r.case_cents/100).toFixed(2)}"></td>
           <td class="r mono" style="color:#9a9da4">${usd(Math.round(r.case_cents/r.case_pack))}</td>
+          <td class="r mono repm" data-repm="${r.sku}">${usd(r.case_cents - r.list_cents)}</td>
           <td class="r">${r.is_override?`<button class="tiny" data-clear="${r.sku}">CLEAR</button>`:''}</td>
         </tr>`).join('')}
       </tbody>
@@ -1087,6 +1090,17 @@ async function dealerDetail(id){
       const v = cents(inp.value);
       if(!Number.isInteger(v) || v < 0){ inp.value = '0.00'; return; }
       inp.disabled = true;
+      // Below wholesale means the rep owes Motto more than the store paid
+      // them. The rep portal refuses it outright; here it is allowed with a
+      // warning, because the owner sometimes has a reason and should not be
+      // stopped by a rule written for someone else.
+      const row = rows.find(r => r.sku === inp.dataset.sku);
+      if (row && v < row.list_cents &&
+          !confirm(`${usd(v)} is below the wholesale price of ${usd(row.list_cents)}.\n\nThe rep would owe Motto more than this store pays them. Set it anyway?`)) {
+        inp.value = (row.case_cents / 100).toFixed(2);
+        inp.disabled = false;
+        return;
+      }
       try{ await call('set_price', { dealer_id: id, sku: inp.dataset.sku, case_cents: v }); dealerDetail(id); }
       catch(e){ alert(e.message); inp.disabled = false; }
     };

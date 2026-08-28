@@ -15,8 +15,9 @@
 //   dealers       my accounts
 //   dealer        one account, with its price list and recent orders
 //   orders        my orders
-//   set_price     quote one of my stores a price for one SKU
-//   clear_price   drop that quote, fall back to the standard retail price
+//
+// Reps read prices; they do not set them. Both price-writing actions answer
+// 403 so the read-only screen is enforced rather than merely displayed.
 
 import { db, getRep } from './_lib.js';
 
@@ -202,46 +203,15 @@ export default async function handler(req, res) {
       }
 
       // ---------------------------------------------------------------
-      case 'set_price': {
-        const { dealer_id, sku } = p;
-        const cents = parseInt(p.case_cents, 10);
-        if (!dealer_id || !sku || !Number.isInteger(cents) || cents < 0) {
-          return res.status(400).json({ error: 'dealer_id, sku and a whole-cent price are required.' });
-        }
-        if (!(await myDealerIds()).has(dealer_id)) {
-          return res.status(404).json({ error: 'No such account.' });
-        }
-
-        // A rep may quote at or above wholesale. Below it the rep is paying
-        // Motto more than the store paid them, which is a mistake being made
-        // in a hurry rather than a deal anybody meant to do.
-        const { data: v } = await db
-          .from('variants').select('list_cents').eq('sku', sku).single();
-        if (!v) return res.status(404).json({ error: `${sku} was not found.` });
-        if (cents < v.list_cents) {
-          return res.status(400).json({
-            error: `That is below the wholesale price of $${(v.list_cents / 100).toFixed(2)} per box. You would be paying Motto more than the store pays you.`
-          });
-        }
-
-        const { error } = await db.from('dealer_prices').upsert({
-          dealer_id, sku, case_cents: cents, note: `set by ${rep.name}`,
-          updated_at: new Date().toISOString()
-        }, { onConflict: 'dealer_id,sku' });
-        if (error) throw error;
-        return res.status(200).json({ ok: true, margin_cents: cents - v.list_cents });
-      }
-
-      case 'clear_price': {
-        const { dealer_id, sku } = p;
-        if (!(await myDealerIds()).has(dealer_id)) {
-          return res.status(404).json({ error: 'No such account.' });
-        }
-        const { error } = await db.from('dealer_prices')
-          .delete().eq('dealer_id', dealer_id).eq('sku', sku);
-        if (error) throw error;
-        return res.status(200).json({ ok: true });
-      }
+      // Prices are set by Motto, not by reps. The screen shows them as text
+      // rather than fields, and these two actions are kept only to answer
+      // clearly if something old still calls them. Leaving them working would
+      // mean the read-only screen was a suggestion rather than a rule.
+      case 'set_price':
+      case 'clear_price':
+        return res.status(403).json({
+          error: 'Prices are set by Motto. Contact the office to change a price for this account.'
+        });
 
       default:
         return res.status(400).json({ error: `Unknown action: ${action}` });
