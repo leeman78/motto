@@ -127,6 +127,62 @@ export default async function handler(req, res) {
         return res.status(200).json({ ok: true });
       }
 
+      case 'reset_rep_password': {
+        // Same shape as reset_password for dealers. Either a chosen password,
+        // because it is usually being read out on the phone, or a generated
+        // one. Six characters is Supabase's floor, and saying so here beats
+        // surfacing its error.
+        const { id } = p;
+        if (!id) return res.status(400).json({ error: 'id is required.' });
+        const password = p.password ? String(p.password) : tempPassword();
+        if (password.length < 6) {
+          return res.status(400).json({ error: 'A password must be at least 6 characters.' });
+        }
+        const { error } = await db.auth.admin.updateUserById(id, { password });
+        if (error) throw error;
+        // Spoken aloud means temporary, so it has to be replaced on next use.
+        await db.from('reps').update({ must_change_password: true }).eq('id', id);
+        return res.status(200).json({ ok: true, password });
+      }
+
+      case 'send_rep_link': {
+        // Passwordless way back in when a rep has locked themselves out.
+        // generateLink builds it; sending is ours, so it arrives from Motto.
+        const { data: rep } = await db.from('reps').select('name, email').eq('id', p.id).single();
+        if (!rep) return res.status(404).json({ error: 'No such rep.' });
+
+        const origin = req.headers.origin || `https://${req.headers.host}`;
+        const { data, error } = await db.auth.admin.generateLink({
+          type: 'magiclink', email: rep.email,
+          options: { redirectTo: origin + '/rep.html' }
+        });
+        if (error) throw error;
+        const link = data?.properties?.action_link;
+        if (!link) throw new Error('Supabase did not return a link.');
+
+        await sendMail({
+          to: rep.email,
+          subject: 'Your Motto rep portal sign-in link',
+          html: `
+          <div style="font-family:-apple-system,Segoe UI,sans-serif;max-width:520px;color:#0b0b0d">
+            <p style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#8a8d94;margin:0 0 10px">
+              Motto USA · Wholesale</p>
+            <h2 style="margin:0 0 14px;font-size:21px;letter-spacing:-.02em">Sign in to the rep portal</h2>
+            <p style="font-size:15px;line-height:1.6;margin:0 0 22px">
+              Hi ${esc(rep.name)}, tap the button to open your accounts and margins. No password needed.</p>
+            <p style="margin:0 0 22px">
+              <a href="${link}" style="display:inline-block;background:#111;color:#fff;text-decoration:none;
+                 padding:14px 26px;border-radius:999px;font-weight:700;font-size:14px">Open the rep portal</a></p>
+            <p style="font-size:12.5px;line-height:1.6;color:#8a8d94;margin:0 0 18px">
+              This link works once and expires in 24 hours. If you did not ask for it, ignore this email.</p>
+            <p style="font-size:12px;color:#9a9da4;line-height:1.6;margin:0">
+              Motto USA · 1445 Mac Arthur Dr Ste 116, Carrollton, TX 75007<br>
+              214-681-8417 · Mon–Fri 9–5 Central</p>
+          </div>`
+        });
+        return res.status(200).json({ ok: true, sent_to: rep.email });
+      }
+
       case 'assign_dealer': {
         // Reassigning changes who owns the relationship from now on. Past
         // orders keep the rep_id they were stamped with, so commission

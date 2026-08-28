@@ -68,6 +68,16 @@ tr.click:hover td{background:#f7f8fa}
 
   /* Motto's own margin. Tinted because it is the one number on this screen
      that no rep and no store may ever see. */
+  /* The price table's widths are written for its ten columns. These two have
+     five and three, so they set their own or the last cell is pushed off the
+     right edge of the table. */
+  .ptable.reps5 th:nth-child(n),.ptable.reps5 td:nth-child(n){width:auto}
+  .ptable.reps5{table-layout:auto}
+  .ptable.reps5 td:last-child{white-space:nowrap;text-align:right}
+  .ptable.reps5 td:last-child .btn{margin-left:6px}
+  .ptable.cover3{table-layout:auto}
+  .ptable.cover3 th:nth-child(n),.ptable.cover3 td:nth-child(n){width:auto}
+
   .mottom{color:#7c2d12;background:#fff7ed}
   .repm{color:#166534}
 
@@ -244,7 +254,6 @@ async function repList(){
       <input id="rName"  placeholder="Full name">
       <input id="rEmail" placeholder="name@mottousa.com">
       <input id="rPhone" placeholder="Phone (optional)">
-      <input id="rPct"   placeholder="Commission %" inputmode="decimal" style="width:130px">
       <input id="rPass"  placeholder="First password (6+)" style="width:180px">
       <button class="btn dark" id="rAdd">Create rep</button>
     </div>
@@ -253,14 +262,18 @@ async function repList(){
 
   <div class="panel">
     <h2>Reps</h2>
-    <table class="ptable">
-      <thead><tr><th>Name</th><th>Email</th><th class="r">Commission</th><th class="r">Dealers</th><th class="r">Status</th></tr></thead>
+    <table class="ptable reps5">
+      <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th class="r">Dealers</th><th class="r">Access</th></tr></thead>
       <tbody>${items.map(r => `<tr>
-        <td class="pname"><b>${esc(r.name)}</b><span>${r.must_change_password ? 'Password not changed yet' : 'Active sign-in'}</span></td>
-        <td class="mono" style="font-size:12px">${esc(r.email)}</td>
-        <td class="r"><input class="pin" style="width:70px;text-align:right" data-rpct="${r.id}" value="${r.commission_pct}"><span class="unit">%</span></td>
+        <td class="pname"><b>${esc(r.name)}</b><span>${r.must_change_password ? 'Password not changed yet' : 'Signed in before'}</span></td>
+        <td><input class="pin" style="width:100%;text-align:left;font-size:12px" data-rmail="${r.id}" value="${esc(r.email)}"></td>
+        <td><input class="pin" style="width:100%;text-align:left;font-size:12px" data-rphone="${r.id}" value="${esc(r.phone || '')}" placeholder="Phone"></td>
         <td class="r mono">${r.dealers}</td>
-        <td class="r"><button class="btn soft" data-rtog="${r.id}" data-on="${r.is_active}">${r.is_active ? 'Active' : 'Off'}</button></td>
+        <td class="r" style="white-space:nowrap">
+          <button class="btn soft" data-rpass="${r.id}">Reset password</button>
+          <button class="btn soft" data-rlink="${r.id}">Send link</button>
+          <button class="btn soft" data-rtog="${r.id}" data-on="${r.is_active}">${r.is_active ? 'Active' : 'Off'}</button>
+        </td>
       </tr>`).join('') || '<tr><td colspan="5" class="sub">No reps yet.</td></tr>'}
       </tbody>
     </table>
@@ -269,7 +282,7 @@ async function repList(){
   <div class="panel">
     <h2>Who covers whom</h2>
     <p class="sub">Changing this moves the account from now on. Orders already placed keep the rep they were placed under.</p>
-    <table class="ptable" style="margin-top:16px">
+    <table class="ptable cover3" style="margin-top:16px">
       <thead><tr><th>Dealer</th><th>Email</th><th>Rep</th></tr></thead>
       <tbody>${ds.map(d => `<tr>
         <td class="pname"><b>${esc(d.business_name)}</b><span>${esc(d.contact_name || '')}</span></td>
@@ -289,7 +302,6 @@ async function repList(){
       name: $('#rName').value.trim(),
       email: $('#rEmail').value.trim(),
       phone: $('#rPhone').value.trim(),
-      commission_pct: parseFloat($('#rPct').value) || 0
     };
     if ($('#rPass').value.trim()) body.password = $('#rPass').value.trim();
     if (!body.name || !body.email) { msg.textContent = 'Name and email are required.'; return; }
@@ -299,17 +311,43 @@ async function repList(){
       // Shown once. It is not stored anywhere readable, so if it is lost the
       // rep uses the reset link rather than anyone looking it up.
       msg.textContent = `Created ${body.email}. First password: ${r.password} — give it to them now, it is not shown again.`;
-      $('#rName').value = $('#rEmail').value = $('#rPhone').value = $('#rPct').value = $('#rPass').value = '';
+      $('#rName').value = $('#rEmail').value = $('#rPhone').value = $('#rPass').value = '';
       const keep = msg.textContent;
       await repList();
       $('#rMsg').textContent = keep;
     } catch (e) { msg.textContent = e.message; }
   };
 
-  document.querySelectorAll('[data-rpct]').forEach(el =>
+  const field = (attr, key) => document.querySelectorAll(`[data-${attr}]`).forEach(el =>
     el.onchange = async () => {
-      try { await call('set_rep', { id: el.dataset.rpct, commission_pct: parseFloat(el.value) || 0 }); el.classList.remove('edited'); }
+      try { await call('set_rep', { id: el.dataset[attr], [key]: el.value.trim() }); $('#rMsg').textContent = 'Saved.'; }
       catch (e) { $('#rMsg').textContent = e.message; }
+    });
+  field('rmail', 'email');
+  field('rphone', 'phone');
+
+  // A password read out on the phone is temporary by definition, so the rep
+  // is made to replace it on next sign-in. It is shown once and not stored
+  // anywhere readable; if it is lost, reset it again or send a link.
+  document.querySelectorAll('[data-rpass]').forEach(el =>
+    el.onclick = async () => {
+      const chosen = prompt('New password for this rep. Leave blank to generate one.\nMinimum 6 characters.');
+      if (chosen === null) return;
+      try {
+        const body = { id: el.dataset.rpass };
+        if (chosen.trim()) body.password = chosen.trim();
+        const r = await call('reset_rep_password', body);
+        $('#rMsg').textContent = `New password: ${r.password} — read it to them now, it is not shown again.`;
+      } catch (e) { $('#rMsg').textContent = e.message; }
+    });
+
+  document.querySelectorAll('[data-rlink]').forEach(el =>
+    el.onclick = async () => {
+      $('#rMsg').textContent = 'Sending…';
+      try {
+        const r = await call('send_rep_link', { id: el.dataset.rlink });
+        $('#rMsg').textContent = `Sign-in link sent to ${r.sent_to}. It works once and expires in 24 hours.`;
+      } catch (e) { $('#rMsg').textContent = e.message; }
     });
 
   document.querySelectorAll('[data-rtog]').forEach(el =>
