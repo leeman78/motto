@@ -66,6 +66,11 @@ tbody tr.click:hover td{background:#fafafb}
 .msg{font-size:12.5px;color:var(--ink-2);margin-top:12px;min-height:18px}
 
 .gate{position:fixed;inset:0;background:rgba(10,10,12,.55);display:grid;place-items:center;z-index:80}
+/* The password prompt outranks the sign-in box. They are both full-screen
+   layers, and whichever is later in the document would otherwise win on
+   stacking order alone and swallow the clicks meant for the other. */
+#pwgate{z-index:90}
+.gate[hidden]{display:none !important}
 .card{background:#fff;border-radius:20px;padding:30px;width:min(400px,92vw)}
 .card h2{font-size:20px;margin-bottom:6px}
 .card label{display:block;font-size:11px;letter-spacing:.1em;text-transform:uppercase;
@@ -192,11 +197,24 @@ async function start() {
 }
 
 function forceNewPassword(me) {
+  // The sign-in box is another full-screen layer. If it is still in the
+  // document it sits on top of this one and silently eats every click, which
+  // looks exactly like a broken button: no error, nothing happens. Remove it
+  // rather than hide it, so there is nothing left to intercept.
+  document.getElementById('gate')?.remove();
   $('#pwgate').hidden = false;
   $('#out').hidden = false;
-  const err = $('#perr');
+  $('#np').focus();
+}
 
-  $('#pgo').onclick = async () => {
+// Bound once, on the document, rather than on the button. An onclick assigned
+// inside a render function is lost the moment anything redraws, and start()
+// can legitimately run twice when a magic link restores a session. This
+// cannot come unbound.
+document.addEventListener('click', async (ev) => {
+  if (ev.target.id !== 'pgo') return;
+  const err = $('#perr'), btn = $('#pgo');
+  {
     const a = $('#np').value, b = $('#np2').value;
     err.textContent = '';
     // Eight rather than Supabase's six: this one is chosen, not dictated over
@@ -204,11 +222,19 @@ function forceNewPassword(me) {
     if (a.length < 8)  { err.textContent = 'Use at least 8 characters.'; return; }
     if (a !== b)       { err.textContent = 'Those two do not match.'; return; }
 
-    $('#pgo').disabled = true;
-    $('#pgo').textContent = 'Saving…';
+    btn.disabled = true;
+    btn.textContent = 'Saving…';
     try {
       const c = await client();
-      const { error } = await c.auth.updateUser({ password: a });
+      // A dead session makes updateUser hang rather than reject, which shows
+      // up as a button stuck on "Saving…" with no error anywhere. Magic-link
+      // sessions are short and single use, so this is the common case, not an
+      // edge one. Time it out and say what to do about it.
+      const { error } = await Promise.race([
+        c.auth.updateUser({ password: a }),
+        new Promise((_, no) => setTimeout(
+          () => no(new Error('Your sign-in has expired. Sign in with your email and password on this page, then change it here.')), 12000))
+      ]);
       if (error) throw new Error(error.message);
     } catch (e) {
       // Only the password change itself belongs in this catch. Anything after
@@ -216,8 +242,14 @@ function forceNewPassword(me) {
       // save left the button greyed out with no message, which reads as the
       // screen having frozen.
       err.textContent = e.message || 'That did not save. Try again.';
-      $('#pgo').disabled = false;
-      $('#pgo').textContent = 'Save and continue';
+      btn.disabled = false;
+      btn.textContent = 'Save and continue';
+      if (/expired|session/i.test(e.message || '')) {
+        // Nothing on this screen can succeed without a live session, so send
+        // them back to the one thing that can fix it.
+        try { (await client()).auth.signOut(); } catch (_) {}
+        setTimeout(() => location.reload(), 2500);
+      }
       return;
     }
 
@@ -226,8 +258,8 @@ function forceNewPassword(me) {
     $('#pwgate').hidden = true;
     $('#tabs').hidden = false;
     $('#out').hidden = false;
-    $('#pgo').disabled = false;
-    $('#pgo').textContent = 'Save and continue';
+    btn.disabled = false;
+    btn.textContent = 'Save and continue';
 
     try { await call('password_changed'); }
     catch (e) { console.error('could not clear the change-password flag', e); }
@@ -237,9 +269,12 @@ function forceNewPassword(me) {
       $('#pane').innerHTML = `<div class="panel"><h2>Password saved</h2>
         <p class="sub" style="margin-top:8px">Your new password is in place. Reload the page to load your accounts.</p></div>`;
     }
-  };
-  $('#np2').addEventListener('keydown', e => { if (e.key === 'Enter') $('#pgo').click(); });
-}
+  }
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && e.target.id === 'np2') $('#pgo').click();
+});
 
 document.querySelectorAll('#tabs button').forEach(b => b.onclick = () => {
   tab = b.dataset.tab; open = null;
@@ -407,11 +442,29 @@ function esc(s) {
   return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
 }
 
-// A session already in the browser skips the sign-in box.
+// A magic link arrives with the session in the URL fragment, and the client
+// needs a moment to trade that for a session. Asking getSession() straight
+// away answers null, which is why arriving by link left the screen half
+// built. onAuthStateChange fires once the exchange is done, so wait for it.
 (async () => {
   const c = await client();
-  const { data } = await c.auth.getSession();
-  if (data?.session) { session = data.session; await start(); }
+  let started = false;
+  const begin = async (sess) => {
+    if (started || !sess) return;
+    started = true;
+    session = sess;
+    await start();
+  };
+
+  // Wrapped because one failing call here would take the rest of the startup
+  // with it, and what is left is a page that renders but does nothing.
+  try { c.auth.onAuthStateChange?.((_e, sess) => { begin(sess); }); }
+  catch (e) { console.error('auth listener unavailable', e); }
+
+  try {
+    const { data } = await c.auth.getSession();
+    if (data?.session) await begin(data.session);
+  } catch (e) { console.error('could not read the session', e); }
 })();
 </script>
 </body>
