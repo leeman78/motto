@@ -5,6 +5,44 @@ what you want to work on next. Everything needed to continue is here.
 
 ---
 
+
+## Office orders & pay links (Aug 27)
+
+Orders no longer have to start in the dealer's browser. The office writes an
+order in the admin (dealer detail → **New order**), the store gets an email
+with the full order table and an **Approve & pay** button. The link opens
+`pay.html?t=<pay_token>` — no account, no password; the UUID token authorizes
+viewing and paying that one order only. First payment connects the store's
+bank through Stripe (mandate = the "signature"); the account saves against a
+per-dealer Stripe customer, so later orders are two taps.
+
+| Piece | What it does |
+|---|---|
+| `supabase/13_office_orders.sql` | `orders.placed_by / pay_token / pay_link_sent_at`, `dealer_accounts.stripe_customer_id`. Run after 12. |
+| `api/_order.js` | The one place pricing + Stripe sessions are built. checkout / admin / pay all call it. |
+| `api/pay.js` | Token-gated view + pay. Charges the prices **frozen** on order_items, never re-resolved. |
+| `public/pay.html` | Store-facing approve-and-pay page. |
+| admin `create_order` | Office order, status `requested`, MOQ not enforced (samples, make-goods). |
+| admin `send_pay_link` | Emails the order + link. Also rescues abandoned dealer checkouts. |
+
+The rep portal has the same flow (Aug 27): an **Order** column on the
+account price screen → totals bar with the rep's margin → review screen →
+**Send for approval**. `api/rep.js` `create_order` is scoped to the rep's own
+accounts, stamps `rep_id` and `placed_by='rep'`; the email comes from the
+shared builder in `api/_paylink.js`, so office and rep orders look identical
+to the store. The rep never touches the money — the store pays Motto through
+the link.
+
+Pre-loading bank numbers was considered and rejected: Stripe requires
+verification before any debit, and a manually entered account has to clear
+microdeposits (store digs a 6-digit code out of its bank statement, 1–2
+days). One bank login through the pay link is faster, so first order = link,
+every later order = saved account. Never store routing/account numbers in
+Supabase.
+
+Orders in `processing` never get a pay button or link — the ACH debit is
+already moving and a second one would collect twice.
+
 ## What this is
 
 A private B2B catalog and ordering portal for **Motto USA**, a Dallas-based

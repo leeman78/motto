@@ -63,6 +63,8 @@ tbody tr.click:hover td{background:#fafafb}
   border:1px solid #e2e2e6;border-radius:9px;padding:8px 10px;width:92px;outline:none}
 .pin:focus{border-color:#111}
 .pin.q{border-color:#f59e0b;background:#fff7ed}
+.obar{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;
+  margin-top:16px;padding:13px 16px;background:var(--soft);border-radius:12px;font-size:13.5px}
 .ea{display:block;font-size:11px;color:var(--ink-3);font-weight:400;margin-top:2px}
 .quoted{display:inline-block;font-size:10px;font-weight:800;letter-spacing:.09em;
   text-transform:uppercase;color:var(--warn);background:#fff7ed;padding:2px 7px;border-radius:999px;margin-top:3px}
@@ -365,7 +367,8 @@ async function account(id) {
       Prices are set by Motto: call or email to have one changed for this account.</p>
     <table style="margin-top:18px">
       <thead><tr><th>Product</th><th>SKU</th><th class="r">Per box</th>
-        <th class="r">Wholesale</th><th class="r">This store pays</th><th class="r">My margin</th></tr></thead>
+        <th class="r">Wholesale</th><th class="r">This store pays</th><th class="r">My margin</th>
+        <th class="r" style="width:82px">Order</th></tr></thead>
       <tbody>${prices.map(r => `<tr>
         <td class="nm"><b>${esc(r.product)}</b><span>${esc(r.label)}</span></td>
         <td class="mono" style="font-size:12px;color:var(--ink-3)">${esc(r.sku)}</td>
@@ -377,11 +380,23 @@ async function account(id) {
           ${r.is_quoted ? '<br><span class="quoted">special price</span>' : ''}</td>
         <td class="r mono margin">${usd(r.margin_cents)}<br>
           <span class="ea">${usd(Math.round(r.margin_cents / (r.case_pack || 1)))} each</span></td>
+        <td class="r"><input class="pin oq" data-sku="${r.sku}" data-name="${esc(r.product)} — ${esc(r.label)}"
+          data-cents="${r.charged_cents}" data-margin="${r.margin_cents}" data-pack="${r.case_pack}"
+          type="number" min="0" step="1" placeholder="0" style="width:64px"></td>
       </tr>`).join('')}
       </tbody>
     </table>
+    <div class="obar" id="obar" hidden>
+      <div>
+        <b class="mono" id="oTot">$0.00</b> <span style="color:var(--ink-3)">order total</span>
+        <span style="color:var(--ink-3)"> · you make </span><b class="mono margin" id="oMar">$0.00</b>
+      </div>
+      <button class="btn dark" id="oReview">Review order →</button>
+    </div>
     <p class="msg" id="pmsg"></p>
   </div>
+
+  <div class="panel" id="oPanel" hidden></div>
 
   <div class="panel">
     <h2>Recent orders</h2>
@@ -399,6 +414,77 @@ async function account(id) {
 
   $('#back').onclick = () => { open = null; accounts(); };
 
+  // ---- order builder ----
+  // Freight mirrors the site rule: free at $1,500, else $18 flat.
+  const chosen = () => [...document.querySelectorAll('.oq')]
+    .map(i => ({ sku: i.dataset.sku, name: i.dataset.name, pack: +i.dataset.pack,
+                 cents: +i.dataset.cents, margin: +i.dataset.margin,
+                 cases: Math.max(0, parseInt(i.value, 10) || 0) }))
+    .filter(x => x.cases > 0);
+
+  const oTotals = () => {
+    const c = chosen();
+    const sub = c.reduce((s, x) => s + x.cents * x.cases, 0);
+    const mar = c.reduce((s, x) => s + x.margin * x.cases, 0);
+    const fr = sub === 0 ? 0 : (sub >= 150000 ? 0 : 1800);
+    $('#obar').hidden = c.length === 0;
+    $('#oTot').textContent = usd(sub + fr);
+    $('#oMar').textContent = usd(mar);
+    return { c, sub, fr, mar };
+  };
+  document.querySelectorAll('.oq').forEach(i => i.oninput = oTotals);
+
+  $('#oReview').onclick = () => {
+    const { c, sub, fr, mar } = oTotals();
+    if (!c.length) return;
+    const panel = $('#oPanel');
+    panel.hidden = false;
+    panel.innerHTML = `
+      <h2>Review order — ${esc(dealer.business_name)}</h2>
+      <p class="sub" style="margin-top:6px">This is exactly what lands in their inbox, with an
+      approve-and-pay button. They pay Motto directly — bank (ACH) or card, their choice.</p>
+      <table style="margin-top:18px">
+        <thead><tr><th>Item</th><th class="r">Boxes</th><th class="r">Per box</th><th class="r">Amount</th></tr></thead>
+        <tbody>
+          ${c.map(x => `<tr>
+            <td class="nm"><b>${x.name}</b><span class="mono">${esc(x.sku)} · ${x.pack * x.cases} pcs</span></td>
+            <td class="r mono">${x.cases}</td>
+            <td class="r mono">${usd(x.cents)}</td>
+            <td class="r mono">${usd(x.cents * x.cases)}</td>
+          </tr>`).join('')}
+          <tr><td colspan="3" style="border:0;padding-top:12px">Subtotal</td><td class="r mono" style="border:0;padding-top:12px">${usd(sub)}</td></tr>
+          <tr><td colspan="3" style="border:0">Ground freight</td><td class="r mono" style="border:0">${fr ? usd(fr) : 'Free'}</td></tr>
+          <tr><td colspan="3" style="border:0;font-weight:800;font-size:15px">Total</td><td class="r mono" style="border:0;font-weight:800;font-size:15px">${usd(sub + fr)}</td></tr>
+          <tr><td colspan="3" style="border:0;color:var(--ink-3)">Your margin on this order</td><td class="r mono margin" style="border:0">${usd(mar)}</td></tr>
+        </tbody>
+      </table>
+      <div style="display:flex;gap:10px;margin-top:18px;align-items:center;flex-wrap:wrap">
+        <button class="btn dark" id="oSend">Send to ${esc(dealer.email)} for approval</button>
+        <button class="btn soft" id="oEdit">← Edit</button>
+        <span class="msg" id="oMsg" style="margin:0"></span>
+      </div>`;
+    panel.scrollIntoView({ behavior: 'smooth' });
+
+    $('#oEdit').onclick = () => { panel.hidden = true; };
+    $('#oSend').onclick = async () => {
+      const btn = $('#oSend');
+      btn.disabled = true; btn.textContent = 'Sending…';
+      try {
+        const o = await call('create_order', { dealer_id: id, items: c.map(x => ({ sku: x.sku, cases: x.cases })) });
+        const r = await call('send_pay_link', { order_id: o.order_id });
+        panel.innerHTML = `
+          <h2>Order #${o.order_no} sent</h2>
+          <p class="sub" style="margin-top:6px"><b>${usd(o.total_cents)}</b> — the approve-and-pay
+          email is on its way to <b>${esc(r.sent_to)}</b>. When they pay, it shows under
+          Recent orders and on your dashboard, with your margin of ${usd(mar)} credited to you.</p>
+          <button class="btn soft" style="margin-top:14px" id="oDone">Done</button>`;
+        $('#oDone').onclick = () => account(id);
+      } catch (e) {
+        btn.disabled = false; btn.textContent = 'Send to ' + dealer.email + ' for approval';
+        $('#oMsg').textContent = e.message;
+      }
+    };
+  };
 }
 
 /* ---------------- orders ---------------- */

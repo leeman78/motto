@@ -13,20 +13,11 @@
 //   list_orders     → recent orders
 
 import { db, checkAdmin, tempPassword } from './_lib.js';
+import { priceOrder } from './_order.js';
+// Mail lives in _paylink.js now, shared with the rep portal.
+import { sendMail, sendPayLink } from './_paylink.js';
 
-// Sender stays on the Resend-verified mottob2b.com domain.
-const FROM = process.env.LEAD_FROM_EMAIL || 'Motto Wholesale <info@mottob2b.com>';
 const esc = s => String(s || '').replace(/[<>&]/g, c => ({ '<':'&lt;', '>':'&gt;', '&':'&amp;' }[c]));
-
-async function sendMail({ to, subject, html }) {
-  if (!process.env.RESEND_API_KEY) throw new Error('RESEND_API_KEY is not set, so no email can be sent.');
-  const r = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ from: FROM, to: [to], subject, html })
-  });
-  if (!r.ok) throw new Error(`Resend ${r.status}: ${await r.text()}`);
-}
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
@@ -626,6 +617,77 @@ export default async function handler(req, res) {
         const { error } = await db.from('orders').update(patch).eq('id', order_id);
         if (error) throw error;
         return res.status(200).json({ ok: true });
+      }
+
+      // ---------------------------------------------------------------
+      // The office writes an order for a store. The store approves and pays
+      // it through the emailed link — it needs no account for this.
+      //
+      // Prices resolve through the same priceOrder() checkout uses, then
+      // freeze on order_items. The link charges the frozen number, so what
+      // the store approves is exactly what it is sent, even if the price
+      // sheet moves later.
+      // ---------------------------------------------------------------
+      case 'create_order': {
+        const { dealer_id, items } = p;
+
+        const { data: dealer, error: dErr } = await db
+          .from('dealer_accounts').select('*').eq('id', dealer_id).single();
+        if (dErr || !dealer) return res.status(404).json({ error: 'No such dealer.' });
+
+        let priced;
+        try { priced = await priceOrder(dealer, items); }
+        catch (e) {
+          if (e.status) return res.status(e.status).json({ error: e.message });
+          throw e;
+        }
+        const { rows, subtotal, freight } = priced;
+        // The office can go under the MOQ on purpose — a sample box, a
+        // make-good — so unlike checkout it is not enforced here.
+
+        const { data: order, error: oErr } = await db.from('orders').insert({
+          dealer_id: dealer.id,
+          subtotal_cents: subtotal,
+          freight_cents: freight,
+          status: 'requested',
+          placed_by: 'office',
+          customer_email: dealer.email,
+          customer_name: dealer.business_name
+        }).select('id, order_no, pay_token').single();
+        if (oErr) throw oErr;
+
+        const { error: iErr } = await db.from('order_items')
+          .insert(rows.map(r => ({ ...r, order_id: order.id })));
+        if (iErr) throw iErr;
+
+        return res.status(200).json({
+          ok: true,
+          order_id: order.id,
+          order_no: order.order_no,
+          subtotal_cents: subtotal,
+          freight_cents: freight,
+          total_cents: subtotal + freight
+        });
+      }
+
+      // ---------------------------------------------------------------
+      // Email the store its order and the link to approve and pay it. The
+      // email carries the full order table, so "what did I agree to" is
+      // answered in the inbox, not just behind the link.
+      //
+      // Works for any unpaid order regardless of who placed it, so it also
+      // rescues an abandoned dealer checkout: send the link, they finish
+      // paying without signing back in.
+      // ---------------------------------------------------------------
+      case 'send_pay_link': {
+        const origin = req.headers.origin || `https://${req.headers.host}`;
+        try {
+          const r = await sendPayLink(p.order_id, origin);
+          return res.status(200).json({ ok: true, ...r });
+        } catch (e) {
+          if (e.status) return res.status(e.status).json({ error: e.message });
+          throw e;
+        }
       }
 
       default:

@@ -123,6 +123,9 @@ tr.click:hover td{background:#f7f8fa}
 .tiny{border:0;background:none;color:#b3b6bd;font-size:11px;font-weight:700;cursor:pointer;padding:4px}
 .tiny:hover{color:var(--red)}
 .back{border:0;background:none;font-size:13px;font-weight:650;color:#6b6e75;cursor:pointer;padding:0;margin-bottom:14px}
+.msg{border-radius:10px;padding:12px 14px;font-size:13px;line-height:1.5}
+.msg.ok{background:#e8f6ee;color:#0a6b34;border:1px solid #c9e9d6}
+.msg.bad{background:#fdf1f0;color:#9a2f27;border:1px solid #f3d3d0}
 .credbox{background:#0c0d0f;color:#fff;border-radius:18px;padding:22px;margin-top:16px}
 .credbox .k{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#8e9198;font-weight:700}
 .credbox .v{font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:19px;font-weight:700;margin:5px 0 16px;user-select:all}
@@ -969,6 +972,11 @@ async function createDealer(){
 }
 
 /* ---------------- price sheet ---------------- */
+function note2(sel, kind, head, body){
+  document.querySelector(sel).innerHTML =
+    `<div class="msg ${kind}" style="margin-top:12px"><b>${head}</b> ${body || ''}</div>`;
+}
+
 async function dealerDetail(id){
   $('#pane').innerHTML = '<div class="panel"><p class="sub">Loading price sheet…</p></div>';
   const { dealer, rows } = await call('price_sheet', { dealer_id: id });
@@ -1027,9 +1035,90 @@ async function dealerDetail(id){
       </tbody>
     </table>
     <p class="sub" style="margin:18px 0 0">Changes save the moment you leave a field.</p>
+  </div>
+
+  <div class="panel">
+    <h2>New order</h2>
+    <p class="sub">Write an order for this store — a phone order, a rep calling one in, a
+    trade-show order. The store gets an email with the order and a pay link: no
+    sign-in, they look it over and pay. Boxes ship assorted colors.</p>
+    <table>
+      <thead><tr>
+        <th>Product</th><th class="r">Pcs/box</th><th class="r">Per box</th>
+        <th class="r" style="width:90px">Boxes</th><th class="r">Amount</th>
+      </tr></thead>
+      <tbody>${rows.map(r=>`
+        <tr>
+          <td><b>${r.product_name}</b><br><span style="color:#9a9da4;font-size:11.5px">${r.label} · ${r.sku}</span></td>
+          <td class="r mono" style="color:#9a9da4">${r.case_pack}</td>
+          <td class="r mono">${usd(r.case_cents)}</td>
+          <td class="r"><input class="priceinput qin" data-sku="${r.sku}" data-cents="${r.case_cents}"
+               type="number" min="0" step="1" placeholder="0" style="width:74px"></td>
+          <td class="r mono" data-amt="${r.sku}" style="color:#9a9da4">—</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>
+    <div class="inline" style="margin-top:16px;align-items:center">
+      <div style="font-size:13.5px;margin-right:auto">
+        Subtotal <b class="mono" id="noSub">$0.00</b>
+        <span style="color:#9a9da4"> · freight <span class="mono" id="noFr">$0.00</span> · total </span>
+        <b class="mono" id="noTot">$0.00</b>
+      </div>
+      <button class="btn dark" id="noSend">Create order &amp; email pay link</button>
+      <button class="btn soft" id="noSave">Create only</button>
+    </div>
+    <div id="noMsg"></div>
   </div>`;
 
   $('#back').onclick = () => go('dealers', null);
+
+  // ---- new order: totals follow the boxes as you type ----
+  // Freight mirrors the site rule: free at $1,500, else $18 flat. If that
+  // changes in api/_lib.js it changes here too, or the panel misquotes.
+  const noTotals = () => {
+    let sub = 0;
+    document.querySelectorAll('.qin').forEach(inp => {
+      const q = Math.max(0, parseInt(inp.value, 10) || 0);
+      const amt = q * Number(inp.dataset.cents);
+      sub += amt;
+      const cell = document.querySelector(`[data-amt="${inp.dataset.sku}"]`);
+      cell.textContent = q ? usd(amt) : '—';
+      cell.style.color = q ? '' : '#9a9da4';
+    });
+    const fr = sub === 0 ? 0 : (sub >= 150000 ? 0 : 1800);
+    $('#noSub').textContent = usd(sub);
+    $('#noFr').textContent = sub >= 150000 && sub > 0 ? 'Free' : usd(fr);
+    $('#noTot').textContent = usd(sub + fr);
+    return sub;
+  };
+  document.querySelectorAll('.qin').forEach(inp => inp.oninput = noTotals);
+
+  const noItems = () => [...document.querySelectorAll('.qin')]
+    .map(inp => ({ sku: inp.dataset.sku, cases: parseInt(inp.value, 10) || 0 }))
+    .filter(i => i.cases > 0);
+
+  const noCreate = async (send) => {
+    const items = noItems();
+    if (!items.length) { $('#noMsg').innerHTML = ''; return note2('#noMsg', 'bad', 'Nothing to order.', 'Put a box count on at least one line.'); }
+    const btn = send ? $('#noSend') : $('#noSave');
+    btn.disabled = true;
+    try {
+      const o = await call('create_order', { dealer_id: id, items });
+      let extra = 'It is on the Orders tab as “requested”.';
+      if (send) {
+        const r = await call('send_pay_link', { order_id: o.order_id });
+        extra = `Pay link emailed to ${r.sent_to}.`;
+      }
+      note2('#noMsg', 'ok', `Order #${o.order_no} created — ${usd(o.total_cents)}.`, extra);
+      document.querySelectorAll('.qin').forEach(i => i.value = '');
+      noTotals();
+    } catch (e) {
+      note2('#noMsg', 'bad', 'Order not created.', e.message);
+    }
+    btn.disabled = false;
+  };
+  $('#noSend').onclick = () => noCreate(true);
+  $('#noSave').onclick = () => noCreate(false);
 
   // Same shape as deleting a rep: name typed out, and orders survive it.
   $('#ddel').onclick = async () => {
@@ -1085,7 +1174,10 @@ async function dealerDetail(id){
     }catch(e){ msg.textContent = 'Not sent: ' + e.message; }
   };
 
-  document.querySelectorAll('.priceinput').forEach(inp => {
+  // :not(.qin) — the New order panel reuses .priceinput for its box-count
+  // fields, and those are quantities, not prices. Binding this save handler
+  // to them would treat "4 boxes" as a $4.00 price change.
+  document.querySelectorAll('.priceinput:not(.qin)').forEach(inp => {
     inp.onchange = async () => {
       const v = cents(inp.value);
       if(!Number.isInteger(v) || v < 0){ inp.value = '0.00'; return; }
@@ -1122,9 +1214,14 @@ async function orderList(){
   const rev  = paid.reduce((s,o) => s + (o.total_cents || 0), 0);
 
   const pill = s => ({
-    paid:'ok', shipped:'ok', processing:'warn', pending:'grey',
+    paid:'ok', shipped:'ok', processing:'warn', pending:'grey', requested:'warn',
     abandoned:'grey', payment_failed:'warn', refunded:'warn'
   })[s] || 'grey';
+
+  // Which orders a pay link still makes sense for. Processing is out — the
+  // ACH debit is already moving and a second link would collect twice.
+  const linkable = s => ['requested','pending','payment_failed','abandoned'].includes(s);
+  const by = s => s === 'office' ? 'Office' : s === 'rep' ? 'Rep' : 'Store';
 
   $('#pane').innerHTML = `
   <div class="summary">
@@ -1137,7 +1234,7 @@ async function orderList(){
     <h2>Recent orders</h2>
     <p class="sub">ACH settles a few business days after checkout, so an ACH order sits at Processing until the webhook clears it. Do not ship on Processing.</p>
     <table>
-      <thead><tr><th>#</th><th>Dealer</th><th>Placed</th><th class="r">Total</th><th>Pay</th><th>Status</th><th>Tracking</th></tr></thead>
+      <thead><tr><th>#</th><th>Dealer</th><th>Placed</th><th class="r">Total</th><th>Pay</th><th>Status</th><th>Pay link</th><th>Tracking</th></tr></thead>
       <tbody>${orders.map(o=>`
         <tr>
           <td class="mono">${o.order_no}</td>
@@ -1145,12 +1242,27 @@ async function orderList(){
           <td style="color:#71747b;font-size:12.5px">${new Date(o.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric'})}</td>
           <td class="r mono">${usd(o.total_cents || o.subtotal_cents + o.freight_cents)}</td>
           <td style="font-size:11.5px;color:#71747b">${o.payment_method==='card'?'Card':'ACH'}</td>
-          <td><span class="pill ${pill(o.status)}">${o.status}</span></td>
+          <td><span class="pill ${pill(o.status)}">${o.status}</span><br>
+            <span style="color:#9a9da4;font-size:10.5px;letter-spacing:.05em">${by(o.placed_by)}</span></td>
+          <td>${linkable(o.status)
+              ? `<button class="tiny" data-paylink="${o.id}">${o.pay_link_sent_at ? 'RESEND' : 'SEND'}</button>`
+              : '<span style="color:#c4c6cb">—</span>'}</td>
           <td><input class="priceinput" style="width:130px;text-align:left" data-order="${o.id}" value="${o.tracking||''}" placeholder="Add tracking"></td>
-        </tr>`).join('') || '<tr><td colspan="7" style="color:#9a9da4;padding:40px 10px;text-align:center">No orders yet.</td></tr>'}
+        </tr>`).join('') || '<tr><td colspan="8" style="color:#9a9da4;padding:40px 10px;text-align:center">No orders yet.</td></tr>'}
       </tbody>
     </table>
   </div>`;
+
+  document.querySelectorAll('[data-paylink]').forEach(btn => {
+    btn.onclick = async () => {
+      btn.disabled = true; btn.textContent = '…';
+      try {
+        const r = await call('send_pay_link', { order_id: btn.dataset.paylink });
+        btn.textContent = 'SENT';
+        setTimeout(orderList, 900);
+      } catch (e) { alert(e.message); btn.disabled = false; btn.textContent = 'SEND'; }
+    };
+  });
 
   document.querySelectorAll('[data-order]').forEach(inp => {
     inp.onchange = async () => {

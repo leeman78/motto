@@ -20,6 +20,8 @@
 // 403 so the read-only screen is enforced rather than merely displayed.
 
 import { db, getRep } from './_lib.js';
+import { priceOrder } from './_order.js';
+import { sendPayLink } from './_paylink.js';
 
 const monthStart = (d = new Date()) => new Date(d.getFullYear(), d.getMonth(), 1).toISOString();
 const lastMonthStart = () => {
@@ -212,6 +214,72 @@ export default async function handler(req, res) {
         return res.status(403).json({
           error: 'Prices are set by Motto. Contact the office to change a price for this account.'
         });
+
+      // ---------------------------------------------------------------
+      // A rep writes an order for one of their stores — the store called it
+      // in, the rep is standing in the aisle. Same pricing path as checkout
+      // and the admin console, so all three can never disagree. The rep can
+      // only order for accounts assigned to them, and the store still
+      // approves and pays through the emailed link: the rep never touches
+      // the money.
+      // ---------------------------------------------------------------
+      case 'create_order': {
+        const { dealer_id, items } = p;
+        if (!(await myDealerIds()).has(dealer_id)) {
+          return res.status(404).json({ error: 'No such account.' });
+        }
+        const { data: dealer, error: dErr } = await db
+          .from('dealer_accounts').select('*').eq('id', dealer_id).single();
+        if (dErr || !dealer) return res.status(404).json({ error: 'No such account.' });
+
+        let priced;
+        try { priced = await priceOrder(dealer, items); }
+        catch (e) {
+          if (e.status) return res.status(e.status).json({ error: e.message });
+          throw e;
+        }
+        const { rows, subtotal, freight } = priced;
+
+        const { data: order, error: oErr } = await db.from('orders').insert({
+          dealer_id: dealer.id,
+          rep_id: rep.id,          // credited to the rep who wrote it
+          subtotal_cents: subtotal,
+          freight_cents: freight,
+          status: 'requested',
+          placed_by: 'rep',
+          customer_email: dealer.email,
+          customer_name: dealer.business_name
+        }).select('id, order_no').single();
+        if (oErr) throw oErr;
+
+        const { error: iErr } = await db.from('order_items')
+          .insert(rows.map(r => ({ ...r, order_id: order.id })));
+        if (iErr) throw iErr;
+
+        return res.status(200).json({
+          ok: true, order_id: order.id, order_no: order.order_no,
+          subtotal_cents: subtotal, freight_cents: freight,
+          total_cents: subtotal + freight
+        });
+      }
+
+      // Email the approve-and-pay link. Scoped like everything else here:
+      // a rep can only send links for orders on their own accounts.
+      case 'send_pay_link': {
+        const { data: order } = await db
+          .from('orders').select('id, dealer_id').eq('id', p.order_id).single();
+        if (!order || !(await myDealerIds()).has(order.dealer_id)) {
+          return res.status(404).json({ error: 'No such order.' });
+        }
+        const origin = req.headers.origin || `https://${req.headers.host}`;
+        try {
+          const r = await sendPayLink(order.id, origin);
+          return res.status(200).json({ ok: true, ...r });
+        } catch (e) {
+          if (e.status) return res.status(e.status).json({ error: e.message });
+          throw e;
+        }
+      }
 
       default:
         return res.status(400).json({ error: `Unknown action: ${action}` });

@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Approve your order — Motto Wholesale</title>
+<style>
+:root{
+  --ink:#0b0b0d; --ink-2:#5f6268; --ink-3:#9a9da4;
+  --line:#e7e7ea; --soft:#f5f5f7; --blue:#1268ff;
+  --ok:#0a7d3b; --warn:#b45309;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--soft);color:var(--ink);-webkit-font-smoothing:antialiased;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Inter","Segoe UI",sans-serif}
+.mono{font-family:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;font-variant-numeric:tabular-nums}
+a{color:inherit;text-decoration:none}
+
+.bar{background:#0c0d0f;color:#fff;padding:16px 22px;display:flex;align-items:center;gap:10px}
+.bar b{font-size:17px;letter-spacing:-.04em}
+.bar span{font-size:10.5px;color:#8a8d94;letter-spacing:.15em;text-transform:uppercase;font-weight:750;
+  border-left:1px solid #2a2c30;padding-left:10px}
+
+.page{max-width:640px;margin:0 auto;padding:26px 16px 60px}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:24px 22px;margin-bottom:14px}
+h1{font-size:21px;letter-spacing:-.03em;margin:0 0 4px}
+.sub{color:var(--ink-2);font-size:13.5px;line-height:1.55;margin:0}
+
+table{width:100%;border-collapse:collapse;margin-top:16px;font-size:13.5px}
+th{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);
+  text-align:left;font-weight:750;padding:0 0 9px;border-bottom:1px solid var(--line)}
+th.r,td.r{text-align:right;padding-left:14px;white-space:nowrap}
+td{padding:11px 0;border-bottom:1px solid var(--line);vertical-align:top}
+td .d{color:var(--ink-3);font-size:11.5px;margin-top:2px}
+tr.tot td{border:0;padding:8px 0 0;font-size:13.5px}
+tr.grand td{font-size:17px;font-weight:800;padding-top:6px}
+
+.btn{display:block;width:100%;border:0;border-radius:12px;padding:16px;font-size:15.5px;font-weight:750;
+  cursor:pointer;font-family:inherit;text-align:center}
+.btn.pay{background:var(--ink);color:#fff}
+.btn.pay:active{transform:scale(.99)}
+.btn[disabled]{opacity:.55;cursor:default}
+.alt{display:block;text-align:center;margin-top:12px;font-size:13px;color:var(--ink-2);
+  background:none;border:0;cursor:pointer;font-family:inherit;width:100%;text-decoration:underline;text-underline-offset:3px}
+
+.state{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;
+  padding:4px 10px;border-radius:999px;margin-bottom:12px}
+.state.ok{background:#e8f6ee;color:var(--ok)}
+.state.warn{background:#fff7ed;color:var(--warn)}
+
+.note{font-size:12px;color:var(--ink-3);line-height:1.6;margin-top:14px}
+.err{background:#fdf1f0;border:1px solid #f3d3d0;color:#9a2f27;border-radius:12px;
+  padding:14px 16px;font-size:13.5px;line-height:1.5}
+.foot{text-align:center;color:var(--ink-3);font-size:12px;margin-top:22px;line-height:1.7}
+.skel{height:14px;border-radius:6px;background:linear-gradient(90deg,#eee 25%,#f6f6f6 50%,#eee 75%);
+  background-size:200% 100%;animation:sh 1.2s infinite;margin:10px 0}
+@keyframes sh{to{background-position:-200% 0}}
+</style>
+</head>
+<body>
+
+<div class="bar"><b>MOTTO</b><span>Wholesale</span></div>
+
+<div class="page" id="page">
+  <div class="card"><div class="skel" style="width:40%"></div><div class="skel"></div><div class="skel" style="width:70%"></div></div>
+</div>
+
+<script>
+const usd = c => '$' + (c / 100).toLocaleString('en-US', { minimumFractionDigits: 2 });
+const esc = s => String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const token = new URLSearchParams(location.search).get('t');
+const page = document.getElementById('page');
+
+async function call(action, extra = {}) {
+  const r = await fetch('/api/pay', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action, token, ...extra })
+  });
+  const d = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(d.error || 'Something went wrong.');
+  return d;
+}
+
+function fail(msg) {
+  page.innerHTML = `<div class="card"><div class="err">${esc(msg)}</div>
+    <p class="foot">Motto USA · Dallas, TX · 214-681-8417 · info@mottousa.com</p></div>`;
+}
+
+function render(o) {
+  const total = o.subtotal_cents + o.freight_cents;
+  const when = new Date(o.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
+
+  // The state line answers "do I need to do anything" before the numbers do.
+  let state = '', button = '';
+  if (o.status === 'paid' || o.status === 'shipped') {
+    state = `<span class="state ok">Paid${o.paid_at ? ' · ' + new Date(o.paid_at).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : ''}</span>`;
+  } else if (o.status === 'processing') {
+    state = `<span class="state warn">Payment on its way</span>`;
+    button = `<p class="note">Your bank payment is clearing — ACH takes a few business days. Nothing more to do.</p>`;
+  } else if (o.payable) {
+    button = `
+      <button class="btn pay" id="payBtn">Approve &amp; pay ${usd(total)} by bank (ACH)</button>
+      <button class="alt" id="cardBtn">Pay by card instead</button>
+      <p class="note">Tapping approve authorizes Motto USA to debit your account for this
+      order. Your bank is connected securely through Stripe — Motto never sees your
+      login — and is remembered for next time, so future orders are one tap.</p>`;
+  } else {
+    state = `<span class="state warn">${esc(o.status)}</span>`;
+  }
+
+  page.innerHTML = `
+  <div class="card">
+    ${state}
+    <h1>Order #${o.order_no}</h1>
+    <p class="sub">for <b>${esc(o.business_name)}</b> · placed ${when}</p>
+
+    <table>
+      <thead><tr><th>Item</th><th class="r">Boxes</th><th class="r">Per box</th><th class="r">Amount</th></tr></thead>
+      <tbody>
+        ${o.items.map(it => `
+        <tr>
+          <td><b>${esc(it.name)}</b>${it.label ? ' — ' + esc(it.label) : ''}${it.color ? ' — ' + esc(it.color) : ''}
+            <div class="d mono">${esc(it.sku)}${it.case_pack ? ' · ' + it.case_pack + ' pcs/box · ' + it.pieces + ' pcs total' : ''}</div></td>
+          <td class="r mono">${it.cases}</td>
+          <td class="r mono">${usd(it.case_cents)}</td>
+          <td class="r mono">${usd(it.case_cents * it.cases)}</td>
+        </tr>`).join('')}
+        <tr class="tot"><td colspan="3">Subtotal</td><td class="r mono">${usd(o.subtotal_cents)}</td></tr>
+        <tr class="tot"><td colspan="3">Ground freight</td><td class="r mono">${o.freight_cents ? usd(o.freight_cents) : 'Free'}</td></tr>
+        <tr class="tot grand"><td colspan="3">Total</td><td class="r mono">${usd(total)}</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card" ${button ? '' : 'hidden'}>${button}</div>
+
+  <p class="foot">Questions about this order? Call your rep, or Motto USA at
+  214-681-8417 · info@mottousa.com</p>`;
+
+  const go = method => async ev => {
+    const b = ev.currentTarget;
+    b.disabled = true; b.textContent = 'Opening secure payment…';
+    try {
+      const { url } = await call('pay', { payment_method: method });
+      location.href = url;
+    } catch (e) {
+      b.disabled = false;
+      b.textContent = method === 'card' ? 'Pay by card instead' : `Approve & pay ${usd(total)} by bank (ACH)`;
+      alert(e.message);
+    }
+  };
+  document.getElementById('payBtn')?.addEventListener('click', go('us_bank_account'));
+  document.getElementById('cardBtn')?.addEventListener('click', go('card'));
+}
+
+if (!token) fail('This link is missing its code. Open the link from your email again.');
+else call('view').then(render).catch(e => fail(e.message));
+</script>
+</body>
+</html>
