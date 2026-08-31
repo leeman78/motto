@@ -8,10 +8,10 @@
 import { db } from './_lib.js';
 
 const NOTIFY_TO   = process.env.LEAD_NOTIFY_EMAIL || 'info@mottousa.com';
-// Sender stays on mottob2b.com: that is the domain verified in Resend.
+// Sender is mottousa.com, verified in Resend on Aug 31, 2026.
 // Point it at mottousa.com only after verifying that domain there, or
 // every message silently fails to send.
-const NOTIFY_FROM = process.env.LEAD_FROM_EMAIL   || 'Motto Wholesale <info@mottob2b.com>';
+const NOTIFY_FROM = process.env.LEAD_FROM_EMAIL   || 'Motto Wholesale <info@mottousa.com>';
 
 const esc = s => String(s || '').replace(/[<>&]/g, c => ({ '<':'&lt;', '>':'&gt;', '&':'&amp;' }[c]));
 

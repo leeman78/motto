@@ -413,7 +413,7 @@ async function repList(){
       try {
         const r = await call('send_rep_link', { id: el.dataset.rlink });
         note('ok', `Sign-in link sent to ${r.sent_to}.`,
-             'It works once and expires in 24 hours. If it is not there in a minute, check the junk folder — it arrives from info@mottob2b.com.');
+             'It works once and expires in 24 hours. If it is not there in a minute, check the junk folder — it arrives from info@mottousa.com.');
       } catch (e) {
         note('bad', 'The link was not sent.', e.message);
       }

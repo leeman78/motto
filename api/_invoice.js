@@ -17,8 +17,8 @@
 
 import { db } from './_lib.js';
 
-const FROM = process.env.LEAD_FROM_EMAIL || 'Motto Wholesale <info@mottob2b.com>';
-const BOOKS = process.env.INVOICE_EMAIL || 'invoice@mottob2b.com';
+const FROM = process.env.LEAD_FROM_EMAIL || 'Motto Wholesale <info@mottousa.com>';
+const BOOKS = process.env.INVOICE_EMAIL || 'invoice@mottousa.com';
 
 const usd = c => '$' + ((c || 0) / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const esc = s => String(s ?? '').replace(/[<>&]/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' }[c]));

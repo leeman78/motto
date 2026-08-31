@@ -6,10 +6,10 @@
 
 import { db } from './_lib.js';
 
-// Sender stays on the Resend-verified mottob2b.com domain. Point it at
-// mottousa.com only after verifying that domain in Resend, or every message
-// silently fails to send.
-export const FROM = process.env.LEAD_FROM_EMAIL || 'Motto Wholesale <info@mottob2b.com>';
+// Sender is mottousa.com, verified in Resend (Aug 31, 2026). Whatever
+// domain goes here must be verified there first, or every message silently
+// fails to send.
+export const FROM = process.env.LEAD_FROM_EMAIL || 'Motto Wholesale <info@mottousa.com>';
 
 export async function sendMail({ to, subject, html }) {
   if (!process.env.RESEND_API_KEY) throw new Error('RESEND_API_KEY is not set, so no email can be sent.');
