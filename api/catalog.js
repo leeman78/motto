@@ -34,7 +34,7 @@ export default async function handler(req, res) {
         slug, type_label, name, description, spec_tags, colors, images, sort_order, compliance,
         description_long, features, compatibility, weight_oz,
         categories ( slug ),
-        variants ( sku, upc, label, case_pack, master_carton, is_active, sort_order, stock_status, restock_date )
+        variants ( sku, upc, label, case_pack, master_carton, msrp_cents, is_active, sort_order, stock_status, restock_date )
       `)
       .eq('is_published', true)
       .order('sort_order');
@@ -78,6 +78,9 @@ export default async function handler(req, res) {
           label: v.label,
           pack: v.case_pack,
           master_carton: v.master_carton,
+          // suggested retail per piece — consumer-facing, safe on the public
+          // catalog; the brochure prints it as "Retails at $X.XX"
+          msrp_cents: v.msrp_cents ?? null,
           stock: v.stock_status,
           restock: v.restock_date,
           // omitted entirely when nobody is signed in
