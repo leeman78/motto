@@ -4,125 +4,139 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Motto USA — Wholesale Catalog 2026</title>
-<meta name="description" content="Leather-wrapped charging cables, chargers and audio for convenience retail. Wholesale catalog with SKUs, box quantities and suggested retail.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,500;9..144,600&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
 /* =====================================================================
-   One document, two lives.
+   Design proposal — "lookbook" direction.
 
-   On a screen it is the catalog a rep opens on their phone in a store
-   aisle. Sent through the print dialog it becomes a Letter-size PDF —
-   cover page, product pages, order page — with nothing web-ish left on
-   it. The [Download PDF] button is just window.print(): the browser's
-   PDF engine is the best free typesetter there is.
+   The v1 brochure is a clean spec sheet. This one is art-directed like a
+   leather-goods lookbook: an editorial serif for display, hairline gold
+   rules, roman-numeral chapters, price set like a hang tag. Same data,
+   same one-file web + print behavior.
    ===================================================================== */
 :root{
-  --ink:#0b0b0d; --ink-2:#5f6268; --ink-3:#9a9da4;
-  --line:#e7e7ea; --soft:#f5f5f7; --gold:#b98a3c; --ok:#0a7d3b;
+  --ink:#141210; --ink-2:#5c5852; --ink-3:#9b968e;
+  --paper:#faf8f4; --card:#ffffff; --line:#e6e1d8;
+  --gold:#a87f3d; --gold-soft:#c9a86a; --espresso:#1c1611; --ok:#2f6b45;
 }
 *{box-sizing:border-box;margin:0}
 html{scroll-behavior:smooth}
-body{background:#fff;color:var(--ink);-webkit-font-smoothing:antialiased;
-  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Inter","Segoe UI",sans-serif}
-.mono{font-family:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;font-variant-numeric:tabular-nums}
+body{background:var(--paper);color:var(--ink);-webkit-font-smoothing:antialiased;
+  font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.serif{font-family:"Fraunces",Georgia,serif}
+.mono{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-variant-numeric:tabular-nums}
 img{max-width:100%;display:block}
 a{color:inherit;text-decoration:none}
 
 /* ---------------- screen chrome ---------------- */
-.bar{position:sticky;top:0;z-index:20;background:rgba(12,13,15,.97);color:#fff;
-  backdrop-filter:blur(8px);display:flex;align-items:center;gap:12px;padding:13px 18px}
-.bar b{font-size:16px;letter-spacing:-.04em}
-.bar span{font-size:10px;letter-spacing:.16em;text-transform:uppercase;font-weight:750;color:#8a8d94;
-  border-left:1px solid #2a2c30;padding-left:11px}
-.bar .dl{margin-left:auto;background:#fff;color:#0b0b0d;border:0;border-radius:999px;
-  padding:9px 16px;font-size:13px;font-weight:750;cursor:pointer;font-family:inherit}
-.bar .dl:active{transform:scale(.98)}
-.chips{position:sticky;top:52px;z-index:19;display:flex;gap:8px;overflow-x:auto;
-  padding:10px 18px;background:#fff;border-bottom:1px solid var(--line);scrollbar-width:none}
+.bar{position:sticky;top:0;z-index:20;background:rgba(20,17,14,.96);color:#f4efe7;
+  backdrop-filter:blur(10px);display:flex;align-items:center;gap:12px;padding:13px 20px}
+.bar b{font-size:16px;letter-spacing:.02em;font-weight:800}
+.bar span{font-size:9.5px;letter-spacing:.24em;text-transform:uppercase;font-weight:700;color:#a89f92;
+  border-left:1px solid #3a352d;padding-left:12px}
+.bar .dl{margin-left:auto;background:var(--gold);color:#fff;border:0;border-radius:2px;
+  padding:10px 18px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  cursor:pointer;font-family:inherit}
+.chips{position:sticky;top:53px;z-index:19;display:flex;gap:22px;overflow-x:auto;
+  padding:13px 22px;background:var(--paper);border-bottom:1px solid var(--line);scrollbar-width:none}
 .chips::-webkit-scrollbar{display:none}
-.chips a{flex:none;font-size:12.5px;font-weight:700;color:var(--ink-2);
-  border:1px solid var(--line);border-radius:999px;padding:7px 14px}
-.chips a:active{background:var(--soft)}
+.chips a{flex:none;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-2)}
+.chips a:hover{color:var(--gold)}
 
 /* ---------------- cover ---------------- */
-.cover{padding:64px 24px 56px;background:#0c0d0f;color:#fff;position:relative;overflow:hidden}
-.cover .k{font-size:11px;letter-spacing:.22em;text-transform:uppercase;font-weight:800;color:#b98a3c}
-.cover h1{font-size:clamp(34px,7vw,60px);letter-spacing:-.045em;line-height:1.02;margin:14px 0 18px;font-weight:800}
-.cover p{color:#b9bcc2;font-size:15.5px;line-height:1.65;max-width:520px}
-.cover .meta{display:flex;flex-wrap:wrap;gap:10px 26px;margin-top:30px;font-size:13px;color:#8a8d94}
-.cover .meta b{color:#fff;font-weight:700}
+.cover{background:
+  radial-gradient(1200px 500px at 85% -10%, rgba(168,127,61,.28), transparent 60%),
+  radial-gradient(900px 600px at -10% 110%, rgba(168,127,61,.12), transparent 55%),
+  var(--espresso);
+  color:#f4efe7;padding:88px 0 74px;position:relative}
+.cover::after{content:'';position:absolute;inset:14px;border:1px solid rgba(201,168,106,.32);pointer-events:none}
+.cwrap{max-width:1020px;margin:0 auto;padding:0 22px;position:relative}
+.cover .rule{width:54px;height:1px;background:var(--gold-soft);margin-bottom:22px}
+.cover .k{font-size:10.5px;letter-spacing:.34em;text-transform:uppercase;font-weight:700;color:var(--gold-soft)}
+.cover h1{font-family:"Fraunces",Georgia,serif;font-weight:300;font-size:clamp(42px,8vw,84px);
+  line-height:1.03;letter-spacing:-.01em;margin:20px 0 8px}
+.cover h1 em{font-style:italic;font-weight:500;color:var(--gold-soft)}
+.cover .yr{font-family:"Fraunces",Georgia,serif;font-size:clamp(15px,2.4vw,20px);font-weight:300;
+  font-style:italic;color:#c9c2b6;margin-bottom:26px}
+.cover p{color:#b5ac9e;font-size:15px;line-height:1.75;max-width:480px}
+.cover .meta{display:flex;flex-wrap:wrap;gap:8px 30px;margin-top:44px;padding-top:22px;
+  border-top:1px solid rgba(201,168,106,.25);font-size:12.5px;color:#a89f92;letter-spacing:.02em}
+.cover .meta b{color:#f4efe7;font-weight:600}
 
-/* ---------------- sections ---------------- */
-.wrap{max-width:1060px;margin:0 auto;padding:0 20px}
-.sec{padding:44px 0 8px}
-.sec .k{font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:800;color:var(--gold)}
-.sec h2{font-size:clamp(24px,4vw,34px);letter-spacing:-.035em;margin:8px 0 4px}
-.sec .n{color:var(--ink-3);font-size:13px}
+/* ---------------- chapters ---------------- */
+.wrap{max-width:1020px;margin:0 auto;padding:0 22px}
+.sec{padding:58px 0 6px}
+.sechead{display:flex;align-items:baseline;gap:18px;border-bottom:1px solid var(--ink);padding-bottom:14px}
+.sechead .num{font-family:"Fraunces",Georgia,serif;font-size:15px;font-weight:500;color:var(--gold);letter-spacing:.1em}
+.sechead h2{font-family:"Fraunces",Georgia,serif;font-weight:500;font-size:clamp(26px,4.6vw,40px);letter-spacing:-.01em}
+.sechead .n{margin-left:auto;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);white-space:nowrap}
 
 /* ---------------- product cards ---------------- */
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:18px;margin:22px 0 10px}
-.card{border:1px solid var(--line);border-radius:18px;overflow:hidden;display:flex;flex-direction:column;
-  break-inside:avoid;page-break-inside:avoid}
-.ph{background:var(--soft);aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;padding:20px;position:relative}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:26px;margin:28px 0 12px}
+.card{background:var(--card);border:1px solid var(--line);display:flex;flex-direction:column;
+  break-inside:avoid;page-break-inside:avoid;position:relative}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold),var(--gold-soft) 60%,transparent)}
+.ph{background:#f1ede6;aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;padding:22px;position:relative}
 .ph img{max-height:100%;object-fit:contain;mix-blend-mode:multiply}
-.ph.dark{background:#101114}
-.ph.dark img{mix-blend-mode:normal;border-radius:10px}
-.ph .oos{position:absolute;top:12px;left:12px;background:#fff;border:1px solid var(--line);
-  color:var(--ink-2);font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;
-  border-radius:999px;padding:4px 10px}
-.bd{padding:16px 16px 14px;display:flex;flex-direction:column;gap:10px;flex:1}
-.bd .t{font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:800;color:var(--ink-3)}
-.bd h3{font-size:17.5px;letter-spacing:-.02em;line-height:1.25}
-.bd .d{font-size:13px;line-height:1.55;color:var(--ink-2)}
+.ph.dark{background:#181410}
+.ph.dark img{mix-blend-mode:normal}
+.ph .oos{position:absolute;top:12px;left:12px;background:var(--paper);border:1px solid var(--line);
+  color:var(--ink-2);font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:5px 10px}
+.bd{padding:18px 18px 16px;display:flex;flex-direction:column;gap:11px;flex:1}
+.bd .t{font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;color:var(--gold)}
+.bd h3{font-family:"Fraunces",Georgia,serif;font-weight:500;font-size:19px;line-height:1.3;letter-spacing:-.005em}
+.bd .d{font-size:12.5px;line-height:1.65;color:var(--ink-2)}
 .dots{display:flex;gap:6px;align-items:center}
-.dots i{width:14px;height:14px;border-radius:50%;border:1px solid rgba(0,0,0,.14)}
-.dots span{font-size:11px;color:var(--ink-3);margin-left:3px}
+.dots i{width:13px;height:13px;border-radius:50%;border:1px solid rgba(0,0,0,.15)}
+.dots span{font-size:10.5px;color:var(--ink-3);margin-left:4px;letter-spacing:.02em}
 table{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:auto}
-th{font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);font-weight:800;
-  text-align:left;padding:0 0 6px;border-bottom:1px solid var(--line)}
+th{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3);font-weight:700;
+  text-align:left;padding:0 0 7px;border-bottom:1px solid var(--ink)}
 th.r,td.r{text-align:right;padding-left:10px;white-space:nowrap}
-td{padding:7px 0;border-bottom:1px solid var(--line)}
+td{padding:8px 0;border-bottom:1px solid var(--line)}
 tr:last-child td{border-bottom:0}
-td .sku{color:var(--ink-3);font-size:11px}
+td .sku{color:var(--ink-3);font-size:10.5px;letter-spacing:.04em}
 .msrp{font-weight:800}
-.msrp small{display:block;font-weight:600;color:var(--ink-3);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase}
+.msrp small{display:block;font-weight:600;color:var(--gold);font-size:8.5px;letter-spacing:.14em;text-transform:uppercase}
 
 /* ---------------- order page ---------------- */
-.order{background:#0c0d0f;color:#fff;border-radius:22px;margin:46px 0 30px;padding:38px 30px;
+.order{background:var(--espresso);color:#f4efe7;margin:56px 0 34px;padding:46px 36px;position:relative;
   break-inside:avoid;page-break-inside:avoid}
-.order .k{font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:800;color:var(--gold)}
-.order h2{font-size:clamp(22px,4vw,30px);letter-spacing:-.03em;margin:8px 0 22px}
-.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:18px 26px}
-.steps b{display:block;font-size:14.5px;margin-bottom:5px}
-.steps div{font-size:13px;line-height:1.6;color:#b9bcc2}
-.steps .no{color:var(--gold);font-weight:800;font-size:12px;letter-spacing:.1em}
-.terms{display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:26px;padding-top:20px;border-top:1px solid #26282c;
-  font-size:12.5px;color:#8a8d94}
-.terms b{color:#fff}
-.oc{display:flex;flex-wrap:wrap;align-items:center;gap:18px 30px;margin-top:24px}
-.oc .who{font-size:14px;line-height:1.7}
-.oc .who b{font-size:16px}
-.oc img{width:86px;height:86px;border-radius:10px;background:#fff;padding:6px;margin-left:auto}
+.order::after{content:'';position:absolute;inset:12px;border:1px solid rgba(201,168,106,.3);pointer-events:none}
+.order .in{position:relative}
+.order .k{font-size:10px;letter-spacing:.3em;text-transform:uppercase;font-weight:700;color:var(--gold-soft)}
+.order h2{font-family:"Fraunces",Georgia,serif;font-weight:400;font-size:clamp(24px,4.4vw,36px);margin:12px 0 30px}
+.order h2 em{font-style:italic;color:var(--gold-soft)}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:22px 30px}
+.steps .no{font-family:"Fraunces",Georgia,serif;font-size:22px;font-weight:300;font-style:italic;color:var(--gold-soft)}
+.steps b{display:block;font-size:14px;margin:6px 0 5px;letter-spacing:.01em}
+.steps div{font-size:12.5px;line-height:1.7;color:#b5ac9e}
+.terms{display:flex;flex-wrap:wrap;gap:8px 26px;margin-top:32px;padding-top:22px;
+  border-top:1px solid rgba(201,168,106,.25);font-size:12px;color:#a89f92}
+.terms b{color:#f4efe7}
+.oc{display:flex;flex-wrap:wrap;align-items:center;gap:18px 30px;margin-top:26px}
+.oc .who{font-size:13px;line-height:1.8;color:#b5ac9e}
+.oc .who b{font-size:15px;color:#f4efe7}
+.oc img{width:84px;height:84px;background:#fff;padding:6px;margin-left:auto}
 
-.foot{color:var(--ink-3);font-size:11.5px;text-align:center;padding:8px 0 46px;line-height:1.7}
+.foot{color:var(--ink-3);font-size:11px;text-align:center;padding:6px 22px 48px;line-height:1.8}
+.skel{max-width:1020px;margin:34px auto;padding:0 22px;color:var(--ink-3);font-size:14px}
+.err{max-width:520px;margin:60px auto;padding:20px;border:1px solid #e5c9c4;background:#fbf1ef;
+  color:#8e3a30;font-size:14px;line-height:1.6;text-align:center}
 
-.err{max-width:520px;margin:60px auto;padding:20px;border:1px solid #f3d3d0;background:#fdf1f0;
-  color:#9a2f27;border-radius:14px;font-size:14px;line-height:1.6;text-align:center}
-.skel{max-width:1060px;margin:30px auto;padding:0 20px;color:var(--ink-3);font-size:14px}
-
-/* =====================================================================
-   PRINT — the same document becomes the PDF.
-   ===================================================================== */
+/* ---------------- print ---------------- */
 @media print{
   @page{size:letter;margin:.55in}
-  body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  body{background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}
   .bar,.chips{display:none}
-  .cover{border-radius:18px;page-break-after:always;padding:150px 46px;min-height:8.6in}
+  .cover{page-break-after:always;padding:170px 52px;min-height:8.6in}
   .sec{page-break-before:always;padding-top:0}
   .sec:first-of-type{page-break-before:auto}
-  .grid{grid-template-columns:1fr 1fr;gap:14px}
-  .card{border-radius:14px}
+  .grid{grid-template-columns:1fr 1fr;gap:16px}
   .ph{aspect-ratio:5/3}
-  .order{page-break-before:always;border-radius:18px;padding:44px 40px}
+  .order{page-break-before:always;padding:52px 44px}
   a[href]:after{content:''}
 }
 </style>
@@ -130,55 +144,49 @@ td .sku{color:var(--ink-3);font-size:11px}
 <body>
 
 <div class="bar">
-  <b>MOTTO</b><span>Wholesale Catalog</span>
+  <b>MOTTO</b><span>Wholesale Catalog · MMXXVI</span>
   <button class="dl" onclick="window.print()">Download PDF</button>
 </div>
 <nav class="chips" id="chips" aria-label="Categories"></nav>
 
 <header class="cover">
-  <div class="k">Motto USA · 2026</div>
-  <h1>Wholesale<br>Product Catalog</h1>
-  <p>Leather-wrapped charging cables, fast chargers and audio, built for the
-  convenience-store counter. Every item ships in retail-ready boxes with
-  suggested pricing your customers already say yes to.</p>
-  <div class="meta">
-    <div><b>214-681-8417</b> · Mon–Fri 9–5 CT</div>
-    <div><b>info@mottousa.com</b></div>
-    <div><b>mottousa.com</b></div>
+  <div class="cwrap">
+    <div class="rule"></div>
+    <div class="k">Motto USA · Wholesale</div>
+    <h1>The Counter<br><em>Collection</em></h1>
+    <div class="yr serif">Product Catalog · 2026</div>
+    <p>Leather-wrapped charging cables, fast chargers and audio, made for the
+    convenience-store counter — retail-ready boxes, suggested pricing your
+    customers already say yes to.</p>
+    <div class="meta">
+      <div><b>214-681-8417</b> · Mon–Fri 9–5 CT</div>
+      <div><b>info@mottousa.com</b></div>
+      <div><b>mottousa.com</b></div>
+    </div>
   </div>
 </header>
 
-<main class="wrap" id="main">
-  <p class="skel">Loading the catalog…</p>
-</main>
+<main class="wrap" id="main"><p class="skel">Loading the catalog…</p></main>
 
 <p class="foot">Motto USA · 1445 Mac Arthur Dr Ste 116, Carrollton, TX 75007 ·
 Prices shown are manufacturer's suggested retail per piece. Wholesale pricing is
-quoted per account — call or write for yours. Catalog generated live; contents
-reflect current availability.</p>
+quoted per account — call or write for yours.</p>
 
 <script>
 const usd = c => '$' + (c / 100).toFixed(2);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-// brand/lifestyle shots sit on their own dark backdrop; cutouts sit on soft grey
+const ROMAN = ['I','II','III','IV','V','VI','VII','VIII'];
 const isFlat = f => /_hero\.|_lifestyle\.|_detail\.|_box\.|_specs\.|_controls\./.test(f || '');
-
-// The photo that leads a card: prefer a clean color cutout, fall back to the
-// first shot the product has.
-function leadPhoto(p) {
-  const cut = (p.colors || []).find(c => c.image)?.image;
-  return cut || (p.shots || [])[0] || null;
-}
+const leadPhoto = p => (p.colors || []).find(c => c.image)?.image || (p.shots || [])[0] || null;
 
 function card(p) {
   const img = leadPhoto(p);
   const colors = (p.colors || []).filter(c => c.hex);
-  const oos = p.stock === 'out_of_stock';
   return `
   <article class="card">
     <div class="ph ${img && isFlat(img) ? 'dark' : ''}">
       ${img ? `<img src="assets/${esc(img)}" alt="${esc(p.name)}" loading="lazy">` : ''}
-      ${oos ? '<span class="oos">Restocking</span>' : ''}
+      ${p.stock === 'out_of_stock' ? '<span class="oos">Restocking</span>' : ''}
     </div>
     <div class="bd">
       <div class="t">${esc(p.type || '')}</div>
@@ -186,11 +194,10 @@ function card(p) {
       ${p.desc ? `<p class="d">${esc(p.desc)}</p>` : ''}
       ${colors.length ? `<div class="dots">${colors.map(c =>
           `<i style="background:${esc(c.hex)}" title="${esc(c.name)}"></i>`).join('')}
-          <span>${colors.length} colors, assorted per box</span></div>` : ''}
+          <span>${colors.length} colors · assorted per box</span></div>` : ''}
       <table>
         <thead><tr><th>Option · SKU</th><th class="r">Pcs/Box</th><th class="r">MSRP</th></tr></thead>
-        <tbody>
-          ${(p.variants || []).map(v => `
+        <tbody>${(p.variants || []).map(v => `
           <tr>
             <td>${esc(v.label)}<br><span class="sku mono">${esc(v.sku)}</span></td>
             <td class="r mono">${v.pack}${v.master_carton ? `<br><span class="sku">${v.master_carton}/master</span>` : ''}</td>
@@ -203,28 +210,26 @@ function card(p) {
 }
 
 function orderPage(rules) {
-  const moq = rules?.moq_cents ? usd(rules.moq_cents).replace('.00','') : '$500';
-  const ff  = rules?.free_freight_cents ? usd(rules.free_freight_cents).replace('.00','') : '$1,500';
-  const fr  = rules?.freight_cents ? usd(rules.freight_cents).replace('.00','') : '$18';
+  const m = c => c ? usd(c).replace('.00','') : '';
   return `
-  <section class="order">
+  <section class="order"><div class="in">
     <div class="k">How to order</div>
-    <h2>Three ways, same day.</h2>
+    <h2>Three ways. <em>Same day.</em></h2>
     <div class="steps">
-      <div><span class="no">01</span><b>Call or text your rep</b>
-        We write the order for you and email a secure link — review it and pay
-        in two taps. No account needed.</div>
-      <div><span class="no">02</span><b>Call the office</b>
-        214-681-8417, Monday to Friday 9–5 Central. Same-day processing on
-        orders placed by 2 PM.</div>
-      <div><span class="no">03</span><b>Order online</b>
+      <div><span class="no serif">No. 1</span><b>Call or text your rep</b>
+        We write the order and email a secure link — review it and pay in two
+        taps. No account needed.</div>
+      <div><span class="no serif">No. 2</span><b>Call the office</b>
+        214-681-8417, Mon–Fri 9–5 Central. Same-day processing on orders in
+        by 2 PM.</div>
+      <div><span class="no serif">No. 3</span><b>Order online</b>
         Partners with a login see their pricing and order any time at
         mottousa.com.</div>
     </div>
     <div class="terms">
-      <div>Minimum order <b>${moq}</b></div>
-      <div>Ground freight <b>${fr} flat</b></div>
-      <div>Free freight at <b>${ff}</b></div>
+      <div>Minimum order <b>${m(rules?.moq_cents) || '$500'}</b></div>
+      <div>Ground freight <b>${m(rules?.freight_cents) || '$18'} flat</b></div>
+      <div>Free freight at <b>${m(rules?.free_freight_cents) || '$1,500'}</b></div>
       <div>Pay by <b>bank (ACH) or card</b></div>
     </div>
     <div class="oc">
@@ -233,7 +238,7 @@ function orderPage(rules) {
         info@mottousa.com · mottousa.com</div>
       <img src="assets/qr_mottousa.png" alt="QR code to mottousa.com">
     </div>
-  </section>`;
+  </div></section>`;
 }
 
 (async () => {
@@ -244,28 +249,23 @@ function orderPage(rules) {
     data = await r.json();
     if (!r.ok) throw new Error(data.error || 'failed');
   } catch (e) {
-    main.innerHTML = '';
-    document.querySelector('.skel')?.remove();
-    main.insertAdjacentHTML('beforeend',
-      '<div class="err">The catalog could not load. Refresh the page, or call 214-681-8417 and we will send a copy.</div>');
+    main.innerHTML = '<div class="err">The catalog could not load. Refresh the page, or call 214-681-8417 and we will send a copy.</div>';
     return;
   }
-
-  const cats = data.categories || [];
+  const cats = (data.categories || []).filter(c => (data.products || []).some(p => p.cat === c.slug));
   const byCat = {};
   for (const p of data.products || []) (byCat[p.cat] ||= []).push(p);
 
-  // category chips (screen only)
-  document.getElementById('chips').innerHTML = cats
-    .filter(c => byCat[c.slug]?.length)
-    .map(c => `<a href="#c-${esc(c.slug)}">${esc(c.name)}</a>`).join('');
+  document.getElementById('chips').innerHTML =
+    cats.map(c => `<a href="#c-${esc(c.slug)}">${esc(c.name)}</a>`).join('');
 
-  main.innerHTML = cats.filter(c => byCat[c.slug]?.length).map(c => `
+  main.innerHTML = cats.map((c, i) => `
     <section class="sec" id="c-${esc(c.slug)}">
-      <div class="k">Category</div>
-      <h2>${esc(c.name)}</h2>
-      <div class="n">${byCat[c.slug].length} product ${byCat[c.slug].length > 1 ? 'families' : 'family'} ·
-        boxes ship assorted colors</div>
+      <div class="sechead">
+        <span class="num">${ROMAN[i] || i + 1}</span>
+        <h2>${esc(c.name)}</h2>
+        <span class="n">${byCat[c.slug].length} famil${byCat[c.slug].length > 1 ? 'ies' : 'y'} · assorted colors</span>
+      </div>
       <div class="grid">${byCat[c.slug].map(card).join('')}</div>
     </section>`).join('') + orderPage(data.rules);
 })();
