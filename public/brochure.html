@@ -36,7 +36,10 @@ a{color:inherit;text-decoration:none}
 .bar b{font-size:16px;letter-spacing:.02em;font-weight:800}
 .bar span{font-size:9.5px;letter-spacing:.24em;text-transform:uppercase;font-weight:700;color:#a89f92;
   border-left:1px solid #3a352d;padding-left:12px}
-.bar .dl{margin-left:auto;background:var(--gold);color:#fff;border:0;border-radius:2px;
+.bar .homelink{color:inherit}
+.bar .home{margin-left:auto;font-size:12px;font-weight:600;color:#c9c2b6;white-space:nowrap;padding:8px 4px}
+.bar .home:hover{color:#fff}
+.bar .dl{background:var(--gold);color:#fff;border:0;border-radius:2px;
   padding:10px 18px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
   cursor:pointer;font-family:inherit}
 .chips{position:sticky;top:53px;z-index:19;display:flex;gap:22px;overflow-x:auto;
@@ -121,6 +124,15 @@ td .sku{color:var(--ink-3);font-size:10.5px;letter-spacing:.04em}
 .oc .who b{font-size:15px;color:#f4efe7}
 .oc img{width:84px;height:84px;background:#fff;padding:6px;margin-left:auto}
 
+.cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
+.btn-g{background:var(--gold);color:#fff;padding:15px 26px;font-size:13px;font-weight:700;
+  letter-spacing:.08em;text-transform:uppercase;border-radius:2px}
+.btn-g:hover{background:var(--gold-soft)}
+.btn-o{border:1px solid rgba(201,168,106,.5);color:#f4efe7;padding:15px 26px;font-size:13px;
+  font-weight:700;letter-spacing:.08em;text-transform:uppercase;border-radius:2px}
+.backhome{text-align:center;margin:0 0 10px;font-size:13px}
+.backhome a{color:var(--ink-2);border-bottom:1px solid var(--line);padding-bottom:2px}
+.backhome a:hover{color:var(--gold)}
 .foot{color:var(--ink-3);font-size:11px;text-align:center;padding:6px 22px 48px;line-height:1.8}
 .skel{max-width:1020px;margin:34px auto;padding:0 22px;color:var(--ink-3);font-size:14px}
 .err{max-width:520px;margin:60px auto;padding:20px;border:1px solid #e5c9c4;background:#fbf1ef;
@@ -130,7 +142,7 @@ td .sku{color:var(--ink-3);font-size:10.5px;letter-spacing:.04em}
 @media print{
   @page{size:letter;margin:.55in}
   body{background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  .bar,.chips{display:none}
+  .bar,.chips,.cta,.backhome{display:none}
   .cover{page-break-after:always;padding:170px 52px;min-height:8.6in}
   .sec{page-break-before:always;padding-top:0}
   .sec:first-of-type{page-break-before:auto}
@@ -144,7 +156,9 @@ td .sku{color:var(--ink-3);font-size:10.5px;letter-spacing:.04em}
 <body>
 
 <div class="bar">
-  <b>MOTTO</b><span>Wholesale Catalog · MMXXVI</span>
+  <a href="/" class="homelink" aria-label="Back to mottousa.com"><b>MOTTO</b></a>
+  <span>Wholesale Catalog · MMXXVI</span>
+  <a href="/" class="home">← Home</a>
   <button class="dl" onclick="window.print()">Download PDF</button>
 </div>
 <nav class="chips" id="chips" aria-label="Categories"></nav>
@@ -232,13 +246,18 @@ function orderPage(rules) {
       <div>Free freight at <b>${m(rules?.free_freight_cents) || '$1,500'}</b></div>
       <div>Pay by <b>bank (ACH) or card</b></div>
     </div>
+    <div class="cta">
+      <a class="btn-g" href="/#contact">Request wholesale pricing</a>
+      <a class="btn-o" href="tel:2146818417">Call 214-681-8417</a>
+    </div>
     <div class="oc">
       <div class="who"><b>Motto USA</b><br>
         1445 Mac Arthur Dr Ste 116, Carrollton, TX 75007<br>
         info@mottousa.com · mottousa.com</div>
       <img src="assets/qr_mottousa.png" alt="QR code to mottousa.com">
     </div>
-  </div></section>`;
+  </div></section>
+  <p class="backhome"><a href="/">← Back to mottousa.com</a></p>`;
 }
 
 (async () => {

@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<!-- Draft page: invisible to search engines until it is promoted to the homepage. -->
+<meta name="robots" content="noindex,nofollow">
+<title>Motto Wholesale — Put a profit center on your counter</title>
+<style>
+/* =====================================================================
+   /sample — the homepage rebuilt as a B2B sales page.
+
+   The 30-second journey Nam specified, in order, top to bottom:
+   what is this → why my store → how much do I keep → how do I start.
+   Product comes second; the store owner's money comes first. Prices stay
+   behind the account wall — this page builds the *feel* for the profit,
+   then points at the door.
+   ===================================================================== */
+:root{
+  --ink:#0b0b0d; --ink-2:#5f6268; --ink-3:#9a9da4;
+  --line:#e7e7ea; --soft:#f5f5f7; --blue:#1268ff; --ok:#0a7d3b; --gold:#b98a3c;
+}
+*{box-sizing:border-box;margin:0}
+html{scroll-behavior:smooth}
+body{background:#fff;color:var(--ink);-webkit-font-smoothing:antialiased;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Inter","Segoe UI",sans-serif}
+.mono{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-variant-numeric:tabular-nums}
+img{max-width:100%;display:block}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:1120px;margin:0 auto;padding:0 22px}
+
+/* ---------------- top bar ---------------- */
+.bar{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.92);backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line)}
+.bar .in{max-width:1120px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;gap:12px}
+.bar b{font-size:17px;letter-spacing:-.04em}
+.bar span{font-size:10px;letter-spacing:.16em;text-transform:uppercase;font-weight:750;color:var(--ink-3);
+  border-left:1px solid var(--line);padding-left:11px}
+.bar .cta{margin-left:auto;background:var(--ink);color:#fff;border-radius:999px;
+  padding:10px 18px;font-size:13px;font-weight:750;white-space:nowrap}
+
+/* ---------------- hero ---------------- */
+.hero{padding:58px 0 30px}
+.hero .in{display:grid;grid-template-columns:1.1fr .9fr;gap:44px;align-items:center}
+.kick{font-size:11px;letter-spacing:.18em;text-transform:uppercase;font-weight:800;color:var(--blue)}
+h1{font-size:clamp(34px,5.4vw,58px);letter-spacing:-.045em;line-height:1.04;margin:14px 0 18px}
+h1 em{font-style:normal;color:var(--blue)}
+.hero p{font-size:16.5px;line-height:1.65;color:var(--ink-2);max-width:480px}
+.hero .btns{display:flex;flex-wrap:wrap;gap:12px;margin-top:26px}
+.btn{display:inline-block;border-radius:12px;padding:15px 24px;font-size:14.5px;font-weight:750}
+.btn.blue{background:var(--blue);color:#fff}
+.btn.ghost{border:1.5px solid var(--line);color:var(--ink)}
+.heropic{border-radius:20px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.16);position:relative}
+.heropic img{width:100%;height:100%;object-fit:cover;aspect-ratio:4/4.2}
+.heropic .tag{position:absolute;left:14px;bottom:14px;background:rgba(11,11,13,.85);color:#fff;
+  font-size:11.5px;font-weight:700;padding:8px 13px;border-radius:999px;backdrop-filter:blur(6px)}
+
+/* ---------------- proof stats ---------------- */
+.stats{border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin-top:44px}
+.stats .in{max-width:1120px;margin:0 auto;padding:22px;display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:18px 30px}
+.stat b{display:block;font-size:24px;letter-spacing:-.03em}
+.stat span{font-size:12.5px;color:var(--ink-2);line-height:1.5;display:block;margin-top:3px}
+
+/* ---------------- sections ---------------- */
+.sec{padding:64px 0 10px}
+.sec .kick{color:var(--gold)}
+h2{font-size:clamp(26px,4vw,38px);letter-spacing:-.04em;margin:12px 0 10px}
+.sub{font-size:15px;color:var(--ink-2);line-height:1.65;max-width:560px}
+
+/* ---------------- install gallery ---------------- */
+.gal{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:28px}
+.gal figure{border-radius:16px;overflow:hidden;background:var(--soft);position:relative;margin:0}
+.gal img{width:100%;height:100%;object-fit:cover;aspect-ratio:1/1.06}
+.gal figure:first-child{grid-row:span 2}
+.gal figure:first-child img{aspect-ratio:1/2.2;height:100%}
+.gal figcaption{position:absolute;left:12px;bottom:12px;background:rgba(11,11,13,.8);color:#fff;
+  font-size:10.5px;font-weight:700;padding:6px 11px;border-radius:999px}
+
+/* ---------------- profit calculator ---------------- */
+.calc{background:var(--ink);color:#fff;border-radius:24px;margin-top:30px;padding:40px 34px;
+  display:grid;grid-template-columns:1fr 1fr;gap:34px;align-items:center}
+.calc .lab{font-size:13.5px;color:#b9bcc2;margin-bottom:10px}
+.calc .lab b{color:#fff}
+input[type=range]{width:100%;accent-color:var(--blue);height:34px}
+.calc .units{font-size:15px;margin-top:4px}
+.calc .units b{font-size:22px}
+.bignum{text-align:center}
+.bignum .n{font-size:clamp(48px,7vw,76px);font-weight:800;letter-spacing:-.045em;line-height:1}
+.bignum .n small{font-size:.42em;font-weight:700;color:#8a8d94;letter-spacing:0}
+.bignum .d{font-size:12.5px;color:#8a8d94;margin-top:10px;line-height:1.6}
+.keeps{margin-top:26px;border-top:1px solid #26282c;padding-top:20px;display:grid;
+  grid-template-columns:repeat(3,1fr);gap:14px;grid-column:1 / -1}
+.keep b{display:block;font-size:15px}
+.keep span{font-size:11.5px;color:#8a8d94;display:block;margin-top:2px;line-height:1.5}
+.keep .m{color:#5dd08a;font-weight:800}
+
+/* ---------------- how it starts ---------------- */
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:20px 28px;margin-top:28px}
+.step .no{font-size:12px;font-weight:800;letter-spacing:.1em;color:var(--blue)}
+.step b{display:block;font-size:16.5px;margin:7px 0 6px;letter-spacing:-.01em}
+.step p{font-size:13.5px;line-height:1.65;color:var(--ink-2)}
+.terms{display:flex;flex-wrap:wrap;gap:8px 26px;margin-top:30px;padding:18px 0;border-top:1px solid var(--line);
+  font-size:13px;color:var(--ink-2)}
+.terms b{color:var(--ink)}
+
+/* ---------------- gated price CTA ---------------- */
+.gate{background:linear-gradient(135deg,#0e3fae,var(--blue));color:#fff;border-radius:24px;
+  margin:56px 0 40px;padding:52px 36px;text-align:center}
+.gate h2{margin-bottom:12px}
+.gate p{font-size:15px;color:rgba(255,255,255,.85);max-width:520px;margin:0 auto;line-height:1.65}
+.gate .btn{background:#fff;color:var(--ink);margin-top:26px;font-size:15px;padding:17px 30px}
+.gate .alt{display:block;margin-top:16px;font-size:13.5px;color:rgba(255,255,255,.8)}
+.gate .alt b{color:#fff}
+
+.foot{text-align:center;color:var(--ink-3);font-size:12px;padding:8px 22px 46px;line-height:1.8}
+
+@media (max-width:860px){
+  .hero .in{grid-template-columns:1fr}
+  .heropic img{aspect-ratio:4/3}
+  .gal{grid-template-columns:1fr 1fr}
+  .gal figure:first-child{grid-row:auto}
+  .gal figure:first-child img{aspect-ratio:1/1.06}
+  .calc{grid-template-columns:1fr;padding:30px 22px}
+  .keeps{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="bar"><div class="in">
+  <a href="/"><b>MOTTO</b></a><span>Wholesale</span>
+  <a class="cta" href="/#contact">Get wholesale pricing</a>
+</div></div>
+
+<!-- ============ 1 · What is this / why my store ============ -->
+<header class="hero"><div class="wrap in">
+  <div>
+    <div class="kick">For gas stations · c-stores · smoke shops</div>
+    <h1>Two square feet of counter.<br><em>Real money</em> every week.</h1>
+    <p>Motto is a Dallas wholesaler of leather-wrapped charging cables, chargers
+    and audio. The display lands on your counter stocked and ready — your
+    customers pay $9.99–$39.99, and <b>roughly half of every sale stays with
+    you.</b></p>
+    <div class="btns">
+      <a class="btn blue" href="#profit">See your profit</a>
+      <a class="btn ghost" href="#stores">See it in stores</a>
+    </div>
+  </div>
+  <div class="heropic">
+    <img src="assets/install_ck129.webp" alt="Motto counter display installed at a Dallas convenience store checkout">
+    <span class="tag">Installed · Dallas–Fort Worth</span>
+  </div>
+</div></header>
+
+<div class="stats"><div class="in">
+  <div class="stat"><b>$9.99–$39.99</b><span>what your customers pay — impulse range, next to the register</span></div>
+  <div class="stat"><b>~half is yours</b><span>typical store keep on every Motto item sold</span></div>
+  <div class="stat"><b>12+ counters</b><span>already installed across Dallas–Fort Worth</span></div>
+  <div class="stat"><b>$500</b><span>opening order · free freight at $1,500</span></div>
+</div></div>
+
+<!-- ============ 2 · Real installs ============ -->
+<section class="sec" id="stores"><div class="wrap">
+  <div class="kick">On counters right now</div>
+  <h2>Not a rendering. These are our displays, this month.</h2>
+  <p class="sub">Gas stations and convenience stores across Dallas–Fort Worth run the
+  Motto counter display next to the register — where phone-cable emergencies get
+  solved at full retail. Picture the empty spot on your own counter.</p>
+  <div class="gal">
+    <figure><img src="assets/install_ck110.webp" alt="Motto display beside the register at a DFW fuel station"><figcaption>Fuel station · DFW</figcaption></figure>
+    <figure><img src="assets/install_ck117.webp" alt="Motto accessory tower on a convenience store counter"><figcaption>Gas station · DFW</figcaption></figure>
+    <figure><img src="assets/install_ck123.webp" alt="Motto counter display at checkout"><figcaption>C-store · DFW</figcaption></figure>
+    <figure><img src="assets/install_ck129.webp" alt="Motto charging accessories display at a c-store counter"><figcaption>C-store · DFW</figcaption></figure>
+    <figure><img src="assets/install_ck124.webp" alt="Motto display at a travel stop register"><figcaption>Travel stop · DFW</figcaption></figure>
+  </div>
+</div></section>
+
+<!-- ============ 3 · See your profit ============ -->
+<section class="sec" id="profit"><div class="wrap">
+  <div class="kick">See your profit</div>
+  <h2>How many cables walk out of your store a week?</h2>
+  <p class="sub">Charging accessories are a distress purchase — a dead phone buys at
+  full price, no comparison shopping. Slide to your traffic and see what the
+  counter display returns.</p>
+
+  <div class="calc">
+    <div>
+      <div class="lab">Motto items sold per week — <b>most counters land between 8 and 20</b></div>
+      <input type="range" id="rng" min="3" max="60" value="12" aria-label="items sold per week">
+      <div class="units"><b id="u">12</b> items / week</div>
+    </div>
+    <div class="bignum">
+      <div class="n">$<span id="profit$">338</span><small> /mo</small></div>
+      <div class="d">estimated monthly profit that stays with you<br>
+      <span id="yearly">≈ $4,056 a year</span> · from two square feet</div>
+    </div>
+    <div class="keeps">
+      <div class="keep"><b>Leather cable</b><span>sells $9.99–$16.99 · <i class="m">you keep ≈ $5–8</i></span></div>
+      <div class="keep"><b>Wired earbuds · chargers</b><span>sell $9.99–$12.99 · <i class="m">you keep ≈ $5–7</i></span></div>
+      <div class="keep"><b>Wireless buds · headsets</b><span>sell $39.99 · <i class="m">you keep ≈ $20</i></span></div>
+    </div>
+  </div>
+  <p class="sub" style="font-size:12px;color:var(--ink-3);margin-top:14px">Estimate assumes a
+  $12.99 average ticket and a typical keep of about half — many items run higher.
+  Your exact numbers come with your wholesale account.</p>
+</div></section>
+
+<!-- ============ 4 · How it starts ============ -->
+<section class="sec"><div class="wrap">
+  <div class="kick">How it starts</div>
+  <h2>Stocked and selling the same week.</h2>
+  <div class="steps">
+    <div class="step"><div class="no">STEP 1</div><b>Create your account</b>
+      <p>Tell us about your store — two minutes. We reply the same business day
+      with your wholesale price sheet.</p></div>
+    <div class="step"><div class="no">STEP 2</div><b>Display lands stocked</b>
+      <p>The counter display arrives loaded with best-sellers in assorted
+      colors, priced and ready. Clear a spot; that's the whole setup.</p></div>
+    <div class="step"><div class="no">STEP 3</div><b>Sell, then text your rep</b>
+      <p>Restocks are a call or text away — your rep writes the order and you
+      approve and pay from one link. No portal required.</p></div>
+  </div>
+  <div class="terms">
+    <div>Opening order <b>$500</b></div>
+    <div>Ground freight <b>$18 flat</b> · free at <b>$1,500</b></div>
+    <div>Pay by <b>bank (ACH) or card</b></div>
+    <div>Based in <b>Carrollton, TX</b> — local reps, local restocks</div>
+  </div>
+</div></section>
+
+<!-- ============ 5 · Gated price CTA ============ -->
+<div class="wrap"><section class="gate">
+  <h2>Wholesale prices are for partners.</h2>
+  <p>You've seen what the counter returns. Your exact cost, margin by item, and
+  display options are one short form away — no commitment, no card.</p>
+  <a class="btn" href="/#contact">Create a wholesale account · see your price</a>
+  <span class="alt">Prefer to talk? <b>214-681-8417</b> · Mon–Fri 9–5 CT · info@mottousa.com</span>
+</section></div>
+
+<p class="foot">Motto USA · 1445 Mac Arthur Dr Ste 116, Carrollton, TX 75007 ·
+Wholesale only — resale certificate required. MSRP figures are suggested retail;
+store results vary with traffic and placement.</p>
+
+<script>
+// The one moving part: the profit slider. Average ticket $12.99, keep ≈ 52% —
+// deliberately at the conservative end of the real per-item keeps shown above,
+// so the number on screen is one we can stand behind in person.
+const rng = document.getElementById('rng');
+const fmt = n => n.toLocaleString('en-US');
+function upd() {
+  const wk = +rng.value;
+  const mo = Math.round(wk * 4.33 * 12.99 * 0.52);
+  document.getElementById('u').textContent = wk;
+  document.getElementById('profit$').textContent = fmt(mo);
+  document.getElementById('yearly').textContent = '≈ $' + fmt(mo * 12) + ' a year';
+}
+rng.addEventListener('input', upd); upd();
+</script>
+</body>
+</html>
