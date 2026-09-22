@@ -74,8 +74,20 @@ h2{font-size:clamp(26px,4vw,38px);letter-spacing:-.04em;margin:12px 0 10px}
 .gal img{width:100%;height:100%;object-fit:cover;aspect-ratio:1/1.06}
 .gal figure:first-child{grid-row:span 2}
 .gal figure:first-child img{aspect-ratio:1/2.2;height:100%}
-.gal figcaption{position:absolute;left:12px;bottom:12px;background:rgba(11,11,13,.8);color:#fff;
-  font-size:10.5px;font-weight:700;padding:6px 11px;border-radius:999px}
+.gal figcaption{position:absolute;left:12px;bottom:12px;display:flex;gap:6px;align-items:center}
+.gal figcaption span{background:rgba(11,11,13,.8);color:#fff;font-size:10.5px;font-weight:700;
+  padding:6px 11px;border-radius:999px}
+.code{background:var(--blue) !important;letter-spacing:.06em}
+.heropic .tag.code{left:auto;right:14px;background:var(--blue)}
+.strip-head{margin-top:40px;display:flex;flex-wrap:wrap;gap:6px 30px;align-items:baseline}
+.strip-head h3{font-size:21px;letter-spacing:-.025em}
+.strip-head p{font-size:13.5px;color:var(--ink-2);max-width:520px;line-height:1.6}
+.strip{display:grid;grid-auto-flow:column;grid-auto-columns:250px;gap:12px;overflow-x:auto;
+  margin-top:16px;padding-bottom:10px;scrollbar-width:thin}
+.strip figure{margin:0;position:relative;border-radius:14px;overflow:hidden;background:var(--soft)}
+.strip img{width:100%;aspect-ratio:16/10.5;object-fit:cover}
+.strip figcaption{position:absolute;left:10px;bottom:10px}
+.strip .code{font-size:10px;font-weight:800;color:#fff;padding:5px 10px;border-radius:999px;display:inline-block}
 
 /* ---------------- profit calculator ---------------- */
 .calc{background:var(--ink);color:#fff;border-radius:24px;margin-top:30px;padding:40px 34px;
@@ -136,7 +148,7 @@ input[type=range]{width:100%;accent-color:var(--blue);height:34px}
 <!-- ============ 1 · What is this / why my store ============ -->
 <header class="hero"><div class="wrap in">
   <div>
-    <div class="kick">For gas stations · c-stores · smoke shops</div>
+    <div class="kick">For gas stations · convenience stores · smoke shops</div>
     <h1>Two square feet of counter.<br><em>Real money</em> every week.</h1>
     <p>Motto is a Dallas wholesaler of leather-wrapped charging cables, chargers
     and audio. The display lands on your counter stocked and ready — your
@@ -149,7 +161,7 @@ input[type=range]{width:100%;accent-color:var(--blue);height:34px}
   </div>
   <div class="heropic">
     <img src="assets/install_ck129.webp" alt="Motto counter display installed at a Dallas convenience store checkout">
-    <span class="tag">Installed · Dallas–Fort Worth</span>
+    <span class="tag">Installed · Dallas–Fort Worth</span><span class="tag code">CK 129</span>
   </div>
 </div></header>
 
@@ -168,11 +180,31 @@ input[type=range]{width:100%;accent-color:var(--blue);height:34px}
   Motto counter display next to the register — where phone-cable emergencies get
   solved at full retail. Picture the empty spot on your own counter.</p>
   <div class="gal">
-    <figure><img src="assets/install_ck110.webp" alt="Motto display beside the register at a DFW fuel station"><figcaption>Fuel station · DFW</figcaption></figure>
-    <figure><img src="assets/install_ck117.webp" alt="Motto accessory tower on a convenience store counter"><figcaption>Gas station · DFW</figcaption></figure>
-    <figure><img src="assets/install_ck123.webp" alt="Motto counter display at checkout"><figcaption>C-store · DFW</figcaption></figure>
-    <figure><img src="assets/install_ck129.webp" alt="Motto charging accessories display at a c-store counter"><figcaption>C-store · DFW</figcaption></figure>
-    <figure><img src="assets/install_ck124.webp" alt="Motto display at a travel stop register"><figcaption>Travel stop · DFW</figcaption></figure>
+    <figure><img src="assets/install_ck110.webp" alt="Motto display beside the register at a DFW fuel station"><figcaption><span>Fuel station · DFW</span><span class="code">CK 110</span></figcaption></figure>
+    <figure><img src="assets/install_ck117.webp" alt="Motto accessory tower on a convenience store counter"><figcaption><span>Gas station · DFW</span><span class="code">CK 117</span></figcaption></figure>
+    <figure><img src="assets/install_ck123.webp" alt="Motto counter display at checkout"><figcaption><span>Convenience store · DFW</span><span class="code">CK 123</span></figcaption></figure>
+    <figure><img src="assets/install_ck129.webp" alt="Motto charging accessories display at a convenience store counter"><figcaption><span>Convenience store · DFW</span><span class="code">CK 129</span></figcaption></figure>
+    <figure><img src="assets/install_ck124.webp" alt="Motto display at a travel stop register"><figcaption><span>Travel stop · DFW</span><span class="code">CK 124</span></figcaption></figure>
+  </div>
+
+  <div class="strip-head">
+    <h3>Yes — including Circle&nbsp;K.</h3>
+    <p>Twelve Circle&nbsp;K locations across the metroplex carry Motto at the
+    counter today. Independent stores sit right beside them on our route.</p>
+  </div>
+  <div class="strip">
+    <figure><img src="assets/store_ck123.webp" alt="Circle K location carrying Motto accessories" loading="lazy"><figcaption><span class="code">CK 123</span></figcaption></figure>
+    <figure><img src="assets/store_ck124.webp" alt="Circle K location carrying Motto accessories" loading="lazy"><figcaption><span class="code">CK 124</span></figcaption></figure>
+    <figure><img src="assets/store_ck121.webp" alt="Circle K location carrying Motto accessories" loading="lazy"><figcaption><span class="code">CK 121</span></figcaption></figure>
+    <figure><img src="assets/store_ck117.webp" alt="Circle K location carrying Motto accessories" loading="lazy"><figcaption><span class="code">CK 117</span></figcaption></figure>
+    <figure><img src="assets/store_ck110.webp" alt="Circle K location carrying Motto accessories" loading="lazy"><figcaption><span class="code">CK 110</span></figcaption></figure>
+    <figure><img src="assets/store_ck116.webp" alt="Circle K location carrying Motto accessories" loading="lazy"><figcaption><span class="code">CK 116</span></figcaption></figure>
+    <figure><img src="assets/store_ck102.webp" alt="Circle K location carrying Motto accessories" loading="lazy"><figcaption><span class="code">CK 102</span></figcaption></figure>
+    <figure><img src="assets/store_ck114.webp" alt="Circle K location carrying Motto accessories" loading="lazy"><figcaption><span class="code">CK 114</span></figcaption></figure>
+    <figure><img src="assets/store_ck108.webp" alt="Circle K location carrying Motto accessories" loading="lazy"><figcaption><span class="code">CK 108</span></figcaption></figure>
+    <figure><img src="assets/store_ck107.webp" alt="Circle K location carrying Motto accessories" loading="lazy"><figcaption><span class="code">CK 107</span></figcaption></figure>
+    <figure><img src="assets/store_ck127.webp" alt="Circle K location carrying Motto accessories" loading="lazy"><figcaption><span class="code">CK 127</span></figcaption></figure>
+    <figure><img src="assets/store_ck134.webp" alt="Circle K location carrying Motto accessories" loading="lazy"><figcaption><span class="code">CK 134</span></figcaption></figure>
   </div>
 </div></section>
 
