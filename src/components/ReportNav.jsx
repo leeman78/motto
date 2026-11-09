@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Download, Menu, X } from 'lucide-react';
+import { Download, Menu, X, LogOut } from 'lucide-react';
 import { exportSectionAsPDF } from '@/report/exportUtils';
 import ExportModal from '@/components/ExportModal';
 
-export default function ReportNav({ sections, active, onNavigate }) {
+export default function ReportNav({ sections, active, onNavigate, onLock }) {
   const [expanded, setExpanded] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
@@ -34,6 +34,9 @@ export default function ReportNav({ sections, active, onNavigate }) {
           <Download size={12} /> Export PDF
         </button>
         <p className="text-white/20 text-[10px] text-center">전체 또는 선택 페이지</p>
+        <button onClick={() => { close && close(); onLock && onLock(); }} className="w-full mt-2 rounded-lg py-2 text-xs text-white/50 hover:text-white hover:bg-white/5 transition-all flex items-center justify-center gap-2">
+          <LogOut size={12} /> 로그아웃 (잠금)
+        </button>
       </div>
     </div>
   );

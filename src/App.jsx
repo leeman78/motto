@@ -40,7 +40,7 @@ export default function App() {
 
   return (
     <div className="bg-paper min-h-screen">
-      <ReportNav sections={SECTIONS} active={active} onNavigate={scrollTo} />
+      <ReportNav sections={SECTIONS} active={active} onNavigate={scrollTo} onLock={() => { sessionStorage.removeItem('artbox-report-unlocked'); setUnlocked(false); window.scrollTo(0, 0); }} />
       <PageNav current={active} total={SECTIONS.length} onPrev={() => scrollTo(active - 1)} onNext={() => scrollTo(active + 1)} />
       <div className="md:pr-6">
         {SECTIONS.map((s, idx) => {
