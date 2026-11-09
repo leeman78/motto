@@ -35,7 +35,7 @@ export function Cover({ index }) {
         </motion.div>
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.2 }} className="mt-auto pt-12 flex flex-col md:flex-row justify-between md:items-end gap-3 text-xs text-ink/50">
           <div><p>수신 · ARTBOX USA, Inc. Yongwon Lee 대표님 · Jason Choi, CPA</p><p>기준 자료 · 보험 정보 요청서 회신 (2026. 11. 8)</p></div>
-          <div className="md:text-right"><p>작성 · eStyle Insurance Solutions Team · working with WTW</p><p>보고일 · 2026. 11. 9</p></div>
+          <div className="md:text-right"><p>작성 · eStyle Insurance Solutions Team · working with WTW</p><p>보고일 · 2026. 11. 9 · v{__APP_VERSION__}</p></div>
         </motion.div>
       </div>
     </section>

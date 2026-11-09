@@ -20,6 +20,7 @@ export default function PageNav({ current, total, onPrev, onNext }) {
       <div className="hidden md:block h-px w-6 bg-white/10 my-1" />
       {btn(atStart, onPrev, ChevronUp, '이전 페이지')}
       {btn(atEnd, onNext, ChevronDown, '다음 페이지')}
+      <span className="hidden md:block text-white/30 text-[9px] font-mono mt-1" title={`build ${__BUILD_DATE__}`}>v{__APP_VERSION__}</span>
     </div>
   );
 }

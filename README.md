@@ -3,6 +3,9 @@
 KTO K-Roadshow 리포트와 같은 구조의 페이지형 리포트 앱입니다.
 Vite + React + Tailwind + framer-motion. 백엔드 없음(패스워드 검증은 Vercel 서버리스 함수 1개).
 
+## 버전 올리기
+내용을 바꿀 때마다 `package.json`의 `"version"`을 올리고 `CHANGELOG.md`에 한 줄 적으세요. 빌드 시 자동으로 화면 네 곳(패스워드 화면·페이지 패널·표지·푸터)에 표시됩니다.
+
 ## 기능
 - 19개 페이지(풀스크린 섹션), 우측 레일 목차(호버 시 확장 · 진행 점), 우하단 페이지 이동(이전/다음), 키보드 ↑↓/PageUp·Down 이동
 - 패스워드 게이트 — `/api/verify` 서버 검증(환경변수 `REPORT_PASSWORD`), 세션 동안 유지

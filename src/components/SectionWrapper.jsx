@@ -53,7 +53,7 @@ export function Card({ children, dark = false, className = '', hover = true }) {
 export function Footer({ dark = false, page }) {
   return (
     <div className={`mt-auto pt-10 flex justify-between items-end text-[11px] ${dark ? 'text-white/30' : 'text-ink/30'}`}>
-      <p>ARTBOX USA, Inc. · 보험 자문 리포트 · eStyle Insurance Solutions Team · working with WTW · 2026. 11. 9</p>
+      <p>ARTBOX USA, Inc. · 보험 자문 리포트 · eStyle Insurance Solutions Team · working with WTW · 2026. 11. 9 · v{__APP_VERSION__}</p>
       <p className="font-mono">{String(page).padStart(2, '0')}</p>
     </div>
   );

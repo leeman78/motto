@@ -44,7 +44,7 @@ export default function PasswordGate({ onUnlock }) {
               {busy ? '확인 중…' : '열기'}
             </motion.button>
           </form>
-          <p className="text-white/25 text-xs mt-6">eStyle Insurance Solutions Team · Confidential</p>
+          <p className="text-white/25 text-xs mt-6">eStyle Insurance Solutions Team · Confidential · v{__APP_VERSION__} ({__BUILD_DATE__})</p>
         </div>
       </motion.div>
     </div>
