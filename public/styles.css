@@ -126,7 +126,7 @@ nav{height:var(--nav-h);position:sticky;top:0;z-index:60;background:rgba(255,255
   box-shadow:0 40px 90px rgba(0,0,0,.5)}
 .heroart img{width:100%;height:100%;object-fit:contain;display:block}
 /* ---- full-bleed photo hero: composed family shot, text over the dark left ---- */
-.hero.herophoto{background:#0a0b0d url('assets/hero_family.webp') right center/cover no-repeat}
+.hero.herophoto{background:#0a0b0d url('assets/hero_family.webp') right center/auto 100% no-repeat}
 .hero.herophoto::before{content:'';position:absolute;inset:0;pointer-events:none;
   background:linear-gradient(90deg,rgba(8,9,11,.92) 0%,rgba(8,9,11,.62) 34%,rgba(8,9,11,0) 58%),
              linear-gradient(0deg,rgba(8,9,11,.72) 0%,rgba(8,9,11,0) 26%)}
