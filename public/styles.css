@@ -140,11 +140,11 @@ nav{height:var(--nav-h);position:sticky;top:0;z-index:60;background:rgba(255,255
 .htxt>*:nth-child(5){animation-delay:.28s}
 .hphoto-m{display:none}
 @media(max-width:940px){
-  .hero.herophoto{background:var(--panel)}
+  .hero.herophoto{background:var(--panel);display:flex;flex-direction:column}
   .hero.herophoto::before{display:none}
-  .hero-in2{padding-block:52px 12px}
-  .hphoto-m{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;object-position:74% center;
-    border-radius:0;max-width:100%;margin:10px 0 0}
+  .hphoto-m{display:block;order:-1;width:100%;aspect-ratio:4/3.2;object-fit:cover;
+    object-position:72% center;border-radius:0;max-width:100%;margin:0}
+  .hero-in2{padding-block:30px 14px}
 }
 .trust{position:relative;display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid rgba(255,255,255,.12)}
 .trust > div{padding:24px 22px 30px}
