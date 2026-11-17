@@ -143,7 +143,7 @@ nav{height:var(--nav-h);position:sticky;top:0;z-index:60;background:rgba(255,255
   .hero.herophoto{background:var(--panel);display:flex;flex-direction:column}
   .hero.herophoto::before{display:none}
   .hphoto-m{display:block;order:-1;width:100%;aspect-ratio:4/3.2;object-fit:cover;
-    object-position:72% center;border-radius:0;max-width:100%;margin:0}
+    object-position:100% center;border-radius:0;max-width:100%;margin:0}
   .hero-in2{padding-block:30px 14px}
 }
 .trust{position:relative;display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid rgba(255,255,255,.12)}
