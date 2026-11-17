@@ -143,8 +143,8 @@ nav{height:var(--nav-h);position:sticky;top:0;z-index:60;background:rgba(255,255
   .hero.herophoto{background:var(--panel)}
   .hero.herophoto::before{display:none}
   .hero-in2{padding-block:52px 12px}
-  .hphoto-m{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;object-position:68% center;
-    border-radius:18px;max-width:calc(100% - 40px);margin:18px auto 8px}
+  .hphoto-m{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;object-position:74% center;
+    border-radius:0;max-width:100%;margin:10px 0 0}
 }
 .trust{position:relative;display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid rgba(255,255,255,.12)}
 .trust > div{padding:24px 22px 30px}
