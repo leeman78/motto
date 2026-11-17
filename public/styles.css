@@ -125,6 +125,27 @@ nav{height:var(--nav-h);position:sticky;top:0;z-index:60;background:rgba(255,255
 .heroart{position:relative;aspect-ratio:1;border-radius:32px;overflow:hidden;background:#000;
   box-shadow:0 40px 90px rgba(0,0,0,.5)}
 .heroart img{width:100%;height:100%;object-fit:contain;display:block}
+/* ---- full-bleed photo hero: composed family shot, text over the dark left ---- */
+.hero.herophoto{background:#0a0b0d url('assets/hero_family.webp') right center/cover no-repeat}
+.hero.herophoto::before{content:'';position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(90deg,rgba(8,9,11,.92) 0%,rgba(8,9,11,.62) 34%,rgba(8,9,11,0) 58%),
+             linear-gradient(0deg,rgba(8,9,11,.72) 0%,rgba(8,9,11,0) 26%)}
+.hero.herophoto h1{font-size:clamp(38px,4.55vw,62px)}
+.hero-in2{position:relative;z-index:1;padding-block:96px 110px}
+.htxt{max-width:640px}
+.htxt>*{animation:heroUp .7s cubic-bezier(.22,1,.36,1) both}
+.htxt>*:nth-child(2){animation-delay:.07s}
+.htxt>*:nth-child(3){animation-delay:.14s}
+.htxt>*:nth-child(4){animation-delay:.21s}
+.htxt>*:nth-child(5){animation-delay:.28s}
+.hphoto-m{display:none}
+@media(max-width:940px){
+  .hero.herophoto{background:var(--panel)}
+  .hero.herophoto::before{display:none}
+  .hero-in2{padding-block:52px 12px}
+  .hphoto-m{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;object-position:68% center;
+    border-radius:18px;max-width:calc(100% - 40px);margin:18px auto 8px}
+}
 .trust{position:relative;display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid rgba(255,255,255,.12)}
 .trust > div{padding:24px 22px 30px}
 .trust > div + div{border-left:1px solid rgba(255,255,255,.12)}
