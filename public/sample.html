@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Motto USA — Wholesale Phone Accessories for Gas Stations & C-Stores</title>
-<meta name="description" content="Leather-wrapped charging cables, chargers and audio at wholesale. Counter displays installed across Dallas–Fort Worth — including Circle K. See your profit, then create a wholesale account.">
+<meta name="description" content="Leather-wrapped charging cables, chargers and audio at wholesale. Counter displays installed across Dallas–Fort Worth — including Circle K. Create a wholesale account to see your price.">
 <style>
 /* =====================================================================
    /sample — the homepage rebuilt as a B2B sales page.
@@ -128,24 +128,6 @@ h2{font-size:clamp(26px,4vw,38px);letter-spacing:-.04em;margin:12px 0 10px}
 .strip figcaption{position:absolute;left:10px;bottom:10px}
 .strip .code{font-size:10px;font-weight:800;color:#fff;padding:5px 10px;border-radius:999px;display:inline-block}
 
-/* ---------------- profit calculator ---------------- */
-.calc{background:var(--ink);color:#fff;border-radius:24px;margin-top:30px;padding:40px 34px;
-  display:grid;grid-template-columns:1fr 1fr;gap:34px;align-items:center}
-.calc .lab{font-size:13.5px;color:#b9bcc2;margin-bottom:10px}
-.calc .lab b{color:#fff}
-input[type=range]{width:100%;accent-color:var(--blue);height:34px}
-.calc .units{font-size:15px;margin-top:4px}
-.calc .units b{font-size:22px}
-.bignum{text-align:center}
-.bignum .n{font-size:clamp(48px,7vw,76px);font-weight:800;letter-spacing:-.045em;line-height:1}
-.bignum .n small{font-size:.42em;font-weight:700;color:#8a8d94;letter-spacing:0}
-.bignum .d{font-size:12.5px;color:#8a8d94;margin-top:10px;line-height:1.6}
-.keeps{margin-top:26px;border-top:1px solid #26282c;padding-top:20px;display:grid;
-  grid-template-columns:repeat(3,1fr);gap:14px;grid-column:1 / -1}
-.keep b{display:block;font-size:15px}
-.keep span{font-size:11.5px;color:#8a8d94;display:block;margin-top:2px;line-height:1.5}
-.keep .m{color:#5dd08a;font-weight:800}
-
 /* ---------------- how it starts ---------------- */
 .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:20px 28px;margin-top:28px}
 .step .no{font-size:12px;font-weight:800;letter-spacing:.1em;color:var(--blue)}
@@ -192,8 +174,6 @@ input[type=range]{width:100%;accent-color:var(--blue);height:34px}
   .gal{grid-template-columns:1fr 1fr}
   .gal figure:first-child{grid-row:auto}
   .gal figure:first-child>img{aspect-ratio:1/1.06}
-  .calc{grid-template-columns:1fr;padding:30px 22px}
-  .keeps{grid-template-columns:1fr}
 }
 </style>
 </head>
@@ -247,8 +227,8 @@ input[type=range]{width:100%;accent-color:var(--blue);height:34px}
     Your customers pay $9.99–$39.99 — <b>about half of every sale stays with
     you.</b> The display arrives stocked.</p>
     <div class="btns">
-      <a class="btn blue" href="#profit">See your profit</a>
-      <a class="btn ghost" href="#stores">See it in stores</a>
+      <a class="btn blue" href="#stores">See it in stores</a>
+      <a class="btn ghost" href="#contact">Create a wholesale account</a>
     </div>
   </div>
   <div class="heropic">
@@ -260,7 +240,6 @@ input[type=range]{width:100%;accent-color:var(--blue);height:34px}
 <div class="stats"><div class="in">
   <div class="stat"><b>$9.99–$39.99</b><span>what your customers pay</span></div>
   <div class="stat"><b>~half is yours</b><span>your typical keep, every item</span></div>
-  <div class="stat"><b>12+ counters</b><span>installed across DFW</span></div>
   <div class="stat"><b>$500</b><span>opening order · free freight at $1,500</span></div>
 </div></div>
 
@@ -297,35 +276,6 @@ input[type=range]{width:100%;accent-color:var(--blue);height:34px}
     <figure><img src="assets/store_ck127.webp" alt="Circle K location carrying Motto accessories" loading="lazy"><figcaption><span class="code">CK 127</span></figcaption></figure>
     <figure><img src="assets/store_ck134.webp" alt="Circle K location carrying Motto accessories" loading="lazy"><figcaption><span class="code">CK 134</span></figcaption></figure>
   </div>
-</div></section>
-
-<!-- ============ 3 · See your profit ============ -->
-<section class="sec" id="profit"><div class="wrap">
-  <div class="kick">See your profit</div>
-  <h2>How many cables walk out of your store a week?</h2>
-  <p class="sub">A dead phone buys at full price, no comparison shopping.
-  Slide to your traffic:</p>
-
-  <div class="calc">
-    <div>
-      <div class="lab">Motto items sold per week — <b>most counters land between 8 and 20</b></div>
-      <input type="range" id="rng" min="3" max="60" value="12" aria-label="items sold per week">
-      <div class="units"><b id="u">12</b> items / week</div>
-    </div>
-    <div class="bignum">
-      <div class="n">$<span id="profit$">338</span><small> /mo</small></div>
-      <div class="d">estimated monthly profit that stays with you<br>
-      <span id="yearly">≈ $4,056 a year</span> · from two square feet</div>
-    </div>
-    <div class="keeps">
-      <div class="keep"><b>Leather cable</b><span>sells $9.99–$16.99 · <i class="m">you keep ≈ $5–8</i></span></div>
-      <div class="keep"><b>Wired earbuds · chargers</b><span>sell $9.99–$12.99 · <i class="m">you keep ≈ $5–7</i></span></div>
-      <div class="keep"><b>Wireless buds · headsets</b><span>sell $39.99 · <i class="m">you keep ≈ $20</i></span></div>
-    </div>
-  </div>
-  <p class="sub" style="font-size:12px;color:var(--ink-3);margin-top:14px">Assumes a $12.99
-  average ticket and a ~50% keep — many items run higher. Exact numbers come with
-  your account.</p>
 </div></section>
 
 <!-- ============ 4 · How it starts ============ -->
@@ -397,20 +347,6 @@ Wholesale only — resale certificate required. MSRP figures are suggested retai
 store results vary with traffic and placement.</p>
 
 <script>
-// The one moving part: the profit slider. Average ticket $12.99, keep ≈ 52% —
-// deliberately at the conservative end of the real per-item keeps shown above,
-// so the number on screen is one we can stand behind in person.
-const rng = document.getElementById('rng');
-const fmt = n => n.toLocaleString('en-US');
-function upd() {
-  const wk = +rng.value;
-  const mo = Math.round(wk * 4.33 * 12.99 * 0.52);
-  document.getElementById('u').textContent = wk;
-  document.getElementById('profit$').textContent = fmt(mo);
-  document.getElementById('yearly').textContent = '≈ $' + fmt(mo * 12) + ' a year';
-}
-rng.addEventListener('input', upd); upd();
-
 // ---- mobile nav: same behavior as the previous site's nav.js ----
 (function () {
   const burger = document.getElementById('burger');
